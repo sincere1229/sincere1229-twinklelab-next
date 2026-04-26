@@ -112,6 +112,8 @@ export default function StarPortal() {
           <div className="logo-jp">トゥインクル スター オラクル</div>
           <div className="gold-line"></div>
           <div className="tagline">Your Guide to the Stars & Beyond</div>
+          <div style={{marginTop:'12px',fontSize:'13px',color:'rgba(61,26,64,0.7)',letterSpacing:'1px'}}>無料であなたの運命を診断できます</div>
+          <div style={{fontSize:'12px',color:'rgba(61,26,64,0.5)',marginTop:'4px',letterSpacing:'1px'}}>恋愛・仕事・金運・未来をすぐに確認</div>
         </header>
 
         {/* 毎日使う */}
@@ -127,6 +129,7 @@ export default function StarPortal() {
               <div className="d-name">{d.name}</div>
               <div className="d-sub">{d.sub}</div>
               <span className="free-badge">FREE</span>
+              <div style={{fontSize:'10px',color:'rgba(61,26,64,0.45)',marginTop:'4px'}}>→ この先の未来を見る</div>
             </a>
           ))}
         </div>
@@ -142,6 +145,11 @@ export default function StarPortal() {
               <span className="free-badge">FREE</span>
             </a>
           ))}
+        </div>
+
+        <div style={{margin:'8px 14px',background:'linear-gradient(135deg,rgba(155,127,212,0.12),rgba(100,60,160,0.08))',border:'1px solid rgba(155,127,212,0.25)',borderRadius:'12px',padding:'16px',textAlign:'center'}}>
+          <p style={{fontSize:'13px',color:'rgba(240,234,220,0.7)',marginBottom:'10px'}}>迷っているなら、まずはここから</p>
+          <a href="/star/mini" style={{display:'inline-block',background:'linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05))',border:'1px solid rgba(201,168,76,0.4)',borderRadius:'8px',color:'#e8c97a',fontFamily:'Cinzel,serif',fontSize:'12px',letterSpacing:'2px',padding:'10px 20px',textDecoration:'none'}}>✦ 今のあなたの運命を知る（¥980）</a>
         </div>
 
         <div className="div-line"><span className="div-text">✦ 詳細鑑定 ✦</span></div>
@@ -161,8 +169,8 @@ export default function StarPortal() {
         <div style={{margin:'8px 14px 12px',background:'linear-gradient(135deg,rgba(155,127,212,0.15),rgba(100,60,160,0.1))',border:'1px solid rgba(155,127,212,0.35)',borderRadius:'14px',padding:'20px',display:'flex',alignItems:'center',gap:'16px',flexWrap:'wrap' as const}}>
           <div style={{flex:1}}>
             <div style={{fontFamily:'Cinzel,serif',fontSize:'10px',color:'#c4a8f0',letterSpacing:'3px',textTransform:'uppercase' as const,marginBottom:'6px',opacity:0.8}}>✦ Mini Reading ✦</div>
-            <div style={{fontSize:'15px',color:'#f0eadc',fontWeight:500,marginBottom:'4px'}}>簡易鑑定</div>
-            <div style={{fontSize:'12px',color:'rgba(240,234,220,0.5)'}}>1テーマ集中・恋愛/仕事/金運から選択</div>
+            <div style={{fontSize:'15px',color:'#f0eadc',fontWeight:500,marginBottom:'4px'}}>今のあなたの運命を知る</div>
+            <div style={{fontSize:'12px',color:'rgba(240,234,220,0.5)'}}>迷いを解決するための1テーマ集中鑑定</div>
           </div>
           <div style={{textAlign:'center' as const,flexShrink:0}}>
             <div style={{fontFamily:'Cinzel,serif',fontSize:'22px',color:'#c9a84c',marginBottom:'8px'}}>¥980</div>
@@ -173,6 +181,7 @@ export default function StarPortal() {
         {/* 総合鑑定 */}
         <div className="sogo">
           <div className="sogo-label">✦ Premium Reading ✦</div>
+          <div style={{fontSize:'13px',color:'rgba(240,234,220,0.6)',marginBottom:'8px',letterSpacing:'1px'}}>あなたの人生の流れを完全解析</div>
           <div className="sogo-title">AI総合鑑定</div>
           <div className="sogo-items">
             <span className="sogo-item">ホロスコープ図面</span>
@@ -190,10 +199,10 @@ export default function StarPortal() {
         {/* LINEバナー */}
         <div className="line-banner">
           <div className="line-text">
-            <h3>💬 LINE で限定イベント占いを受け取る</h3>
-            <p>毎月限定！ルーン占い・満月リーディングなど特別コンテンツを無料配信</p>
+            <h3 style={{fontSize:'15px'}}>🔮 あなたの本当の運命を無料で受け取る</h3>
+            <p>恋愛・仕事・金運の未来を無料で完全診断</p>
           </div>
-          <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">LINE登録（無料）</a>
+          <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">無料で運命を受け取る</a>
         </div>
 
         {/* SEO説明文 */}
@@ -203,6 +212,7 @@ export default function StarPortal() {
             Twinkle Star Oracleは、AIを活用した本格的な占いポータルサイトです。タロットカード・バードオラクル・易占い・前世リーディング・夢占いなどのカード系占いから、数秘術・九星気学・相性占い・四柱推命などの命術系まで、11種類の多彩な占いを提供しています。毎日更新される星座占い・開運カレンダー・エンジェルナンバー・アファメーションは完全無料でご利用いただけます。また、ホロスコープ図面・四柱推命・タロット3枚・数秘術を組み合わせたAI総合鑑定（¥3,980）では、仕事運・恋愛運・金運・健康運を年代別に詳しく読み解き、過去・現在・未来のメッセージをお届けします。
           </p>
         </div>
+        <p style={{textAlign:'center',fontSize:'14px',color:'rgba(61,26,64,0.5)',margin:'16px 14px 0',lineHeight:'1.9'}}>ここまで見たあなたは、すでに答えに近づいています</p>
         <footer>© 2026 Twinkle Lab / Twinkle Star Oracle</footer>
       </div>
     </>
