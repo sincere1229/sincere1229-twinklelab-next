@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-export const metadata = undefined
-
 export default function SogoPage() {
   const [drawn, setDrawn] = useState<{past:string|null,present:string|null,future:string|null}>({past:null,present:null,future:null})
   const [used, setUsed] = useState<number[]>([])
