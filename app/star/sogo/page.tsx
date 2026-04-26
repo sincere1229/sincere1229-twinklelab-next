@@ -16,13 +16,30 @@ export default function SogoPage() {
     setDrawn({...drawn, [slot]: CARDS[idx]})
   }
 
-  const handlePay = () => {
+  const [paying, setPaying] = useState(false)
+
+  const handlePay = async () => {
     const name = (document.getElementById('inp-name') as HTMLInputElement)?.value
     const birth = (document.getElementById('inp-birth') as HTMLInputElement)?.value
+    const hour = (document.getElementById('inp-hour') as HTMLSelectElement)?.value
+    const gender = (document.getElementById('inp-gender') as HTMLSelectElement)?.value
     const email = (document.getElementById('inp-email') as HTMLInputElement)?.value
     if (!name || !birth || !email) { alert('お名前・生年月日・メールアドレスを入力してください'); return }
     if (!drawn.past || !drawn.present || !drawn.future) { alert('タロットカードを3枚引いてください'); return }
-    alert('Stripe決済ページへ移動します（実装予定）')
+    setPaying(true)
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, birth, hour, gender, email, tarot: drawn }),
+      })
+      const { url, error } = await res.json()
+      if (error) throw new Error(error)
+      window.location.href = url
+    } catch (e: any) {
+      alert('エラーが発生しました：' + e.message)
+      setPaying(false)
+    }
   }
 
   return (
@@ -167,7 +184,7 @@ export default function SogoPage() {
             <span className="hero-tag">あなた専用の鑑定結果を即時表示</span>
           </div>
           <div className="price-hero">¥3,980</div>
-          <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
+          <a href="#form-section" className="cta-btn">{paying ? "移動中..." : "✦ 今すぐ鑑定する ✦"}</a>
           <p className="cta-note">🔒 Stripe安全決済 · 決済後すぐに表示 · PDFダウンロード付き</p>
           <p style={{fontSize:'12px',color:'rgba(240,234,220,0.45)',textAlign:'center',marginTop:'6px',letterSpacing:'1px'}}>※この鑑定は今のあなたの状態をもとに生成されます</p>
           <p style={{fontSize:'12px',color:'rgba(232,122,122,0.9)',textAlign:'center',marginTop:'6px',letterSpacing:'1px'}}>⚠️ 今のタイミングでしか見えない運命の流れがあります</p>
@@ -214,7 +231,7 @@ export default function SogoPage() {
         </div>
 
         {/* CTA（中間） */}
-        <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
+        <a href="#form-section" className="cta-btn">{paying ? "移動中..." : "✦ 今すぐ鑑定する ✦"}</a>
 
         {/* 社会的証明 */}
         <div style={{background:'linear-gradient(135deg,rgba(26,32,64,0.7),rgba(15,22,40,0.8))',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px',margin:'20px 0',textAlign:'center'}}>
@@ -394,7 +411,7 @@ export default function SogoPage() {
             </div>
           </div>
 
-          <button className="cta-btn" onClick={handlePay}>✦ ¥3,980 で今すぐ鑑定する ✦</button>
+          <button className="cta-btn" onClick={handlePay}>{paying ? "決済ページへ移動中..." : "✦ ¥3,980 で今すぐ鑑定する ✦"}</button>
           <p className="cta-note">🔒 Stripe による安全な決済 · 決済完了後すぐに表示 · PDFダウンロード付き</p>
         </div>
 
@@ -407,7 +424,7 @@ export default function SogoPage() {
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.8)',margin:'0 0 16px',lineHeight:'1.9',fontWeight:'500'}}>
           ここまで読んだあなたは、<br/>すでに答えに近づいています。<br/>次は、その答えを\手に入れる\だけです
         </p>
-        <button className="cta-btn" onClick={handlePay}>✦ 今すぐ鑑定する ✦</button>
+        <button className="cta-btn" onClick={handlePay}>{paying ? "移動中..." : "✦ 今すぐ鑑定する ✦"}</button>
 
         <p className="disclaimer">
           ※鑑定はAIにより自動生成されます<br/>
