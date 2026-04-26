@@ -419,7 +419,7 @@ export default function SogoPage() {
       {/* 固定CTAバナー */}
       <div className="fixed-cta">
         <div className="fixed-cta-text">
-          <div className="fixed-cta-label">今この瞬間の選択が未来を変えます</div>
+          <div className="fixed-cta-label">今この選択が未来を変えます</div>
           <div className="fixed-cta-main">あなたの運命を今すぐ知る</div>
         </div>
         <a href="#form-section" className="fixed-cta-btn">¥3,980で鑑定する</a>
