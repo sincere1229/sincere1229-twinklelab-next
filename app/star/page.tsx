@@ -157,6 +157,19 @@ export default function StarPortal() {
           ))}
         </div>
 
+        {/* ミニ鑑定 */}
+        <div style={{margin:'8px 14px 12px',background:'linear-gradient(135deg,rgba(155,127,212,0.15),rgba(100,60,160,0.1))',border:'1px solid rgba(155,127,212,0.35)',borderRadius:'14px',padding:'20px',display:'flex',alignItems:'center',gap:'16px',flexWrap:'wrap' as const}}>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:'10px',color:'#c4a8f0',letterSpacing:'3px',textTransform:'uppercase' as const,marginBottom:'6px',opacity:0.8}}>✦ Mini Reading ✦</div>
+            <div style={{fontSize:'15px',color:'#f0eadc',fontWeight:500,marginBottom:'4px'}}>簡易鑑定</div>
+            <div style={{fontSize:'12px',color:'rgba(240,234,220,0.5)'}}>1テーマ集中・恋愛/仕事/金運から選択</div>
+          </div>
+          <div style={{textAlign:'center' as const,flexShrink:0}}>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:'22px',color:'#c9a84c',marginBottom:'8px'}}>¥980</div>
+            <a href="/star/mini" style={{display:'inline-block',background:'linear-gradient(135deg,#8a6a20,#c9a84c)',borderRadius:'8px',color:'#0a0e1a',fontFamily:'Cinzel,serif',fontSize:'12px',fontWeight:700,letterSpacing:'1px',padding:'10px 20px',textDecoration:'none'}}>今すぐ鑑定する</a>
+          </div>
+        </div>
+
         {/* 総合鑑定 */}
         <div className="sogo">
           <div className="sogo-label">✦ Premium Reading ✦</div>
