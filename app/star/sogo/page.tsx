@@ -169,7 +169,8 @@ export default function SogoPage() {
           <div className="price-hero">¥3,980</div>
           <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
           <p className="cta-note">🔒 Stripe安全決済 · 決済後すぐに表示 · PDFダウンロード付き</p>
-          <p style={{fontSize:'12px',color:'rgba(232,122,122,0.9)',textAlign:'center',marginTop:'8px',letterSpacing:'1px'}}>⚠️ 本日の鑑定受付は残りわずかです</p>
+          <p style={{fontSize:'12px',color:'rgba(240,234,220,0.45)',textAlign:'center',marginTop:'6px',letterSpacing:'1px'}}>※この鑑定は今のあなたの状態をもとに生成されます</p>
+          <p style={{fontSize:'12px',color:'rgba(232,122,122,0.9)',textAlign:'center',marginTop:'6px',letterSpacing:'1px'}}>⚠️ 今のタイミングでしか見えない運命の流れがあります</p>
         </div>
 
         {/* ② 悩み共感 */}
@@ -325,7 +326,7 @@ export default function SogoPage() {
 
         {/* 感情トリガー */}
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.85)',margin:'8px 0 16px',lineHeight:'1.9',fontWeight:'500'}}>
-          迷っている今こそ、<br/>あなたの人生が変わるタイミングかもしれません
+          迷っている今だからこそ、正しい選択が必要です
         </p>
 
         {/* 感情訴求 */}
@@ -341,10 +342,11 @@ export default function SogoPage() {
         <a href="#inp-name" className="cta-btn">✦ あなたの運命を今すぐ知る ✦</a>
         <p className="cta-note">🔒 Stripe安全決済 · 即時表示 · PDFダウンロード付き</p>
 
+        <p style={{textAlign:"center",fontSize:"15px",color:"rgba(232,201,122,0.85)",margin:"0 0 16px",lineHeight:"1.9",fontWeight:500,letterSpacing:"1px"}}>ここから先は、あなただけの鑑定になります</p>
         <div className="form-card" id="form-section">
           <div className="form-title">✦ あなたの情報を入力 ✦</div>
           <div className="form-group">
-            <label className="form-label">お名前</label>
+            <label className="form-label">お名前<span style={{fontSize:"10px",color:"rgba(240,234,220,0.4)",marginLeft:"8px",letterSpacing:"1px",fontFamily:"sans-serif"}}>※ニックネームでもOKです</span></label>
             <input type="text" className="form-input" placeholder="例：さくら" id="inp-name" />
           </div>
           <div className="form-group">
@@ -403,7 +405,7 @@ export default function SogoPage() {
           </p>
         </div>
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.8)',margin:'0 0 16px',lineHeight:'1.9',fontWeight:'500'}}>
-          ここまで読んだあなたは、<br/>すでに答えに近づいています
+          ここまで読んだあなたは、<br/>すでに答えに近づいています。<br/>次は、その答えを\手に入れる\だけです
         </p>
         <button className="cta-btn" onClick={handlePay}>✦ 今すぐ鑑定する ✦</button>
 
@@ -421,6 +423,7 @@ export default function SogoPage() {
         <div className="fixed-cta-text">
           <div className="fixed-cta-label">今この選択が未来を変えます</div>
           <div className="fixed-cta-main">あなたの運命を今すぐ知る</div>
+          <div style={{fontSize:"10px",color:"rgba(240,234,220,0.35)",marginTop:"2px"}}>今の選択が未来を変えます</div>
         </div>
         <a href="#form-section" className="fixed-cta-btn">¥3,980で鑑定する</a>
       </div>
