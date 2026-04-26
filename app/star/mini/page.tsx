@@ -123,7 +123,7 @@ export default function MiniReading() {
 
       <div className="fixed-cta">
         <div className="fixed-cta-text">🔮 1テーマ集中リーディング ¥980</div>
-        <button className="fixed-cta-btn" onClick="document.getElementById('inp-name').focus()">今すぐ鑑定</button>
+        <button className="fixed-cta-btn" onClick={() => { const el = document.getElementById('inp-name'); if(el) el.focus(); }}>今すぐ鑑定</button>
       </div>
       <div className="spacer"></div>
 
