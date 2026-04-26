@@ -1,3 +1,21 @@
+export const metadata = {
+  title: 'Twinkle Heart｜親子でつくるAIあそびブック｜子供でもつくれるAIあそびブック',
+  description: '親子でAIを楽しく学べるKindleシリーズ「親子でつくる！AIあそびブック」。スマホ1台でどうぶつキャラ診断・LINEスタンプ・AI絵本が作れます。プログラミング不要・子供でも簡単。LINE登録で各巻の特典ワークシートを無料プレゼント。',
+  openGraph: {
+    title: 'Twinkle Heart｜親子でつくるAIあそびブック｜子供でもつくれるAIあそびブック',
+    description: '親子でAIを楽しく学べるKindleシリーズ。スマホ1台でどうぶつキャラ診断・LINEスタンプ・AI絵本が作れます。プログラミング不要・子供でも簡単。',
+    url: 'https://twinkle-lab.jp/heart',
+    siteName: 'Twinkle Lab',
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Twinkle Heart｜親子でつくるAIあそびブック',
+    description: '親子でAIを楽しく学べるKindleシリーズ。スマホ1台でどうぶつキャラ診断・LINEスタンプ・AI絵本が作れます。',
+  },
+}
+
 export default function Heart() {
   const books = [
     { vol:'Vol.1', title:'どうぶつキャラ診断', asin:'', emoji:'🐨' },
@@ -41,6 +59,13 @@ export default function Heart() {
             </div>
           ))}
         </div>
+        <div style={{background:'rgba(255,248,252,0.7)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px',marginTop:'16px',marginBottom:'0'}}>
+          <h1 style={{fontFamily:'Noto Sans JP,sans-serif',fontSize:'14px',color:'#6a3a20',marginBottom:'10px',fontWeight:'600'}}>親子でつくる！AIあそびブックとは</h1>
+          <p style={{fontSize:'13px',color:'#8a6a9a',lineHeight:'2'}}>
+            「親子でつくる！AIあそびブック」は、スマホ1台でAIを使った創作体験ができるKindleシリーズです。プログラミングの知識は一切不要。小学生のお子様から大人まで、一緒に楽しみながらAIリテラシーを身につけられます。Vol.1では生成AIを使ったどうぶつキャラ診断、Vol.2ではLINEスタンプ制作、Vol.3ではオリジナルAI絵本づくりを体験できます。各巻にはLINE登録で受け取れる特典ワークシート付き。親子のコミュニケーションを深めながら、楽しくAIと友達になれる一冊です。
+          </p>
+        </div>
+
         <div className="line-box">
           <p>LINE登録で特典PDFをプレゼント🎁<br />各巻の特典ワークシートを無料でお届けします</p>
           <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">💬 LINE登録して特典を受け取る</a>

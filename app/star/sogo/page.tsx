@@ -1,6 +1,19 @@
 export const metadata = {
-  title: 'AI総合鑑定 ¥3,980 | Twinkle Star Oracle',
-  description: 'ホロスコープ・四柱推命・タロット・数秘術を組み合わせた本格AI総合鑑定',
+  title: '総合鑑定｜3つの占いを組み合わせたTwinkle Star Oracle',
+  description: 'ホロスコープ図面・四柱推命・タロット3枚・数秘術を組み合わせたAI総合鑑定（¥3,980）。生年月日・生まれた時刻・タロット3枚を入力するだけで、仕事運・恋愛運・金運・健康運を年代別に分析。過去・現在・未来のメッセージを即座に表示し、PDFでダウンロードも可能です。',
+  openGraph: {
+    title: '総合鑑定｜3つの占いを組み合わせたTwinkle Star Oracle',
+    description: 'ホロスコープ図面・四柱推命・タロット3枚・数秘術を組み合わせたAI総合鑑定（¥3,980）。仕事運・恋愛運・金運・健康運を年代別に詳しく読み解きます。',
+    url: 'https://twinkle-lab.jp/star/sogo',
+    siteName: 'Twinkle Star Oracle',
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '総合鑑定｜3つの占いを組み合わせたTwinkle Star Oracle',
+    description: 'ホロスコープ図面・四柱推命・タロット3枚を組み合わせたAI総合鑑定（¥3,980）。',
+  },
 }
 
 export default function SogoPage() {
@@ -60,6 +73,14 @@ export default function SogoPage() {
           <div className="divider"></div>
           <p className="subtitle">Comprehensive Oracle Reading</p>
           <div className="price-badge">¥3,980</div>
+        </div>
+
+        {/* SEO説明文 */}
+        <div style={{background:'rgba(26,32,64,0.5)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px',marginBottom:'24px'}}>
+          <h1 style={{fontFamily:'Noto Serif JP,serif',fontSize:'15px',color:'#e8c97a',marginBottom:'10px',fontWeight:'500',letterSpacing:'0.05em'}}>AI総合鑑定とは</h1>
+          <p style={{fontSize:'13px',color:'rgba(240,234,220,0.7)',lineHeight:'2.1'}}>
+            Twinkle Star OracleのAI総合鑑定は、西洋占星術（ホロスコープ）・東洋占術（四柱推命）・タロットカード・数秘術の4つを組み合わせた本格的なリーディングです。生年月日・生まれた時刻・タロット3枚の情報をもとに、AIが過去・現在・未来のメッセージを統合分析。20〜40代・40〜60代・60代以降の年代別に、仕事運・恋愛運・金運・健康運を詳しく読み解きます。決済完了後すぐに画面に表示され、PDFダウンロードも可能です。
+          </p>
         </div>
 
         {/* 鑑定内容 */}

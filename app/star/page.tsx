@@ -1,6 +1,19 @@
 export const metadata = {
-  title: 'Twinkle Star Oracle | 占いポータル',
-  description: 'タロット・数秘術・九星気学・四柱推命など11種類の占いが楽しめる占いポータル',
+  title: 'Twinkle Star Oracle｜AI占いポータル',
+  description: 'タロット・数秘術・九星気学・四柱推命・易占い・バードオラクルなど11種類のAI占いが楽しめる無料占いポータル。毎日更新の星座占い・開運カレンダー・エンジェルナンバーも完全無料。AI総合鑑定（¥3,980）では、ホロスコープ図面＋四柱推命＋タロット3枚を組み合わせた本格リーディングを即座に提供します。',
+  openGraph: {
+    title: 'Twinkle Star Oracle｜AI占いポータル',
+    description: 'タロット・数秘術・九星気学・四柱推命など11種類のAI占いが無料で楽しめる占いポータル。毎日更新の星座占い・開運カレンダーも完全無料。',
+    url: 'https://twinkle-lab.jp/star',
+    siteName: 'Twinkle Star Oracle',
+    locale: 'ja_JP',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Twinkle Star Oracle｜AI占いポータル',
+    description: 'タロット・数秘術・九星気学・四柱推命など11種類のAI占いが無料で楽しめる占いポータル。',
+  },
 }
 
 const DAILY = [
@@ -170,6 +183,13 @@ export default function StarPortal() {
           <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">LINE登録（無料）</a>
         </div>
 
+        {/* SEO説明文 */}
+        <div style={{margin:'0 14px 20px',background:'rgba(255,248,252,0.7)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px'}}>
+          <h2 style={{fontFamily:'Noto Sans JP,sans-serif',fontSize:'14px',color:'#6a3a20',marginBottom:'10px',fontWeight:'600'}}>Twinkle Star Oracleについて</h2>
+          <p style={{fontSize:'13px',color:'#8a6a9a',lineHeight:'2'}}>
+            Twinkle Star Oracleは、AIを活用した本格的な占いポータルサイトです。タロットカード・バードオラクル・易占い・前世リーディング・夢占いなどのカード系占いから、数秘術・九星気学・相性占い・四柱推命などの命術系まで、11種類の多彩な占いを提供しています。毎日更新される星座占い・開運カレンダー・エンジェルナンバー・アファメーションは完全無料でご利用いただけます。また、ホロスコープ図面・四柱推命・タロット3枚・数秘術を組み合わせたAI総合鑑定（¥3,980）では、仕事運・恋愛運・金運・健康運を年代別に詳しく読み解き、過去・現在・未来のメッセージをお届けします。
+          </p>
+        </div>
         <footer>© 2026 Twinkle Lab / Twinkle Star Oracle</footer>
       </div>
     </>
