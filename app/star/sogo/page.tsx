@@ -169,6 +169,7 @@ export default function SogoPage() {
           <div className="price-hero">¥3,980</div>
           <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
           <p className="cta-note">🔒 Stripe安全決済 · 決済後すぐに表示 · PDFダウンロード付き</p>
+          <p style={{fontSize:'12px',color:'rgba(232,122,122,0.9)',textAlign:'center',marginTop:'8px',letterSpacing:'1px'}}>⚠️ 本日の鑑定受付は残りわずかです</p>
         </div>
 
         {/* ② 悩み共感 */}
@@ -213,6 +214,16 @@ export default function SogoPage() {
 
         {/* CTA（中間） */}
         <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
+
+        {/* 社会的証明 */}
+        <div style={{background:'linear-gradient(135deg,rgba(26,32,64,0.7),rgba(15,22,40,0.8))',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px',margin:'20px 0',textAlign:'center'}}>
+          <p style={{fontSize:'13px',color:'rgba(240,234,220,0.6)',marginBottom:'12px',letterSpacing:'1px'}}>これまでに多くの方が体験しています</p>
+          <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+            {['自分の方向性が分かった','迷いがなくなった','行動できるようになった'].map(v => (
+              <div key={v} style={{background:'rgba(201,168,76,0.08)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'8px',padding:'10px 16px',fontSize:'13px',color:'rgba(240,234,220,0.8)'}}>✦ {v}</div>
+            ))}
+          </div>
+        </div>
 
         {/* ④ 鑑定内容 */}
         <div className="section">
@@ -304,12 +315,18 @@ export default function SogoPage() {
         <div className="section" style={{textAlign:'center'}}>
           <div className="sec-label">✦ 価格</div>
           <div className="price-compare">
+            <p style={{fontSize:'16px',color:'rgba(232,201,122,0.9)',marginBottom:'12px',fontWeight:'500',letterSpacing:'1px'}}>あなたの人生の設計図を知る価格です</p>
             <div className="price-old">通常の対面鑑定レベル：10,000円〜30,000円</div>
             <div className="price-arrow">↓</div>
             <div className="price-main">¥3,980</div>
             <div className="price-sub">PDFダウンロード付き · 即時表示 · 5,000文字以上</div>
           </div>
         </div>
+
+        {/* 感情トリガー */}
+        <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.85)',margin:'8px 0 16px',lineHeight:'1.9',fontWeight:'500'}}>
+          迷っている今こそ、<br/>あなたの人生が変わるタイミングかもしれません
+        </p>
 
         {/* 感情訴求 */}
         <div className="emotion-box">
@@ -385,6 +402,9 @@ export default function SogoPage() {
             未来は、知った瞬間から変わります
           </p>
         </div>
+        <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.8)',margin:'0 0 16px',lineHeight:'1.9',fontWeight:'500'}}>
+          ここまで読んだあなたは、<br/>すでに答えに近づいています
+        </p>
         <button className="cta-btn" onClick={handlePay}>✦ 今すぐ鑑定する ✦</button>
 
         <p className="disclaimer">
@@ -399,7 +419,7 @@ export default function SogoPage() {
       {/* 固定CTAバナー */}
       <div className="fixed-cta">
         <div className="fixed-cta-text">
-          <div className="fixed-cta-label">🔮 AI総合鑑定 · 5,000文字以上</div>
+          <div className="fixed-cta-label">今この瞬間の選択が未来を変えます</div>
           <div className="fixed-cta-main">あなたの運命を今すぐ知る</div>
         </div>
         <a href="#form-section" className="fixed-cta-btn">¥3,980で鑑定する</a>
