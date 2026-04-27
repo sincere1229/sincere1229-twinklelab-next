@@ -64,7 +64,7 @@ export default function MiniReading() {
           <p className="sub">1テーマ集中・AIが深く読み解く</p>
         </div>
 
-        <div className="price">¥980</div>
+        <div className="price">¥500</div>
         <div className="price-sub">即時表示・1テーマ集中リーディング</div>
 
         <div className="theme-label">✦ 占いたいテーマを選んでください ✦</div>
@@ -99,7 +99,7 @@ export default function MiniReading() {
             <label className="form-label">メールアドレス</label>
             <input type="email" className="form-input" placeholder="example@email.com" id="inp-email" />
           </div>
-          <button className="cta-btn" onClick={handlePay}>✦ ¥980 で今すぐ鑑定する ✦</button>
+          <button className="cta-btn" onClick={handlePay}>✦ ¥500 で今すぐ鑑定する ✦</button>
           <p className="cta-note">🔒 安全な決済 · 即時表示</p>
         </div>
 
@@ -107,7 +107,7 @@ export default function MiniReading() {
           <div className="upsell-title">✦ さらに深く知りたい方へ ✦</div>
           <p className="upsell-desc">
             3テーマ＋ホロスコープ＋四柱推命＋タロット3枚の<br/>
-            AI総合鑑定（¥3,980）もご用意しています。
+            AI総合鑑定（¥3,500）もご用意しています。
           </p>
           <a href="/star/sogo" className="upsell-btn">✦ 総合鑑定を見る</a>
         </div>
@@ -116,7 +116,7 @@ export default function MiniReading() {
       </div>
 
       <div className="fixed-cta">
-        <div className="fixed-cta-text">🔮 1テーマ集中リーディング ¥980</div>
+        <div className="fixed-cta-text">🔮 1テーマ集中リーディング ¥500</div>
         <button className="fixed-cta-btn" onClick={() => { const el = document.getElementById('inp-name'); if(el) el.focus(); }}>今すぐ鑑定</button>
       </div>
       <div className="spacer"></div>
