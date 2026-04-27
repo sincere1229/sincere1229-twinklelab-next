@@ -107,12 +107,12 @@ export default function ResultContent() {
         .share-btn{background:transparent;border:1px solid rgba(201,168,76,0.3);border-radius:8px;color:var(--gold2);font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;padding:10px 20px;cursor:pointer;margin:0 6px;}
         @media print{body{background:white;color:black;}.wrap{padding:20px;}.print-btn,.back-link,.share-btn,.bot{display:none;}.rd-sec{background:white;border:1px solid #ccc;}.rd-text{color:black;}.sum-item,.gg-sec,.tr-sec{background:#f5f5f5;border:1px solid #ddd;}}
       `}</style>
-      <div className="wrap">
+      <div className="wrap"><div id="report-content">
         <div className="hdr">
           <div className="hdr-label">✦ AI総合鑑定 完全版 ✦</div>
           <h1 className="hdr-title">Your Reading</h1>
           <div className="hdr-name">{data.name}様の鑑定結果</div>
-          <button className="print-btn" onClick={() => window.print()}>✦ PDFとして保存・印刷</button>
+          <button className="print-btn" onClick={downloadPDF}>✦ PDFをダウンロード</button>
         </div>
         <div className="sum-grid">
           {[
@@ -155,9 +155,10 @@ export default function ResultContent() {
           <div className="rd-title">✦ AI総合鑑定レポート</div>
           <div className="rd-text">{data.reading}</div>
         </div>
+        </div>{/* /report-content */}
         <div className="bot">
           <a href="/star" className="back-link">← 占いポータルに戻る</a><br/>
-          <button className="share-btn" onClick={() => window.print()}>✦ PDFとして保存</button>
+          <button className="share-btn" onClick={downloadPDF}>✦ PDFをダウンロード</button>
         </div>
       </div>
     </>
