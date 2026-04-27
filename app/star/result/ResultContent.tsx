@@ -23,6 +23,24 @@ export default function ResultContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const downloadPDF = () => {
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
+    script.onload = () => {
+      const element = document.getElementById('report-content')
+      if (!element) return
+      const opt = {
+        margin: 10,
+        filename: 'twinkle-oracle-report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }
+      ;(window as any).html2pdf().set(opt).from(element).save()
+    }
+    document.head.appendChild(script)
+  }
+
   useEffect(() => {
     if (!sessionId) { setError('セッションIDがありません'); setLoading(false); return }
     fetch(`/api/reading?session_id=${sessionId}`)
