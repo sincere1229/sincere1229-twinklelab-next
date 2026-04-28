@@ -10,7 +10,7 @@ export default function ResultPage() {
         <style>{`@keyframes spin{to{transform:rotate(360deg);}}`}</style>
       </div>
     }>
-      <ResultContent />
+      <ResultContent"" />
     </Suspense>
   )
 }
