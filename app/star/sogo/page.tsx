@@ -75,6 +75,12 @@ export default function SogoPage() {
     const email  = (document.getElementById('inp-email')  as HTMLInputElement)?.value?.trim()
     if (!name || !birth || !email) { alert('お名前・生年月日・メールアドレスを入力してください'); return }
     if (!drawn.past || !drawn.present || !drawn.future) { alert('タロットカードを3枚引いてください'); return }
+    sessionStorage.setItem('tso_reading_info', JSON.stringify({
+      plan: 'sogo', name, birth, hour, gender,
+      tarotPast:    `${drawn.past?.name}（${drawn.past?.reversed ? '逆位置' : '正位置'}）`,
+      tarotPresent: `${drawn.present?.name}（${drawn.present?.reversed ? '逆位置' : '正位置'}）`,
+      tarotFuture:  `${drawn.future?.name}（${drawn.future?.reversed ? '逆位置' : '正位置'}）`,
+    }))
     setPaying(true)
     try {
       // APIに渡すタロット情報（カード名＋正逆位置）
