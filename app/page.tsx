@@ -51,7 +51,50 @@ export default function Home() {
           color: var(--text);
           line-height: 1.8;
           max-width: 500px;
-          margin: 0 auto 48px;
+          margin: 0 auto 32px;
+        }
+
+        /* ① ヒーロー下CTA（新規追加） */
+        .hero-cta {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-bottom: 8px;
+        }
+        .hero-cta-main {
+          display: inline-block;
+          background: linear-gradient(135deg, var(--gold), #b8860b);
+          color: #fff;
+          font-family: 'Cinzel', serif;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          padding: 14px 28px;
+          border-radius: 10px;
+          text-decoration: none;
+          transition: all 0.3s;
+          box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+        }
+        .hero-cta-main:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(201,168,76,0.45);
+        }
+        .hero-cta-sub {
+          display: inline-block;
+          background: transparent;
+          border: 1px solid var(--gold);
+          color: #8a6010;
+          font-family: 'Cinzel', serif;
+          font-size: 13px;
+          letter-spacing: 0.08em;
+          padding: 13px 24px;
+          border-radius: 10px;
+          text-decoration: none;
+          transition: all 0.3s;
+        }
+        .hero-cta-sub:hover {
+          background: rgba(201,168,76,0.1);
         }
 
         .nav-grid {
@@ -60,7 +103,7 @@ export default function Home() {
           gap: 16px;
           max-width: 800px;
           margin: 0 auto;
-          padding: 0 24px 80px;
+          padding: 40px 24px 80px;
         }
         @media(min-width:600px) {
           .nav-grid { grid-template-columns: repeat(4,1fr); }
@@ -121,6 +164,7 @@ export default function Home() {
           color: var(--text-s);
           line-height: 2;
         }
+        /* ② LINE ボタン文言変更 */
         .line-btn {
           display: inline-block;
           margin-top: 20px;
@@ -155,15 +199,21 @@ export default function Home() {
             AI × 占い × 親子教育<br />
             星の導きと最新AIで、あなたの毎日をもっと輝かせる
           </p>
+          {/* ① ヒーロー下CTA（新規追加） */}
+          <div className="hero-cta">
+            <a href="/star" className="hero-cta-main">🔮 無料で占ってみる</a>
+            <a href="/star/sogo" className="hero-cta-sub">✦ AI総合鑑定を見る</a>
+          </div>
         </div>
       </div>
 
       <div className="nav-grid">
+        {/* ③ 占いポータルカード説明を強化 */}
         <a href="/star" className="nav-card">
           <span className="nav-icon">🔮</span>
           <div className="nav-en">Twinkle Star Oracle</div>
           <div className="nav-jp">占いポータル</div>
-          <div className="nav-desc">タロット・数秘術・四柱推命など11種類の占い</div>
+          <div className="nav-desc">無料占いからAI総合鑑定まで。タロット・数秘術・四柱推命など11種類の占い</div>
           <span className="new-badge">NEW</span>
         </a>
         <a href="/heart" className="nav-card">
@@ -186,13 +236,14 @@ export default function Home() {
         </a>
       </div>
 
+      {/* ② LINE文言を強化 */}
       <div className="catch-section">
         <p className="catch-text">
-          LINEに登録すると毎月限定の無料占いイベントをお届けします🎁<br />
+          LINEに登録すると、あなたの未来3ヶ月の無料診断と限定占いイベントを受け取れます🎁<br />
           ルーン占い・ケルト十字・満月リーディングなど特別コンテンツ多数
         </p>
         <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">
-          💬 LINE に登録する（無料）
+          💬 無料で未来診断を受け取る
         </a>
       </div>
 
