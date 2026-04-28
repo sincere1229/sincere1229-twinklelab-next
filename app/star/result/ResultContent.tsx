@@ -184,11 +184,39 @@ export default function ResultContent() {
     setPdfLoading(true)
     try {
       const el = reportRef.current
-      const orig = el.getAttribute('style') || ''
-      el.style.background = '#ffffff'
-      el.style.color = '#111'
+      // 全子要素のスタイルを保存
+      const allEls = Array.from(el.querySelectorAll<HTMLElement>('*'))
+      const origStyles = allEls.map(e => e.getAttribute('style') || '')
+      const origRoot = el.getAttribute('style') || ''
+
+      // PDF用：白背景・黒文字に一括変換
+      el.style.cssText = 'background:#ffffff;color:#111111;padding:20px;'
+      allEls.forEach(e => {
+        const tag = e.tagName.toLowerCase()
+        if (tag === 'h2') {
+          e.style.cssText = 'color:#7a5a10;font-size:14px;font-weight:bold;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid #c9a84c;background:transparent;'
+        } else if (tag === 'p') {
+          e.style.cssText = 'color:#222222;font-size:12px;line-height:1.9;margin:3px 0;background:transparent;'
+        } else if (tag === 'hr') {
+          e.style.cssText = 'border:none;border-top:1px solid #ddd;margin:8px 0;'
+        } else if (tag === 'br') {
+          // そのまま
+        } else {
+          e.style.background = 'transparent'
+          e.style.color = '#222222'
+          e.style.border = 'none'
+          e.style.boxShadow = 'none'
+        }
+      })
+
       await downloadPdf(el, getInfo().name)
-      el.setAttribute('style', orig)
+
+      // 元のスタイルに戻す
+      el.setAttribute('style', origRoot)
+      allEls.forEach((e, i) => {
+        if (origStyles[i]) e.setAttribute('style', origStyles[i])
+        else e.removeAttribute('style')
+      })
     } catch {
       alert('PDFの生成に失敗しました。ブラウザの印刷機能をご利用ください。')
     } finally {
