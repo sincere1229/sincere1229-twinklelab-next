@@ -32,10 +32,10 @@ const CARDS = [
 ]
 
 const DEEP = [
-  { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'https://numerology-app-lovat.vercel.app', paid:true },
-  { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'https://kiju-app.vercel.app', paid:true },
-  { icon:'💕', name:'相性占い', sub:'2人の運命スコアを算出', href:'https://aicompat-app.vercel.app', paid:true },
-  { icon:'☯️', name:'四柱推命', sub:'命式・五行バランスを解読', href:'https://shichu-app.vercel.app', paid:true },
+  { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'https://numerology-app-lovat.vercel.app' },
+  { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'https://kiju-app.vercel.app' },
+  { icon:'💕', name:'相性占い', sub:'2人の運命スコアを算出', href:'https://aicompat-app.vercel.app' },
+  { icon:'☯️', name:'四柱推命', sub:'命式・五行バランスを解読', href:'https://shichu-app.vercel.app' },
 ]
 
 export default function StarPortal() {
@@ -83,6 +83,8 @@ export default function StarPortal() {
         .m-icon{font-size:22px;margin-bottom:6px;display:block;}
         .m-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px;}
         .m-sub{font-size:10px;color:var(--text-m);line-height:1.5;}
+
+        /* ① 無料+続きは有料バッジ（¥980削除・paid-badgeを修正） */
         .paid-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:8px;background:rgba(201,168,76,0.1);color:#8a6010;border:1px solid rgba(201,168,76,0.28);margin-top:6px;font-family:'Cinzel',serif;}
 
         .sogo{margin:12px 14px 16px;background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(255,235,245,0.95));border:1px solid rgba(201,168,76,0.4);border-radius:16px;padding:28px 20px;text-align:center;}
@@ -95,6 +97,31 @@ export default function StarPortal() {
         .sogo-sub{font-size:11px;color:var(--text-s);margin-bottom:16px;}
         .sogo-btn{display:inline-block;background:linear-gradient(135deg,#8a6a20,var(--gold),#8a6a20);background-size:200% 100%;border:none;border-radius:8px;color:#fff8f0;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:0.1em;padding:13px 28px;text-decoration:none;transition:all 0.4s;}
         .sogo-btn:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(201,168,76,0.35);}
+
+        /* ④ 2択CTAブロック */
+        .two-cta{margin:0 14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .cta-pay{background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.08));border:1px solid rgba(201,168,76,0.5);border-radius:14px;padding:16px 12px;text-align:center;text-decoration:none;display:block;transition:all 0.3s;}
+        .cta-pay:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,168,76,0.2);}
+        .cta-pay-label{font-size:9px;color:var(--gold);font-family:'Cinzel',serif;letter-spacing:2px;margin-bottom:4px;}
+        .cta-pay-title{font-size:13px;color:var(--text);font-weight:600;margin-bottom:4px;}
+        .cta-pay-price{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);margin-bottom:8px;}
+        .cta-pay-btn{display:inline-block;background:linear-gradient(135deg,#8a6a20,var(--gold));color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:8px 14px;text-decoration:none;letter-spacing:1px;}
+        .cta-line{background:rgba(255,248,252,0.9);border:1px solid rgba(201,168,76,0.22);border-radius:14px;padding:16px 12px;text-align:center;text-decoration:none;display:block;transition:all 0.3s;}
+        .cta-line:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(180,120,160,0.15);}
+        .cta-line-label{font-size:9px;color:#2a8a50;font-family:'Cinzel',serif;letter-spacing:2px;margin-bottom:4px;}
+        .cta-line-title{font-size:13px;color:var(--text);font-weight:600;margin-bottom:4px;}
+        .cta-line-free{font-family:'Cinzel',serif;font-size:20px;color:#2a8a50;margin-bottom:8px;}
+        .cta-line-btn{display:inline-block;background:linear-gradient(135deg,#1a7a3c,#2a8a50);color:#fff;font-size:11px;font-weight:700;border-radius:8px;padding:8px 14px;text-decoration:none;letter-spacing:1px;}
+
+        /* ⑤ ¥1,980ブロック */
+        .mid-block{margin:0 14px 16px;background:linear-gradient(135deg,rgba(155,89,182,0.1),rgba(100,60,160,0.07));border:1px solid rgba(155,89,182,0.3);border-radius:14px;padding:20px;text-align:center;}
+        .mid-label{font-family:'Cinzel',serif;font-size:10px;color:#9b59b6;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+        .mid-title{font-size:15px;color:var(--text);font-weight:600;margin-bottom:4px;}
+        .mid-desc{font-size:11px;color:var(--text-s);margin-bottom:10px;line-height:1.6;}
+        .mid-price{font-family:'Cinzel',serif;font-size:22px;color:#9b59b6;margin-bottom:10px;}
+        .mid-btn{display:inline-block;background:linear-gradient(135deg,#9b59b6,#6c3483);color:#fff;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:1px;padding:11px 24px;border-radius:8px;text-decoration:none;transition:all 0.3s;}
+        .mid-btn:hover{box-shadow:0 4px 16px rgba(155,89,182,0.35);}
+        .mid-note{font-size:10px;color:var(--text-s);margin-top:6px;}
 
         .line-banner{margin:0 14px 16px;background:rgba(255,248,252,0.9);border:1px solid rgba(201,168,76,0.22);border-radius:14px;padding:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
         .line-text h3{font-size:14px;color:var(--text);font-weight:600;margin-bottom:4px;}
@@ -147,42 +174,61 @@ export default function StarPortal() {
           ))}
         </div>
 
-        <div style={{margin:'8px 14px',background:'linear-gradient(135deg,rgba(155,127,212,0.12),rgba(100,60,160,0.08))',border:'1px solid rgba(155,127,212,0.25)',borderRadius:'12px',padding:'16px',textAlign:'center'}}>
-          <p style={{fontSize:'13px',color:'rgba(240,234,220,0.7)',marginBottom:'10px'}}>迷っているなら、まずはここから</p>
-          <a href="/star/mini" style={{display:'inline-block',background:'linear-gradient(135deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05))',border:'1px solid rgba(201,168,76,0.4)',borderRadius:'8px',color:'#e8c97a',fontFamily:'Cinzel,serif',fontSize:'12px',letterSpacing:'2px',padding:'10px 20px',textDecoration:'none'}}>✦ 今すぐ迷いを解決する（¥980）</a>
+        {/* ④ 2択CTA（¥500直課金 or LINE無料）← ¥980ブロックをここに置換 */}
+        <div style={{margin:'4px 14px 4px',textAlign:'center'}}>
+          <p style={{fontSize:'13px',color:'rgba(61,26,64,0.6)',lineHeight:'1.8',marginBottom:'10px'}}>
+            迷っているなら、まずはここから
+          </p>
+        </div>
+        <div className="two-cta">
+          <a href="/star/mini" className="cta-pay">
+            <div className="cta-pay-label">即・結果表示</div>
+            <div className="cta-pay-title">今すぐ詳しく見る</div>
+            <div className="cta-pay-price">¥500</div>
+            <span className="cta-pay-btn">✦ 今すぐ鑑定する</span>
+            <div style={{fontSize:'10px',color:'rgba(61,26,64,0.4)',marginTop:'6px'}}>すぐに結果が表示されます</div>
+          </a>
+          <a href="https://lin.ee/XHDFrA8" target="_blank" className="cta-line">
+            <div className="cta-line-label">完全無料</div>
+            <div className="cta-line-title">じっくり知りたい方へ</div>
+            <div className="cta-line-free">¥0</div>
+            <span className="cta-line-btn">💬 無料で受け取る</span>
+            <div style={{fontSize:'10px',color:'rgba(61,26,64,0.4)',marginTop:'6px'}}>LINE登録するだけ</div>
+          </a>
         </div>
 
         <p style={{textAlign:'center',fontSize:'13px',color:'rgba(61,26,64,0.6)',margin:'4px 14px 8px',lineHeight:'1.8'}}>迷っている今こそ、あなたの人生が変わるタイミングです</p>
         <div className="div-line"><span className="div-text">✦ 詳細鑑定 ✦</span></div>
 
+        {/* ③ 詳細鑑定カード：「無料+続きは有料」に変更 */}
         <div className="main-grid">
           {DEEP.map((d) => (
             <a key={d.name} href={d.href} target="_blank" className="main-card">
               <span className="m-icon">{d.icon}</span>
               <div className="m-name">{d.name}</div>
               <div className="m-sub">{d.sub}</div>
-              <span className="paid-badge">無料+続きLINEへ</span>
+              <span className="paid-badge">無料+続きは¥500</span>
             </a>
           ))}
         </div>
 
-        {/* ミニ鑑定 */}
-        <div style={{margin:'8px 14px 12px',background:'linear-gradient(135deg,rgba(155,127,212,0.15),rgba(100,60,160,0.1))',border:'1px solid rgba(155,127,212,0.35)',borderRadius:'14px',padding:'20px',display:'flex',alignItems:'center',gap:'16px',flexWrap:'wrap' as const}}>
-          <div style={{flex:1}}>
-            <div style={{fontFamily:'Cinzel,serif',fontSize:'10px',color:'#c4a8f0',letterSpacing:'3px',textTransform:'uppercase' as const,marginBottom:'6px',opacity:0.8}}>✦ Mini Reading ✦</div>
-            <div style={{fontSize:'15px',color:'#f0eadc',fontWeight:500,marginBottom:'4px'}}>今すぐ迷いを解決する</div>
-            <div style={{fontSize:'12px',color:'rgba(240,234,220,0.5)'}}>答えが欲しい人のための即効鑑定</div>
+        {/* ⑤ ¥1,980 直課金ブロック（新規追加） */}
+        <div className="mid-block">
+          <div className="mid-label">✦ Standard Reading ✦</div>
+          <div className="mid-title">しっかり知りたい方へ</div>
+          <div className="mid-desc">
+            恋愛・仕事・金運を3テーマまとめて深く鑑定<br />
+            2,500〜3,500文字の詳細リーディング
           </div>
-          <div style={{textAlign:'center' as const,flexShrink:0}}>
-            <div style={{fontFamily:'Cinzel,serif',fontSize:'22px',color:'#c9a84c',marginBottom:'8px'}}>¥980</div>
-            <a href="/star/mini" style={{display:'inline-block',background:'linear-gradient(135deg,#8a6a20,#c9a84c)',borderRadius:'8px',color:'#0a0e1a',fontFamily:'Cinzel,serif',fontSize:'12px',fontWeight:700,letterSpacing:'1px',padding:'10px 20px',textDecoration:'none'}}>今すぐ鑑定する</a>
-          </div>
+          <div className="mid-price">¥1,980</div>
+          <a href="/star/chukan" className="mid-btn">✦ 3テーマをまとめて鑑定する</a>
+          <div className="mid-note">即時表示 · PDFダウンロード付き · 🔒 安全な決済</div>
         </div>
 
         {/* 総合鑑定 */}
         <div className="sogo">
           <div className="sogo-label">✦ Premium Reading ✦</div>
-          <div style={{fontSize:'13px',color:'rgba(240,234,220,0.6)',marginBottom:'8px',letterSpacing:'1px'}}>あなたの人生の流れを完全解析</div>
+          <div style={{fontSize:'13px',color:'rgba(61,26,64,0.6)',marginBottom:'8px',letterSpacing:'1px'}}>あなたの人生の流れを完全解析</div>
           <div className="sogo-title">AI総合鑑定</div>
           <div className="sogo-items">
             <span className="sogo-item">ホロスコープ図面</span>
@@ -192,19 +238,19 @@ export default function StarPortal() {
             <span className="sogo-item">過去・現在・未来</span>
             <span className="sogo-item">年代別メッセージ</span>
           </div>
-          <div style={{fontSize:'13px',color:'rgba(240,234,220,0.6)',marginBottom:'10px',letterSpacing:'1px'}}>あなたの人生は、すでに流れが決まっています</div>
+          <div style={{fontSize:'13px',color:'rgba(61,26,64,0.6)',marginBottom:'10px',letterSpacing:'1px'}}>あなたの人生は、すでに流れが決まっています</div>
           <div className="sogo-price">¥3,980</div>
           <div className="sogo-sub">即座に表示・PDFダウンロード付き</div>
           <a href="/star/sogo" className="sogo-btn">✦ AI総合鑑定を受ける ✦</a>
         </div>
 
-        {/* LINEバナー */}
+        {/* ⑥ LINEは無料特典・リピート用に限定 */}
         <div className="line-banner">
           <div className="line-text">
-            <h3 style={{fontSize:'15px'}}>🔮 今だけ無料｜あなたの未来3ヶ月を完全診断</h3>
-            <p>恋愛・仕事・金運の「これから」を具体的に解説</p>
+            <h3 style={{fontSize:'15px'}}>🎁 LINE限定｜毎月無料占いイベント配信中</h3>
+            <p>ルーン占い・ケルト十字・満月リーディングなど<br />登録者だけの特別コンテンツをお届けします</p>
           </div>
-          <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">無料で未来を受け取る</a>
+          <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">無料で登録する</a>
         </div>
 
         {/* SEO説明文 */}
