@@ -294,9 +294,10 @@ export default function ResultContent() {
 
         <div style={s.resultCard}>
           {result ? result.split('\n').map((line, i) => {
-            if (line.startsWith('## ')) return <h2 key={i} style={s.secTitle}>{line.replace('## ', '')}</h2>
+            if (line.startsWith('## ') || line.startsWith('# ')) return <h2 key={i} style={s.secTitle}>{line.replace(/^#{1,2}\s*/, '')}</h2>
+            if (line.trim() === '---' || line.trim() === '***') return <hr key={i} style={{border:'none',borderTop:'1px solid rgba(201,168,76,0.15)',margin:'8px 0'}} />
             if (line.trim() === '') return <br key={i} />
-            return <p key={i} style={s.resLine}>{line}</p>
+            return <p key={i} style={s.resLine}>{line.replace(/\*\*/g, '')}</p>
           }) : (
             <p style={{color:'rgba(240,234,220,0.4)',textAlign:'center',padding:'40px 0'}}>
               鑑定文を準備しています…
