@@ -1,42 +1,23 @@
 'use client'
 
-// ============================================================
-//  ResultContent.tsx
-//
-//  Payment Link方式の結果表示
-//
-//  フロー:
-//    1. mini/sogo フォーム入力
-//    2. sessionStorage に情報を保存
-//    3. Payment Link へ遷移
-//    4. 決済完了 → Stripeが /star/result?paid=1&plan=xxx へリダイレクト
-//    5. このページで sessionStorage から情報を取得
-//    6. Claude API で鑑定文を生成
-//    7. PDFダウンロード可能
-//
-//  保護: paid=1 がURLにない場合はアクセス不可画面を表示
-// ============================================================
-
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 
-// ============================================================
-//  プラン別プロンプト
-// ============================================================
 function buildPrompt(p: {
   plan: string; name: string; birth: string; hour: string; gender: string
   theme: string; tarotPast: string; tarotPresent: string; tarotFuture: string
 }) {
   const genderLabel = p.gender === 'female' ? '女性' : p.gender === 'male' ? '男性' : 'その他'
+  const displayName = p.name || 'あなた'
 
   if (p.plan === 'sogo') return `あなたはプロの占い師です。以下の情報をもとにAI総合鑑定（完全版）を日本語で行ってください。
 
-【依頼者】名前:${p.name} / 生年月日:${p.birth} / 時間:${p.hour === '-1' ? '不明' : p.hour + '時台'} / 性別:${genderLabel}
+【依頼者】名前:${displayName} / 生年月日:${p.birth || '不明'} / 時間:${p.hour === '-1' ? '不明' : p.hour + '時台'} / 性別:${genderLabel}
 【タロット】過去:${p.tarotPast || '不明'} / 現在:${p.tarotPresent || '不明'} / 未来:${p.tarotFuture || '不明'}
 
 以下をすべて含む3,000〜5,000文字の鑑定文を書いてください:
 
-## ✦ ${p.name}さんへ
+## ✦ ${displayName}さんへ
 （全体的なメッセージ。温かく具体的に）
 
 ## ✦ ホロスコープ分析
@@ -67,12 +48,12 @@ function buildPrompt(p: {
 
   if (p.plan === 'mini') return `あなたはプロの占い師です。以下の情報をもとにミニ鑑定（3テーマ）を日本語で行ってください。
 
-【依頼者】名前:${p.name} / 生年月日:${p.birth} / 性別:${genderLabel}
+【依頼者】名前:${displayName} / 生年月日:${p.birth || '不明'} / 性別:${genderLabel}
 【メインテーマ】${p.theme || '総合運'}
 
 以下をすべて含む1,500〜2,500文字の鑑定文を書いてください:
 
-## ✦ ${p.name}さんへ
+## ✦ ${displayName}さんへ
 （今の全体的な状況と流れ）
 
 ## ✦ 恋愛運
@@ -95,35 +76,22 @@ function buildPrompt(p: {
 
 文体:温かく具体的に。押し売り感なし。`
 
-  // quick ¥500
   return `あなたはプロの占い師です。以下の情報をもとに1テーマ集中リーディングを日本語で行ってください。
 
-【依頼者】名前:${p.name} / 生年月日:${p.birth}
+【依頼者】名前:${displayName} / 生年月日:${p.birth || '不明'}
 【テーマ】${p.theme || '総合運'}
 
 以下を含む800〜1,200文字の鑑定文を書いてください:
 
-## ✦ ${p.name}さんへ
-（テーマに関する今の状況の読み解き）
-
+## ✦ ${displayName}さんへ
 ## ✦ 今の流れ
-（現在の状況と近未来の展開）
-
 ## ✦ この先3日で起きること
-（具体的な変化や注意点）
-
 ## ✦ アドバイス
-（今すぐできる具体的な行動）
-
 ## ✦ 星からのメッセージ
-（温かい締めくくり）
 
 文体:温かく具体的に。`
 }
 
-// ============================================================
-//  PDF ダウンロード
-// ============================================================
 async function downloadPdf(el: HTMLElement, name: string) {
   if (!(window as any).html2pdf) {
     await new Promise<void>((res, rej) => {
@@ -143,63 +111,65 @@ async function downloadPdf(el: HTMLElement, name: string) {
   }).from(el).save()
 }
 
-// ============================================================
-//  メイン
-// ============================================================
 export default function ResultContent() {
-  const params   = useSearchParams()
-  const paid     = params.get('paid')
-  const planUrl  = params.get('plan') || 'sogo'
+  const params = useSearchParams()
 
-  // sessionStorage からユーザー情報を取得
-  const [info, setInfo] = useState({
-    plan: planUrl, name: '', birth: '', hour: '-1',
-    gender: 'other', theme: '', tarotPast: '', tarotPresent: '', tarotFuture: '',
-  })
+  const paid    = params.get('paid')
+  const plan    = params.get('plan') || 'sogo'
+
   const [result,     setResult]     = useState('')
   const [loading,    setLoading]    = useState(false)
   const [error,      setError]      = useState('')
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [started,    setStarted]    = useState(false)
   const reportRef = useRef<HTMLDivElement>(null)
 
-  // paid=1 チェック
   const isAuthorized = paid === '1'
 
-  useEffect(() => {
-    if (!isAuthorized) return
+  // ★ 修正: URLパラメータ or sessionStorage どちらからでも取得
+  const getInfo = () => {
+    // まずsessionStorageを試みる
+    let saved: any = {}
+    try {
+      const raw = sessionStorage.getItem('tso_reading_info')
+      if (raw) saved = JSON.parse(raw)
+    } catch {}
 
-    // sessionStorage から読み取り
-    const saved = sessionStorage.getItem('tso_reading_info')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setInfo(prev => ({ ...prev, ...parsed, plan: planUrl }))
-      } catch {}
+    return {
+      plan:         plan,
+      name:         saved.name         || params.get('name')         || '',
+      birth:        saved.birth        || params.get('birth')        || '',
+      hour:         saved.hour         || params.get('hour')         || '-1',
+      gender:       saved.gender       || params.get('gender')       || 'other',
+      theme:        saved.theme        || params.get('theme')        || '',
+      tarotPast:    saved.tarotPast    || params.get('tarot_past')    || '',
+      tarotPresent: saved.tarotPresent || params.get('tarot_present') || '',
+      tarotFuture:  saved.tarotFuture  || params.get('tarot_future')  || '',
     }
-  }, [isAuthorized, planUrl])
+  }
 
-  // infoが揃ったら生成開始
+  // ★ 修正: paid=1 があれば即座に生成開始（nameがなくても実行）
   useEffect(() => {
-    if (!isAuthorized) return
-    if (!info.name && !info.birth) return  // まだ読み込まれていない
+    if (!isAuthorized || started) return
+    setStarted(true)
+    const info = getInfo()
     generateReading(info)
-  }, [info.name, info.birth, isAuthorized])
+  }, [isAuthorized])
 
-  const generateReading = async (i = info) => {
+  const generateReading = async (info: ReturnType<typeof getInfo>) => {
     setLoading(true)
     setError('')
     try {
-      const prompt = buildPrompt({
-        plan: i.plan, name: i.name || 'あなた', birth: i.birth,
-        hour: i.hour, gender: i.gender, theme: i.theme,
-        tarotPast: i.tarotPast, tarotPresent: i.tarotPresent, tarotFuture: i.tarotFuture,
-      })
+      const prompt = buildPrompt(info)
       const res = await fetch('/api/generate-reading', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
       })
-      if (!res.ok) throw new Error('生成に失敗しました')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || `HTTP ${res.status}`)
+      }
       const data = await res.json()
       setResult(data.text || '')
     } catch (e: any) {
@@ -213,13 +183,12 @@ export default function ResultContent() {
     if (!reportRef.current) return
     setPdfLoading(true)
     try {
-      // PDF用に白背景スタイルを一時適用
       const el = reportRef.current
-      const orig = el.style.cssText
+      const orig = el.getAttribute('style') || ''
       el.style.background = '#ffffff'
       el.style.color = '#111'
-      await downloadPdf(el, info.name)
-      el.style.cssText = orig
+      await downloadPdf(el, getInfo().name)
+      el.setAttribute('style', orig)
     } catch {
       alert('PDFの生成に失敗しました。ブラウザの印刷機能をご利用ください。')
     } finally {
@@ -244,13 +213,14 @@ export default function ResultContent() {
 
   // ---- 生成中 ----
   if (loading) {
+    const info = getInfo()
     return (
       <div style={s.loadWrap}>
         <div style={s.spinner} />
         <div style={s.loadTitle}>✦ 鑑定文を生成しています ✦</div>
         <p style={s.loadText}>
           {info.name || 'あなた'}さんの情報をもとに<br/>
-          {info.plan === 'sogo' ? '4つの占術を統合して' : '丁寧に'}分析しています…
+          {plan === 'sogo' ? '4つの占術を統合して' : '丁寧に'}分析しています…
         </p>
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
@@ -264,13 +234,14 @@ export default function ResultContent() {
         <div style={s.centerBox}>
           <div style={s.boxTitle}>エラーが発生しました</div>
           <p style={s.boxText}>{error}</p>
-          <button onClick={() => generateReading()} style={s.goldBtn}>もう一度試す</button>
+          <button onClick={() => generateReading(getInfo())} style={s.goldBtn as any}>もう一度試す</button>
         </div>
       </div>
     )
   }
 
-  const planLabel = info.plan === 'sogo' ? 'AI総合鑑定（完全版）' : info.plan === 'mini' ? 'ミニ鑑定 3テーマ' : '1テーマ集中リーディング'
+  const info = getInfo()
+  const planLabel = plan === 'sogo' ? 'AI総合鑑定（完全版）' : plan === 'mini' ? 'ミニ鑑定 3テーマ' : '1テーマ集中リーディング'
 
   // ---- 結果 ----
   return (
@@ -282,7 +253,6 @@ export default function ResultContent() {
         .pdf-btn:hover{background:rgba(201,168,76,0.2)!important;}
       `}</style>
 
-      {/* ヘッダー */}
       <div style={s.header}>
         <a href="/star" style={s.backLink}>← 占いポータル</a>
         <div style={s.headerLabel}>✦ {planLabel} ✦</div>
@@ -291,7 +261,6 @@ export default function ResultContent() {
         <p style={s.headerSub}>決済が完了しました · ありがとうございます🙏</p>
       </div>
 
-      {/* PDFボタン（上） */}
       <div style={s.pdfArea}>
         <button className="pdf-btn" onClick={handlePdf} disabled={pdfLoading || !result} style={s.pdfBtn}>
           {pdfLoading ? '⏳ 生成中...' : '📄 PDFをダウンロード'}
@@ -299,16 +268,13 @@ export default function ResultContent() {
         <p style={s.pdfNote}>A4サイズ · 日本語対応 · 何度でも保存できます</p>
       </div>
 
-      {/* 鑑定結果本文（PDFターゲット） */}
       <div ref={reportRef} id="report-content" style={s.reportWrap}>
-        {/* レポートヘッダー */}
         <div style={s.repHeader}>
           <div style={s.repHeaderTitle}>✦ TWINKLE STAR ORACLE ✦</div>
-          <div style={s.repHeaderSub}>{planLabel} · {info.name} · {new Date().toLocaleDateString('ja-JP')}</div>
+          <div style={s.repHeaderSub}>{planLabel} · {info.name || 'あなた'} · {new Date().toLocaleDateString('ja-JP')}</div>
         </div>
 
-        {/* タロット表示（sogoのみ） */}
-        {info.plan === 'sogo' && (info.tarotPast || info.tarotPresent || info.tarotFuture) && (
+        {plan === 'sogo' && (info.tarotPast || info.tarotPresent || info.tarotFuture) && (
           <div style={s.tarotBox}>
             <div style={s.tarotBoxTitle}>🃏 引いたタロットカード</div>
             <div style={s.tarotRow}>
@@ -326,31 +292,31 @@ export default function ResultContent() {
           </div>
         )}
 
-        {/* 鑑定テキスト */}
         <div style={s.resultCard}>
-          {result.split('\n').map((line, i) => {
+          {result ? result.split('\n').map((line, i) => {
             if (line.startsWith('## ')) return <h2 key={i} style={s.secTitle}>{line.replace('## ', '')}</h2>
             if (line.trim() === '') return <br key={i} />
             return <p key={i} style={s.resLine}>{line}</p>
-          })}
+          }) : (
+            <p style={{color:'rgba(240,234,220,0.4)',textAlign:'center',padding:'40px 0'}}>
+              鑑定文を準備しています…
+            </p>
+          )}
         </div>
 
         <div style={s.repFooter}>© 2026 Twinkle Lab / Twinkle Star Oracle · twinkle-lab.jp</div>
       </div>
 
-      {/* PDFボタン（下） */}
       <div style={{...s.pdfArea, marginTop:'8px'}}>
         <button className="pdf-btn" onClick={handlePdf} disabled={pdfLoading || !result} style={s.pdfBtn}>
           {pdfLoading ? '⏳ 生成中...' : '📄 PDFをダウンロード'}
         </button>
       </div>
 
-      {/* 再生成 */}
       <div style={{textAlign:'center',margin:'10px 0 24px'}}>
-        <button onClick={() => generateReading()} style={s.retryBtn}>🔄 鑑定文を再生成する</button>
+        <button onClick={() => generateReading(getInfo())} style={s.retryBtn}>🔄 鑑定文を再生成する</button>
       </div>
 
-      {/* CV導線 */}
       <div style={s.cvSection}>
         <div style={s.cvTitle}>✦ 次のステップ ✦</div>
         <p style={s.cvSub}>鑑定結果を受け取ったあなたへ</p>
@@ -360,7 +326,7 @@ export default function ResultContent() {
             <div style={s.cvName}>別の占いを試す</div>
             <div style={s.cvDesc}>タロット・数秘術など<br/>11種類の無料占いへ</div>
           </a>
-          {info.plan !== 'sogo' && (
+          {plan !== 'sogo' && (
             <a href="/star/sogo" className="cv-card" style={{...s.cvCard, borderColor:'rgba(201,168,76,0.35)', background:'linear-gradient(135deg,rgba(60,40,10,0.4),rgba(40,20,5,0.5))'}}>
               <span style={{fontSize:'28px'}}>⭐</span>
               <div style={s.cvName}>AI総合鑑定へ進む</div>
@@ -372,7 +338,7 @@ export default function ResultContent() {
             <div style={s.cvName}>LINEで続きを受け取る</div>
             <div style={s.cvDesc}>開運情報を無料配信</div>
           </a>
-          <a href={info.plan === 'sogo' ? '/star/sogo' : '/star/mini'} className="cv-card" style={s.cvCard}>
+          <a href={plan === 'sogo' ? '/star/sogo' : '/star/mini'} className="cv-card" style={s.cvCard}>
             <span style={{fontSize:'28px'}}>🔁</span>
             <div style={s.cvName}>再鑑定する</div>
             <div style={s.cvDesc}>別の日時・情報で<br/>もう一度</div>
@@ -385,9 +351,6 @@ export default function ResultContent() {
   )
 }
 
-// ============================================================
-//  スタイル
-// ============================================================
 const s: Record<string, React.CSSProperties> = {
   wrap: { background:'#0a0e1a', minHeight:'100vh', color:'#f0eadc', fontFamily:"'Noto Serif JP',serif", paddingBottom:'60px' },
   loadWrap: { background:'#0a0e1a', minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px', padding:'40px 20px', fontFamily:"'Noto Serif JP',serif" },
