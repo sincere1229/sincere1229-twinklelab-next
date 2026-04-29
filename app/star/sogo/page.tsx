@@ -2,11 +2,6 @@
 
 import { useState } from 'react'
 
-// ============================================================
-//  タロットカード定義
-//  画像パス: /tarot/card_00_fool.jpg ～ card_21_world.jpg
-//  card_back.jpg = 裏面
-// ============================================================
 const TAROT_CARDS = [
   { name: '愚者',         slug: 'card_00_fool' },
   { name: '魔術師',       slug: 'card_01_magician' },
@@ -40,6 +35,23 @@ interface DrawnCard {
   reversed: boolean
 }
 
+// ★ MiniCta をコンポーネントの外に移動（React error #423の修正）
+function MiniCta({ label = '✦ 今すぐ鑑定する（¥3,980）' }: { label?: string }) {
+  return (
+    <div style={{ textAlign: 'center', margin: '16px 0' }}>
+      <a href="#form-section" style={{
+        display: 'inline-block',
+        background: 'linear-gradient(135deg,#8a6a20,#c9a84c,#8a6a20)',
+        backgroundSize: '200% 100%',
+        borderRadius: 10, color: '#0a0e1a',
+        fontFamily: 'Cinzel,serif', fontSize: '14px', fontWeight: 700,
+        letterSpacing: '2px', padding: '12px 24px', textDecoration: 'none',
+      }}>{label}</a>
+      <div style={{ fontSize: '10px', color: 'rgba(240,234,220,0.3)', marginTop: '6px' }}>🔒 Stripe安全決済 · 即時表示</div>
+    </div>
+  )
+}
+
 export default function SogoPage() {
   const [drawn, setDrawn] = useState<{ past: DrawnCard | null; present: DrawnCard | null; future: DrawnCard | null }>({
     past: null, present: null, future: null,
@@ -51,7 +63,6 @@ export default function SogoPage() {
   const drawCard = (slot: Slot) => {
     if (drawn[slot] || flipping) return
     setFlipping(slot)
-
     setTimeout(() => {
       let idx = Math.floor(Math.random() * TAROT_CARDS.length)
       let tries = 0
@@ -59,7 +70,7 @@ export default function SogoPage() {
         idx = Math.floor(Math.random() * TAROT_CARDS.length)
         tries++
       }
-      const reversed = Math.random() < 0.3  // 30%の確率で逆位置
+      const reversed = Math.random() < 0.3
       const card = { ...TAROT_CARDS[idx], reversed }
       setUsedIdx(prev => [...prev, idx])
       setDrawn(prev => ({ ...prev, [slot]: card }))
@@ -83,7 +94,6 @@ export default function SogoPage() {
     }))
     setPaying(true)
     try {
-      // APIに渡すタロット情報（カード名＋正逆位置）
       const tarot = {
         past:    `${drawn.past.name}（${drawn.past.reversed ? '逆位置' : '正位置'}）`,
         present: `${drawn.present.name}（${drawn.present.reversed ? '逆位置' : '正位置'}）`,
@@ -92,7 +102,7 @@ export default function SogoPage() {
       const res = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, birth, hour, gender, email, tarot }),
+        body: JSON.stringify({ plan: 'sogo', name, birth, hour, gender, email, tarot }),
       })
       const { url, error } = await res.json()
       if (error) throw new Error(error)
@@ -103,53 +113,25 @@ export default function SogoPage() {
     }
   }
 
-  const MiniCta = ({ label = '✦ 今すぐ鑑定する（¥3,980）' }: { label?: string }) => (
-    <div style={{ textAlign: 'center', margin: '16px 0' }}>
-      <a href="#form-section" style={{
-        display: 'inline-block',
-        background: 'linear-gradient(135deg,#8a6a20,#c9a84c,#8a6a20)',
-        backgroundSize: '200% 100%',
-        borderRadius: 10, color: '#0a0e1a',
-        fontFamily: 'Cinzel,serif', fontSize: '14px', fontWeight: 700,
-        letterSpacing: '2px', padding: '12px 24px', textDecoration: 'none',
-      }}>{label}</a>
-      <div style={{ fontSize: '10px', color: 'rgba(240,234,220,0.3)', marginTop: '6px' }}>🔒 Stripe安全決済 · 即時表示</div>
-    </div>
-  )
-
-  // カードスロットのレンダリング
   const renderTarotSlot = (slot: Slot) => {
     const labels = { past: 'PAST / 過去', present: 'PRESENT / 現在', future: 'FUTURE / 未来' }
     const card = drawn[slot]
     const isFlipping = flipping === slot
-
     return (
-      <div
-        key={slot}
-        onClick={() => drawCard(slot)}
-        style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-          cursor: card ? 'default' : 'pointer',
-        }}
-      >
-        {/* ポジションラベル */}
+      <div key={slot} onClick={() => drawCard(slot)} style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+        cursor: card ? 'default' : 'pointer',
+      }}>
+        <div style={{ fontFamily: 'Cinzel,serif', fontSize: '10px', color: '#c9a84c', letterSpacing: '2px', textAlign: 'center' }}>
+          {labels[slot]}
+        </div>
         <div style={{
-          fontFamily: 'Cinzel,serif', fontSize: '10px', color: '#c9a84c',
-          letterSpacing: '2px', textAlign: 'center',
-        }}>{labels[slot]}</div>
-
-        {/* カード画像エリア */}
-        <div style={{
-          width: '100%', aspectRatio: '2/3',
-          borderRadius: '10px',
+          width: '100%', aspectRatio: '2/3', borderRadius: '10px',
           border: card ? '2px solid rgba(201,168,76,0.7)' : '1px solid rgba(201,168,76,0.25)',
           boxShadow: card ? '0 0 20px rgba(201,168,76,0.3)' : 'none',
-          overflow: 'hidden',
-          position: 'relative',
-          background: 'rgba(10,14,26,0.8)',
-          transition: 'all 0.4s ease',
+          overflow: 'hidden', position: 'relative',
+          background: 'rgba(10,14,26,0.8)', transition: 'all 0.4s ease',
         }}>
-          {/* フリップアニメーション中 */}
           {isFlipping && (
             <div style={{
               position: 'absolute', inset: 0,
@@ -159,15 +141,10 @@ export default function SogoPage() {
               <div style={{ fontSize: '28px', animation: 'spin 0.6s linear infinite' }}>✦</div>
             </div>
           )}
-
-          {/* 裏面（未引き） */}
           {!card && !isFlipping && (
-            <img
-              src="/tarot/card_back.jpg"
-              alt="カードの裏面"
+            <img src="/tarot/card_back.jpg" alt="カードの裏面"
               style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }}
               onError={(e) => {
-                // 画像がない場合のフォールバック
                 const t = e.currentTarget as HTMLImageElement
                 t.style.display = 'none'
                 const p = t.parentElement
@@ -180,19 +157,14 @@ export default function SogoPage() {
               }}
             />
           )}
-
-          {/* 表面（引いた後） */}
           {card && !isFlipping && (
-            <img
-              src={`/tarot/${card.slug}.jpg`}
-              alt={card.name}
+            <img src={`/tarot/${card.slug}.jpg`} alt={card.name}
               style={{
                 width: '100%', height: '100%', objectFit: 'cover',
                 transform: card.reversed ? 'rotate(180deg)' : 'none',
                 transition: 'transform 0.3s ease',
               }}
               onError={(e) => {
-                // 画像がない場合のフォールバック
                 const t = e.currentTarget as HTMLImageElement
                 t.style.display = 'none'
                 const p = t.parentElement
@@ -206,14 +178,9 @@ export default function SogoPage() {
             />
           )}
         </div>
-
-        {/* カード名 + 正逆位置 */}
         {card ? (
           <div style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: '13px', color: '#e8c97a', fontWeight: 600,
-              marginBottom: '3px',
-            }}>✦ {card.name} ✦</div>
+            <div style={{ fontSize: '13px', color: '#e8c97a', fontWeight: 600, marginBottom: '3px' }}>✦ {card.name} ✦</div>
             <div style={{
               fontSize: '10px', letterSpacing: '1px',
               color: card.reversed ? 'rgba(232,122,122,0.8)' : 'rgba(122,196,160,0.8)',
@@ -223,10 +190,7 @@ export default function SogoPage() {
             }}>{card.reversed ? '▼ 逆位置' : '▲ 正位置'}</div>
           </div>
         ) : (
-          <div style={{
-            fontSize: '11px', color: 'rgba(240,234,220,0.35)',
-            textAlign: 'center',
-          }}>タップして引く</div>
+          <div style={{ fontSize: '11px', color: 'rgba(240,234,220,0.35)', textAlign: 'center' }}>タップして引く</div>
         )}
       </div>
     )
@@ -243,7 +207,6 @@ export default function SogoPage() {
           radial-gradient(ellipse at 80% 70%,rgba(180,140,60,0.06) 0%,transparent 50%);
           pointer-events:none;z-index:0;}
         .wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 20px 120px;}
-
         .hero{text-align:center;padding:50px 0 40px;border-bottom:1px solid rgba(201,168,76,0.15);}
         .back{display:inline-block;font-size:12px;color:rgba(201,168,76,0.6);text-decoration:none;margin-bottom:20px;letter-spacing:0.1em;}
         .hero-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;opacity:0.7;}
@@ -254,41 +217,33 @@ export default function SogoPage() {
         .hero-tag::before{content:'▶ ';color:var(--gold);}
         .gold-line{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 24px;}
         .price-hero{font-family:'Cinzel',serif;font-size:44px;color:var(--gold);margin-bottom:20px;}
-
         .urgency-bar{background:linear-gradient(135deg,rgba(232,122,122,0.15),rgba(200,60,60,0.08));border:1px solid rgba(232,122,122,0.35);border-radius:12px;padding:14px 18px;text-align:center;margin:16px 0;}
         .urgency-bar-text{color:#f5a0a0;font-size:14px;font-weight:600;letter-spacing:1px;margin-bottom:4px;}
         .urgency-bar-sub{color:rgba(232,213,183,0.6);font-size:12px;line-height:1.7;}
-
         .cta-btn{display:block;width:100%;padding:20px;background:linear-gradient(135deg,#8a6a20,var(--gold),#8a6a20);background-size:200% 100%;border:none;border-radius:12px;color:#0a0e1a;font-family:'Cinzel',serif;font-size:18px;font-weight:700;letter-spacing:2px;cursor:pointer;transition:all 0.4s;text-align:center;text-decoration:none;margin-bottom:10px;}
         .cta-btn:hover{background-position:100% 0;box-shadow:0 8px 30px rgba(201,168,76,0.4);transform:translateY(-2px);}
         .cta-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
         .cta-note{text-align:center;font-size:11px;color:rgba(240,234,220,0.3);letter-spacing:1px;margin-bottom:8px;}
-
         .section{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(201,168,76,0.18);border-radius:16px;padding:28px;margin:20px 0;}
         .sec-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;opacity:0.7;}
         .sec-title{font-size:clamp(18px,4vw,24px);color:var(--gold2);font-weight:600;margin-bottom:16px;line-height:1.5;}
         .sec-text{font-size:14px;color:rgba(240,234,220,0.8);line-height:2.1;}
-
         .worry-list{list-style:none;margin:16px 0;}
         .worry-list li{padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.08);font-size:14px;color:rgba(240,234,220,0.8);display:flex;align-items:center;gap:10px;line-height:1.6;}
         .worry-list li::before{content:'・';color:var(--pink);font-size:18px;flex-shrink:0;}
-
         .solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;}
         @media(max-width:480px){.solution-grid{grid-template-columns:1fr;}}
         .solution-item{background:rgba(10,14,26,0.5);border:1px solid rgba(201,168,76,0.15);border-radius:10px;padding:16px;}
         .sol-icon{font-size:24px;margin-bottom:8px;}
         .sol-title{font-size:13px;color:var(--gold2);font-weight:600;margin-bottom:4px;}
         .sol-desc{font-size:12px;color:rgba(240,234,220,0.55);line-height:1.6;}
-
         .check-list{list-style:none;margin:12px 0;}
         .check-list li{padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.06);font-size:14px;color:rgba(240,234,220,0.85);display:flex;align-items:flex-start;gap:10px;line-height:1.7;}
         .check-list li::before{content:'✔';color:var(--gold);font-size:14px;flex-shrink:0;margin-top:2px;}
-
         .output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
         @media(max-width:480px){.output-grid{grid-template-columns:1fr;}}
         .output-item{background:rgba(10,14,26,0.4);border:1px solid rgba(201,168,76,0.12);border-radius:8px;padding:12px 14px;font-size:13px;color:rgba(240,234,220,0.8);display:flex;align-items:center;gap:8px;}
         .output-item::before{content:'▸';color:var(--gold);flex-shrink:0;}
-
         .future-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
         @media(max-width:480px){.future-grid{grid-template-columns:1fr;}}
         .future-box{border-radius:14px;padding:20px;}
@@ -306,7 +261,6 @@ export default function SogoPage() {
         .future-box.stay .future-points li::before{content:'• ';}
         .future-box.change .future-points li{color:rgba(240,234,220,0.85);}
         .future-box.change .future-points li::before{content:'✦ ';color:var(--gold);}
-
         .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
         .compare-box{border-radius:12px;padding:20px;}
         .compare-box.normal{background:rgba(60,60,80,0.3);border:1px solid rgba(255,255,255,0.1);}
@@ -315,23 +269,19 @@ export default function SogoPage() {
         .compare-box.tso .compare-title{color:var(--gold);}
         .compare-content{font-size:13px;color:rgba(240,234,220,0.7);line-height:1.8;}
         .compare-box.tso .compare-content{color:rgba(240,234,220,0.9);}
-
         .trust-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
         .trust-item{background:rgba(10,14,26,0.4);border:1px solid rgba(155,127,212,0.2);border-radius:10px;padding:16px;}
         .trust-icon{font-size:22px;margin-bottom:8px;}
         .trust-title{font-size:13px;color:rgba(196,168,240,0.9);margin-bottom:4px;font-weight:500;}
         .trust-desc{font-size:11px;color:rgba(240,234,220,0.5);line-height:1.7;}
-
         .price-compare{text-align:center;margin:16px 0;}
         .price-old{font-size:14px;color:rgba(240,234,220,0.4);text-decoration:line-through;margin-bottom:6px;}
         .price-arrow{font-size:24px;color:var(--gold);margin:8px 0;}
         .price-main{font-family:'Cinzel',serif;font-size:52px;color:var(--gold);line-height:1;}
         .price-sub{font-size:12px;color:rgba(240,234,220,0.4);margin-top:6px;}
-
         .emotion-box{background:linear-gradient(135deg,rgba(100,60,140,0.3),rgba(60,30,80,0.4));border:1px solid rgba(155,127,212,0.3);border-radius:14px;padding:24px;text-align:center;margin:20px 0;}
         .emotion-text{font-size:clamp(15px,3vw,20px);color:rgba(240,234,220,0.9);line-height:1.9;font-weight:500;}
         .emotion-sub{font-size:13px;color:rgba(240,234,220,0.5);margin-top:10px;}
-
         .form-card{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(201,168,76,0.2);border-radius:16px;padding:28px;margin:20px 0;}
         .form-title{font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;text-align:center;}
         .form-group{margin-bottom:14px;}
@@ -340,18 +290,12 @@ export default function SogoPage() {
         .form-input:focus{border-color:var(--gold);}
         select.form-input{appearance:none;cursor:pointer;}
         select.form-input option{background:#0f1628;}
-
-        /* ★ タロットカード3枚横並び */
         .tarot-section-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:8px;}
         .tarot-note{font-size:12px;color:rgba(240,234,220,0.5);margin-bottom:18px;line-height:1.8;text-align:center;}
         .tarot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
         @media(max-width:360px){.tarot-grid{gap:8px;}}
-
         @keyframes spin{to{transform:rotate(360deg);}}
-        @keyframes cardReveal{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
-
         .disclaimer{font-size:11px;color:rgba(240,234,220,0.25);line-height:1.8;text-align:center;margin:16px 0;}
-
         .fixed-cta{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#1a0a20,#0a0e1a);border-top:1px solid rgba(201,168,76,0.4);padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);}
         .fixed-cta-text{flex:1;}
         .fixed-cta-label{font-size:10px;color:rgba(232,122,122,0.8);margin-bottom:2px;font-weight:600;}
@@ -363,8 +307,6 @@ export default function SogoPage() {
       `}</style>
 
       <div className="wrap">
-
-        {/* ヒーロー */}
         <div className="hero">
           <a href="/star" className="back">← 占いポータルに戻る</a>
           <div className="hero-label">✦ AI Premium Reading ✦</div>
@@ -388,7 +330,6 @@ export default function SogoPage() {
           </p>
         </div>
 
-        {/* 悩み共感 */}
         <div className="section">
           <div className="sec-label">✦ あなたへ</div>
           <h2 className="sec-title">こんな悩みはありませんか？</h2>
@@ -405,7 +346,6 @@ export default function SogoPage() {
         </div>
         <MiniCta label="✦ 今すぐ悩みを解消する（¥3,980）" />
 
-        {/* 解決提示 */}
         <div className="section">
           <div className="sec-label">✦ 解決策</div>
           <h2 className="sec-title">このAI総合鑑定では<br/>4つの占術を組み合わせて分析します</h2>
@@ -429,7 +369,6 @@ export default function SogoPage() {
           </p>
         </div>
 
-        {/* 未来分岐 */}
         <div className="section">
           <div className="sec-label">✦ 未来の分岐</div>
           <h2 className="sec-title">このまま進んだ未来と<br/>選択を変えた未来</h2>
@@ -462,7 +401,6 @@ export default function SogoPage() {
         </div>
         <MiniCta label="✦ 未来を変える選択をする（¥3,980）" />
 
-        {/* 鑑定内容 */}
         <div className="section">
           <div className="sec-label">✦ この鑑定でわかること</div>
           <h2 className="sec-title">人生の全体像を<br/>完全解析します</h2>
@@ -478,19 +416,11 @@ export default function SogoPage() {
         </div>
         <MiniCta label="✦ 人生の全体像を知る（¥3,980）" />
 
-        {/* 出力内容 */}
         <div className="section">
           <div className="sec-label">✦ 出力内容</div>
           <h2 className="sec-title">約5,000文字以上の<br/>詳細鑑定レポート</h2>
           <div className="output-grid">
-            {[
-              'ホロスコープ図面（カラー）','四柱推命の命式・五行分析',
-              'タロット3枚の統合解釈','数秘術の運命数解読',
-              '過去 / 現在 / 未来の流れ','仕事運の詳細分析',
-              '恋愛運・パートナーシップ','金運・豊かさの流れ',
-              '健康運・注意時期','年代別メッセージ',
-              '今月・来月の運気予報','開運アドバイス・行動指針',
-            ].map(o => (
+            {['ホロスコープ図面（カラー）','四柱推命の命式・五行分析','タロット3枚の統合解釈','数秘術の運命数解読','過去 / 現在 / 未来の流れ','仕事運の詳細分析','恋愛運・パートナーシップ','金運・豊かさの流れ','健康運・注意時期','年代別メッセージ','今月・来月の運気予報','開運アドバイス・行動指針'].map(o => (
               <div key={o} className="output-item">{o}</div>
             ))}
           </div>
@@ -499,7 +429,6 @@ export default function SogoPage() {
           </p>
         </div>
 
-        {/* 比較 */}
         <div className="section">
           <div className="sec-label">✦ 他との違い</div>
           <h2 className="sec-title">精度と納得感が<br/>圧倒的に違います</h2>
@@ -516,15 +445,14 @@ export default function SogoPage() {
         </div>
         <MiniCta />
 
-        {/* 安心材料 */}
         <div className="section">
           <div className="sec-label">✦ 安心してください</div>
           <h2 className="sec-title">選ばれる4つの理由</h2>
           <div className="trust-grid">
             {[
-              {icon:'⚡', title:'即時表示', desc:'決済完了後、数秒で鑑定結果が表示されます。待ち時間ゼロ。'},
-              {icon:'🤖', title:'AI×占術の統合分析', desc:'感情に左右されない客観的な分析で、高精度な鑑定を提供。'},
-              {icon:'📱', title:'スマホで完結', desc:'入力から結果表示・PDFダウンロードまでスマホのみで完結。'},
+              {icon:'⚡', title:'即時表示', desc:'決済完了後、数秒で鑑定結果が表示されます。'},
+              {icon:'🤖', title:'AI×占術の統合分析', desc:'感情に左右されない客観的な分析で高精度な鑑定を。'},
+              {icon:'📱', title:'スマホで完結', desc:'入力から結果表示・PDFダウンロードまでスマホのみで。'},
               {icon:'🔒', title:'安全な決済', desc:'Stripe社の最高水準セキュリティで個人情報を保護。'},
             ].map(t => (
               <div key={t.title} className="trust-item">
@@ -536,11 +464,10 @@ export default function SogoPage() {
           </div>
         </div>
 
-        {/* 価格 */}
         <div className="section" style={{textAlign:'center'}}>
           <div className="sec-label">✦ 価格</div>
           <div className="price-compare">
-            <p style={{fontSize:'16px',color:'rgba(232,201,122,0.9)',marginBottom:'12px',fontWeight:'500',letterSpacing:'1px'}}>あなたの人生の設計図を知る価格です</p>
+            <p style={{fontSize:'16px',color:'rgba(232,201,122,0.9)',marginBottom:'12px',fontWeight:'500'}}>あなたの人生の設計図を知る価格です</p>
             <div className="price-old">通常の対面鑑定レベル：10,000円〜30,000円</div>
             <div className="price-arrow">↓</div>
             <div className="price-main">¥3,980</div>
@@ -550,30 +477,20 @@ export default function SogoPage() {
 
         <div className="urgency-bar">
           <div className="urgency-bar-text">⚡ 今、この瞬間の運気が最も重要です</div>
-          <div className="urgency-bar-sub">
-            迷っている時間だけ、チャンスのタイミングが過ぎていきます。<br/>
-            今の選択が、あなたの3ヶ月後を決めます。
-          </div>
+          <div className="urgency-bar-sub">迷っている時間だけ、チャンスのタイミングが過ぎていきます。<br/>今の選択が、あなたの3ヶ月後を決めます。</div>
         </div>
 
         <div className="emotion-box">
-          <p className="emotion-text">
-            未来は、知った瞬間から変わります。<br/>
-            今日のあなたの選択が、<br/>明日の運命を変えます。
-          </p>
+          <p className="emotion-text">未来は、知った瞬間から変わります。<br/>今日のあなたの選択が、<br/>明日の運命を変えます。</p>
           <p className="emotion-sub">あなただけの鑑定が、今すぐ手に入ります</p>
         </div>
 
         <a href="#inp-name" className="cta-btn">✦ あなたの運命を今すぐ知る ✦</a>
         <p className="cta-note">🔒 Stripe安全決済 · 即時表示 · PDFダウンロード付き</p>
-
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(232,201,122,0.85)',margin:'8px 0 16px',lineHeight:'1.9',fontWeight:500,letterSpacing:'1px'}}>
           ここから先は、あなただけの鑑定になります
         </p>
 
-        {/* ============================================================
-            フォーム
-        ============================================================ */}
         <div className="form-card" id="form-section">
           <div className="form-title">✦ あなたの情報を入力 ✦</div>
           <div className="form-group">
@@ -606,24 +523,14 @@ export default function SogoPage() {
             <input type="email" className="form-input" placeholder="example@email.com" id="inp-email" />
           </div>
 
-          {/* ★ タロットカード3枚引き（画像表示） */}
           <div className="form-group" style={{marginTop:'24px'}}>
             <div className="tarot-section-title">✦ タロットカードを3枚引いてください ✦</div>
-            <p className="tarot-note">
-              心を落ち着けて、問いを心に持ちながら<br/>1枚ずつタップしてカードを引いてください
-            </p>
+            <p className="tarot-note">心を落ち着けて、問いを心に持ちながら<br/>1枚ずつタップしてカードを引いてください</p>
             <div className="tarot-grid">
               {(['past','present','future'] as const).map(slot => renderTarotSlot(slot))}
             </div>
-
-            {/* 3枚揃ったら確認メッセージ */}
             {drawn.past && drawn.present && drawn.future && (
-              <div style={{
-                textAlign:'center', padding:'14px',
-                background:'rgba(201,168,76,0.08)',
-                border:'1px solid rgba(201,168,76,0.25)',
-                borderRadius:'10px', marginBottom:'16px',
-              }}>
+              <div style={{textAlign:'center',padding:'14px',background:'rgba(201,168,76,0.08)',border:'1px solid rgba(201,168,76,0.25)',borderRadius:'10px',marginBottom:'16px'}}>
                 <div style={{fontSize:'13px',color:'#e8c97a',marginBottom:'6px'}}>✦ カードが揃いました ✦</div>
                 <div style={{fontSize:'12px',color:'rgba(240,234,220,0.6)',lineHeight:'1.8'}}>
                   過去：{drawn.past.name}（{drawn.past.reversed ? '逆位置' : '正位置'}）<br/>
@@ -646,9 +553,7 @@ export default function SogoPage() {
         </div>
 
         <div className="emotion-box">
-          <p className="emotion-text" style={{fontSize:'clamp(14px,3vw,18px)'}}>
-            未来は、知った瞬間から変わります
-          </p>
+          <p className="emotion-text" style={{fontSize:'clamp(14px,3vw,18px)'}}>未来は、知った瞬間から変わります</p>
         </div>
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(240,234,220,0.8)',margin:'0 0 16px',lineHeight:'1.9',fontWeight:500}}>
           ここまで読んだあなたは、<br/>すでに答えに近づいています。<br/>次は、その答えを手に入れるだけです。
@@ -656,7 +561,6 @@ export default function SogoPage() {
         <button className="cta-btn" onClick={handlePay} disabled={paying}>
           {paying ? '移動中...' : '✦ 今すぐ鑑定する ✦'}
         </button>
-
         <p className="disclaimer">
           ※鑑定はAIにより自動生成されます<br/>
           ※結果は個人差があります<br/>
