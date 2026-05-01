@@ -46,6 +46,36 @@ function buildPrompt(p: {
 
 文体:温かく具体的に。押し売り感なし。`
 
+  if (p.plan === 'teso') return `あなたはプロの手相占い師です。以下のタグ情報をもとに手相詳細診断を日本語で行ってください。
+
+【依頼者】名前:${displayName} / 生年月日:${p.birth || '不明'}
+【テーマ】${p.theme || '手相詳細診断'}
+
+以下をすべて含む1,500〜2,500文字の鑑定文を書いてください:
+
+## ✦ ${displayName}さんへ
+（温かい導入メッセージ）
+
+## ✦ 本質（左手）
+（生まれ持った本来の性質・魂の傾向を具体的に）
+
+## ✦ 現在の状態（右手）
+（今の状況・これまでの経験の影響を具体的に）
+
+## ✦ 本来の自分とのズレ
+（左手と右手の違いから読み解く重要なメッセージ）
+
+## ✦ 軽い未来の流れ
+（今後の展開・転機のタイミング）
+
+## ✦ 今すぐできる行動アドバイス
+（具体的な3つのアクション）
+
+## ✦ 星からのメッセージ
+（温かい締めくくり）
+
+文体:温かく具体的に。断定しすぎず「〜の傾向」「〜かもしれません」を使う。ネガティブで終わらない。`
+
   if (p.plan === 'mini') return `あなたはプロの占い師です。以下の情報をもとにミニ鑑定（3テーマ）を日本語で行ってください。
 
 【依頼者】名前:${displayName} / 生年月日:${p.birth || '不明'} / 性別:${genderLabel}
@@ -343,28 +373,47 @@ export default function ResultContent() {
       <div style={s.cvSection}>
         <div style={s.cvTitle}>✦ 次のステップ ✦</div>
         <p style={s.cvSub}>鑑定結果を受け取ったあなたへ</p>
+        <p style={{fontSize:'13px',color:'rgba(201,168,76,0.8)',textAlign:'center',marginBottom:'16px',fontWeight:600}}>
+          より詳しく知りたい方は、まず手相診断がおすすめです
+        </p>
+
+        {/* メインCV：手相・総合鑑定・LINE */}
         <div style={s.cvGrid}>
-          <a href="/star" className="cv-card" style={s.cvCard}>
-            <span style={{fontSize:'28px'}}>🔮</span>
-            <div style={s.cvName}>別の占いを試す</div>
-            <div style={s.cvDesc}>タロット・数秘術など<br/>11種類の無料占いへ</div>
+          {/* 手相詳細診断（¥980） */}
+          <a href="/star/teso" className="cv-card" style={{...s.cvCard, borderColor:'rgba(155,89,182,0.35)', background:'linear-gradient(135deg,rgba(155,89,182,0.15),rgba(100,50,150,0.1))'}}>
+            <span style={{fontSize:'28px'}}>🤲</span>
+            <div style={s.cvName}>手相詳細診断</div>
+            <div style={s.cvDesc}>本来の自分と今の状態の<br/>ズレを読み解きます</div>
+            <div style={{fontSize:'12px',color:'#c39bd3',fontWeight:700,marginTop:'4px'}}>¥980</div>
           </a>
-          {plan !== 'sogo' && (
-            <a href="/star/sogo" className="cv-card" style={{...s.cvCard, borderColor:'rgba(201,168,76,0.35)', background:'linear-gradient(135deg,rgba(60,40,10,0.4),rgba(40,20,5,0.5))'}}>
-              <span style={{fontSize:'28px'}}>⭐</span>
-              <div style={s.cvName}>AI総合鑑定へ進む</div>
-              <div style={s.cvDesc}>4占術統合の完全版<br/><span style={{color:'#c9a84c',fontWeight:600}}>¥3,980</span></div>
-            </a>
-          )}
-          <a href="https://lin.ee/XHDFrA8" target="_blank" rel="noopener noreferrer" className="cv-card" style={{...s.cvCard, borderColor:'rgba(6,199,85,0.3)', background:'rgba(6,199,85,0.06)'}}>
+
+          {/* AI総合鑑定（¥3,980） */}
+          <a href="/star/sogo" className="cv-card" style={{...s.cvCard, borderColor:'rgba(201,168,76,0.35)', background:'linear-gradient(135deg,rgba(60,40,10,0.4),rgba(40,20,5,0.5))'}}>
+            <span style={{fontSize:'28px'}}>⭐</span>
+            <div style={s.cvName}>AI総合鑑定</div>
+            <div style={s.cvDesc}>4占術統合の完全版<br/>人生全体を解析</div>
+            <div style={{fontSize:'12px',color:'#c9a84c',fontWeight:700,marginTop:'4px'}}>¥3,980</div>
+          </a>
+
+          {/* LINE */}
+          <a href="https://lin.ee/XHDFrA8" target="_blank" rel="noopener noreferrer" className="cv-card" style={{...s.cvCard, borderColor:'rgba(6,199,85,0.3)', background:'rgba(6,199,85,0.06)', gridColumn:'1 / -1'}}>
             <span style={{fontSize:'28px'}}>💬</span>
-            <div style={s.cvName}>LINEで続きを受け取る</div>
-            <div style={s.cvDesc}>開運情報を無料配信</div>
+            <div style={s.cvName}>LINEで手相診断を受ける</div>
+            <div style={s.cvDesc}>あなたの手相も診断できます<br/>LINEで写真を送るだけで無料診断</div>
           </a>
-          <a href={plan === 'sogo' ? '/star/sogo' : '/star/mini'} className="cv-card" style={s.cvCard}>
-            <span style={{fontSize:'28px'}}>🔁</span>
-            <div style={s.cvName}>再鑑定する</div>
-            <div style={s.cvDesc}>別の日時・情報で<br/>もう一度</div>
+        </div>
+
+        {/* サブCV：別の占い・再鑑定 */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px',marginTop:'10px'}}>
+          <a href="/star" className="cv-card" style={{...s.cvCard,padding:'14px'}}>
+            <span style={{fontSize:'22px'}}>🔮</span>
+            <div style={{...s.cvName,fontSize:'12px'}}>別の占いを試す</div>
+            <div style={s.cvDesc}>11種類の無料占いへ</div>
+          </a>
+          <a href={plan === 'sogo' ? '/star/sogo' : '/star/teso'} className="cv-card" style={{...s.cvCard,padding:'14px'}}>
+            <span style={{fontSize:'22px'}}>🔁</span>
+            <div style={{...s.cvName,fontSize:'12px'}}>再鑑定する</div>
+            <div style={s.cvDesc}>別の情報でもう一度</div>
           </a>
         </div>
       </div>
