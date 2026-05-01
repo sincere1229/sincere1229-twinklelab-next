@@ -1,9 +1,9 @@
 export const metadata = {
   title: 'Twinkle Star Oracle｜AI占いポータル',
-  description: 'タロット・数秘術・九星気学・四柱推命・易占い・バードオラクルなど11種類のAI占いが楽しめる無料占いポータル。手相診断（LINE）も無料。AI総合鑑定（¥3,980）では本格リーディングを即座に提供します。',
+  description: 'タロット・数秘術・九星気学・四柱推命・易占い・バードオラクルなど11種類のAI占いが楽しめる無料占いポータル。手相診断（LINE）も無料。AI総合鑑定（¥3,980）では手相＋複数占術で本格リーディングを提供します。',
   openGraph: {
     title: 'Twinkle Star Oracle｜AI占いポータル',
-    description: 'タロット・数秘術・九星気学・四柱推命など11種類のAI占いが無料。手相診断もLINEで無料受付中。',
+    description: 'タロット・数秘術・九星気学・四柱推命など11種類のAI占いが無料。手相診断もLINEで無料受付中。AI総合鑑定（手相＋複数占術）¥3,980。',
     url: 'https://twinkle-lab.jp/star',
     siteName: 'Twinkle Star Oracle',
     locale: 'ja_JP',
@@ -62,7 +62,7 @@ export default function StarPortal() {
         .gold-line{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
         .tagline{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:rgba(160,120,80,0.7);}
 
-        /* ★ 導線ラダー（シンプル版） */
+        /* ★ 導線ラダー */
         .flow-ladder{margin:12px 14px 4px;background:rgba(255,248,252,0.9);border:1px solid rgba(201,168,76,0.25);border-radius:14px;padding:16px;}
         .flow-ladder-title{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:12px;}
         .flow-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(201,168,76,0.1);}
@@ -104,14 +104,23 @@ export default function StarPortal() {
         .m-name{font-size:12px;color:var(--text);font-weight:500;margin-bottom:2px;}
         .m-sub{font-size:10px;color:var(--text-m);line-height:1.5;}
 
-        /* ★ ¥3,980 総合鑑定（メイン有料） */
+        /* ★ 手相→無料診断ナッジ（各占い下部共通） */
+        .teso-nudge{margin:0 14px 16px;background:linear-gradient(135deg,rgba(232,160,192,0.12),rgba(180,100,160,0.06));border:1px solid rgba(232,160,192,0.25);border-radius:12px;padding:16px;text-align:center;}
+        .teso-nudge-title{font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px;}
+        .teso-nudge-body{font-size:11px;color:var(--text-m);line-height:1.8;margin-bottom:12px;}
+        .teso-nudge-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#06c755,#04a844);color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:10px 20px;text-decoration:none;}
+
+        /* ★ ¥3,980 総合鑑定 */
         .sogo{margin:12px 14px 16px;background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(255,235,245,0.95));border:1px solid rgba(201,168,76,0.4);border-radius:16px;padding:28px 20px;text-align:center;}
         .sogo-label{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:0.25em;text-transform:uppercase;margin-bottom:8px;}
-        .sogo-title{font-size:17px;color:var(--text);font-weight:600;margin-bottom:8px;}
+        .sogo-title{font-size:17px;color:var(--text);font-weight:600;margin-bottom:6px;}
+        .sogo-desc{font-size:12px;color:var(--text-m);line-height:1.8;margin-bottom:10px;}
         .sogo-items{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
         .sogo-item{font-size:11px;color:var(--text-s);}
         .sogo-item::before{content:'✦ ';color:var(--gold);font-size:9px;}
-        .sogo-price{font-family:'Cinzel',serif;font-size:28px;color:var(--gold);margin-bottom:4px;}
+        .sogo-price-wrap{margin-bottom:4px;}
+        .sogo-price-orig{font-size:12px;color:var(--text-s);text-decoration:line-through;margin-bottom:2px;}
+        .sogo-price{font-family:'Cinzel',serif;font-size:28px;color:var(--gold);}
         .sogo-sub{font-size:11px;color:var(--text-s);margin-bottom:16px;}
         .sogo-btn{display:inline-block;background:linear-gradient(135deg,#8a6a20,var(--gold),#8a6a20);background-size:200% 100%;border:none;border-radius:8px;color:#fff8f0;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:0.1em;padding:13px 28px;text-decoration:none;transition:all 0.4s;}
         .sogo-btn:hover{background-position:100% 0;box-shadow:0 6px 20px rgba(201,168,76,0.35);}
@@ -165,7 +174,7 @@ export default function StarPortal() {
           </div>
         </header>
 
-        {/* ★ 導線ラダー（シンプル化） */}
+        {/* ★ 導線ラダー */}
         <div className="flow-ladder">
           <div className="flow-ladder-title">✦ READING PLAN ✦</div>
           <div className="flow-row">
@@ -177,7 +186,7 @@ export default function StarPortal() {
           <div className="flow-row">
             <div className="flow-step">②</div>
             <div className="flow-arrow">→</div>
-            <div className="flow-desc"><strong style={{color:'var(--text)'}}>手相診断（LINE）</strong>　両手の写真を送るだけ</div>
+            <div className="flow-desc"><strong style={{color:'var(--text)'}}>手相診断（LINE）</strong>　両手の写真を送るだけ · 無料</div>
             <a href="https://lin.ee/XHDFrA8" className="flow-cta" target="_blank" rel="noopener">無料登録</a>
           </div>
           <div className="flow-row">
@@ -189,7 +198,7 @@ export default function StarPortal() {
           <div className="flow-row">
             <div className="flow-step">④</div>
             <div className="flow-arrow">→</div>
-            <div className="flow-desc"><strong style={{color:'var(--text)'}}>AI総合鑑定</strong>　4占術統合・PDF付き完全解析</div>
+            <div className="flow-desc"><strong style={{color:'var(--text)'}}>AI総合鑑定（手相＋複数占術）</strong>　人生全体を完全解析</div>
             <a href="/star/sogo" className="flow-cta">完全版</a>
           </div>
         </div>
@@ -235,6 +244,20 @@ export default function StarPortal() {
           ))}
         </div>
 
+        {/* ★ 手相ナッジ（カード占い下） */}
+        <div className="teso-nudge">
+          <div className="teso-nudge-title">🤲 より詳しく知りたい方へ</div>
+          <div className="teso-nudge-body">
+            この占いは"今の流れ"を示しますが、<br/>
+            あなたの本質や人生の流れは手相にも表れます。<br/>
+            無料手相診断では、左手と右手から<br/>
+            本来の自分と今の状態を読み解きます。
+          </div>
+          <a href="https://lin.ee/XHDFrA8" className="teso-nudge-btn" target="_blank" rel="noopener">
+            💬 LINEで無料手相診断を受ける
+          </a>
+        </div>
+
         <div className="div-line"><span className="div-text">✦ 詳細鑑定 ✦</span></div>
         <div className="main-grid">
           {DEEP.map((d) => (
@@ -245,6 +268,20 @@ export default function StarPortal() {
               <span className="free-badge">FREE</span>
             </a>
           ))}
+        </div>
+
+        {/* ★ 手相ナッジ（詳細鑑定下） */}
+        <div className="teso-nudge">
+          <div className="teso-nudge-title">🤲 より詳しく知りたい方へ</div>
+          <div className="teso-nudge-body">
+            この占いは"今の流れ"を示しますが、<br/>
+            あなたの本質や人生の流れは手相にも表れます。<br/>
+            無料手相診断では、左手と右手から<br/>
+            本来の自分と今の状態を読み解きます。
+          </div>
+          <a href="https://lin.ee/XHDFrA8" className="teso-nudge-btn" target="_blank" rel="noopener">
+            💬 LINEで無料手相診断を受ける
+          </a>
         </div>
 
         <div className="div-line"><span className="div-text">✦ その他の無料占い ✦</span></div>
@@ -259,31 +296,42 @@ export default function StarPortal() {
           ))}
         </div>
 
-        {/* ★ ¥980 手相詳細診断（小カード） */}
+        {/* ★ ¥980 手相詳細診断 */}
         <div style={{margin:'0 14px 12px',background:'linear-gradient(135deg,rgba(155,89,182,0.12),rgba(100,50,150,0.08))',border:'1px solid rgba(155,89,182,0.3)',borderRadius:14,padding:'18px 16px',textAlign:'center'}}>
           <div style={{fontSize:'11px',color:'rgba(195,155,211,0.8)',letterSpacing:'2px',marginBottom:'6px'}}>まずは手相を詳しく見たい方へ</div>
           <div style={{fontFamily:'Cinzel,serif',fontSize:'16px',color:'#c39bd3',fontWeight:700,marginBottom:'4px'}}>¥980 手相詳細診断</div>
-          <div style={{fontSize:'12px',color:'rgba(106,74,112,0.8)',lineHeight:1.7,marginBottom:'12px'}}>本来の自分と今の状態のズレ、そしてなぜうまくいかないのかが分かります</div>
+          <div style={{fontSize:'12px',color:'rgba(106,74,112,0.8)',lineHeight:1.7,marginBottom:'12px'}}>
+            本来の自分と今の状態のズレ、<br/>なぜうまくいかないのかが分かります
+          </div>
           <a href="/star/teso" style={{display:'inline-block',background:'linear-gradient(135deg,#9b59b6,#6c3483)',color:'#fff',fontWeight:700,fontSize:'13px',borderRadius:8,padding:'10px 24px',textDecoration:'none'}}>
             ✦ 手相詳細診断を見る
           </a>
         </div>
 
-        {/* ★ ¥3,980 総合鑑定 */}
+        {/* ★ ¥3,980 AI総合鑑定（手相＋複数占術） */}
         <div className="sogo">
           <div style={{fontSize:'12px',color:'rgba(138,96,16,0.7)',marginBottom:'8px',letterSpacing:'1px'}}>
             より深く人生全体を見たい方へ
           </div>
           <div className="sogo-label">✦ Premium · AI完全解析 ✦</div>
-          <div className="sogo-title">AI総合鑑定</div>
+          <div className="sogo-title">AI総合鑑定（手相＋複数占術）</div>
+          <div className="sogo-desc">
+            すでに拝見した手相の情報をもとに、<br/>
+            タロット・数秘術・ホロスコープなどを組み合わせ、<br/>
+            人生全体の流れを読み解きます
+          </div>
           <div className="sogo-items">
-            <span className="sogo-item">ホロスコープ図面</span>
-            <span className="sogo-item">四柱推命</span>
+            <span className="sogo-item">手相リーディング</span>
+            <span className="sogo-item">ホロスコープ</span>
             <span className="sogo-item">タロット3枚</span>
             <span className="sogo-item">数秘術</span>
+            <span className="sogo-item">四柱推命</span>
           </div>
-          <div className="sogo-price">¥3,980</div>
-          <div className="sogo-sub">数十秒で表示 · PDFダウンロード付き</div>
+          <div className="sogo-price-wrap">
+            <div className="sogo-price-orig">通常¥4,980相当</div>
+            <div className="sogo-price">¥3,980</div>
+          </div>
+          <div className="sogo-sub">恋愛・仕事・金運・人生の流れを総合的に読み解きます</div>
           <a href="/star/sogo" className="sogo-btn">✦ AI総合鑑定を受ける ✦</a>
         </div>
 
@@ -301,7 +349,7 @@ export default function StarPortal() {
         <div style={{margin:'0 14px 20px',background:'rgba(255,248,252,0.7)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:'14px',padding:'20px'}}>
           <h2 style={{fontFamily:'Noto Sans JP,sans-serif',fontSize:'14px',color:'#6a3a20',marginBottom:'10px',fontWeight:'600'}}>Twinkle Star Oracleについて</h2>
           <p style={{fontSize:'13px',color:'#8a6a9a',lineHeight:'2'}}>
-            Twinkle Star Oracleは、AIを活用した本格的な占いポータルサイトです。手相診断（LINE）、タロットカード・バードオラクル・易占い・前世リーディング・夢占いなどのカード系占いから、数秘術・九星気学・相性占い・四柱推命などの命術系まで、多彩な占いを提供しています。AI総合鑑定（¥3,980）では、仕事運・恋愛運・金運・健康運を詳しく読み解き、過去・現在・未来のメッセージをお届けします。
+            Twinkle Star Oracleは、AIを活用した本格的な占いポータルサイトです。手相診断（LINE）をベースに、タロットカード・バードオラクル・易占い・前世リーディング・夢占いなどのカード系占いから、数秘術・九星気学・相性占い・四柱推命などの命術系まで、多彩な占いを提供しています。AI総合鑑定（手相＋複数占術）¥3,980では、手相をベースに複数の占術を組み合わせ、恋愛運・仕事運・金運・健康運を詳しく読み解き、過去・現在・未来のメッセージをお届けします。
           </p>
         </div>
 
