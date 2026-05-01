@@ -1,0 +1,275 @@
+'use client'
+
+// ============================================================
+//  /star/teso/page.tsx
+//  手相診断ページ
+//
+//  導線：
+//  無料（LINE送信） → ¥980（詳細診断） → ¥3,980（AI総合鑑定）
+// ============================================================
+
+const STRIPE_980  = 'https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05'
+const STRIPE_3980 = 'https://buy.stripe.com/aFa5kw8Hs6C6dR3fRx33W02'
+const LINE_URL    = 'https://lin.ee/XHDFrA8'
+
+export default function TesoPage() {
+  return (
+    <>
+      <style>{`
+        :root{--navy:#0a0e1a;--gold:#c9a84c;--gold2:#e8c97a;--white:#f0eadc;--pink:#e8a0c0;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--navy);color:var(--white);font-family:'Noto Serif JP',serif;min-height:100vh;}
+        body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+          background:radial-gradient(ellipse at 30% 40%,rgba(232,160,192,0.08) 0%,transparent 60%),
+          radial-gradient(ellipse at 80% 70%,rgba(180,140,60,0.06) 0%,transparent 50%);
+          pointer-events:none;z-index:0;}
+        .wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:32px 20px 100px;}
+        .back{display:inline-block;font-size:12px;color:rgba(201,168,76,0.6);text-decoration:none;margin-bottom:20px;letter-spacing:1px;}
+        .hero{text-align:center;margin-bottom:28px;}
+        .hero-badge{display:inline-block;background:linear-gradient(135deg,rgba(232,160,192,0.3),rgba(180,100,160,0.2));border:1px solid rgba(232,160,192,0.4);border-radius:20px;padding:6px 18px;font-size:11px;color:var(--pink);letter-spacing:2px;margin-bottom:14px;}
+        .hero-title{font-family:'Cinzel',serif;font-size:clamp(26px,6vw,40px);color:var(--gold2);letter-spacing:3px;margin-bottom:10px;line-height:1.3;}
+        .gold-line{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+        .hero-sub{font-size:14px;color:rgba(240,234,220,0.75);line-height:1.9;margin-bottom:8px;}
+
+        /* 手のひらイラスト風 */
+        .hand-visual{text-align:center;margin:20px 0;font-size:72px;filter:drop-shadow(0 0 20px rgba(201,168,76,0.3));}
+
+        /* ステップ */
+        .steps{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(201,168,76,0.2);border-radius:16px;padding:28px;margin-bottom:20px;}
+        .steps-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:20px;opacity:0.8;}
+        .step{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+        .step:last-child{margin-bottom:0;}
+        .step-num{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#8a6a20,var(--gold));color:#0a0e1a;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+        .step-body{}
+        .step-title{font-size:14px;color:var(--gold2);font-weight:600;margin-bottom:4px;}
+        .step-desc{font-size:12px;color:rgba(240,234,220,0.6);line-height:1.8;}
+
+        /* メインCTA（LINE） */
+        .main-cta{background:linear-gradient(135deg,rgba(0,185,0,0.15),rgba(0,150,0,0.08));border:2px solid rgba(6,199,85,0.4);border-radius:16px;padding:28px;text-align:center;margin-bottom:20px;}
+        .main-cta-badge{display:inline-block;background:rgba(6,199,85,0.15);border:1px solid rgba(6,199,85,0.3);border-radius:20px;padding:4px 14px;font-size:11px;color:#4ede88;letter-spacing:2px;margin-bottom:12px;}
+        .main-cta-title{font-size:18px;color:var(--white);font-weight:600;margin-bottom:6px;line-height:1.6;}
+        .main-cta-desc{font-size:13px;color:rgba(240,234,220,0.6);line-height:1.8;margin-bottom:18px;}
+        .line-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#06c755,#04a844);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;padding:16px 32px;text-decoration:none;transition:all 0.2s;cursor:pointer;}
+        .line-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(6,199,85,0.4);}
+        .main-cta-note{font-size:11px;color:rgba(240,234,220,0.35);margin-top:10px;}
+
+        /* 手相の撮り方 */
+        .howto{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(201,168,76,0.15);border-radius:16px;padding:24px;margin-bottom:20px;}
+        .howto-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:3px;margin-bottom:16px;text-align:center;opacity:0.8;}
+        .howto-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .howto-item{background:rgba(10,14,26,0.5);border:1px solid rgba(201,168,76,0.12);border-radius:10px;padding:14px 12px;text-align:center;}
+        .howto-icon{font-size:28px;margin-bottom:8px;display:block;}
+        .howto-label{font-size:12px;color:var(--gold2);font-weight:600;margin-bottom:4px;}
+        .howto-desc{font-size:11px;color:rgba(240,234,220,0.5);line-height:1.6;}
+        .howto-tips{margin-top:14px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:12px 16px;}
+        .howto-tip{font-size:12px;color:rgba(240,234,220,0.6);line-height:1.9;}
+        .howto-tip::before{content:'✦ ';color:var(--gold);font-size:10px;}
+
+        /* 有料プラン */
+        .plans{margin-bottom:20px;}
+        .plans-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:16px;opacity:0.8;}
+
+        .plan-card{border-radius:16px;padding:24px;margin-bottom:12px;}
+        .plan-card.p980{background:linear-gradient(135deg,rgba(155,89,182,0.15),rgba(100,50,150,0.1));border:1px solid rgba(155,89,182,0.35);}
+        .plan-card.p3980{background:linear-gradient(135deg,rgba(100,80,30,0.3),rgba(60,40,10,0.4));border:1px solid rgba(201,168,76,0.4);}
+        .plan-badge{display:inline-block;font-size:10px;font-weight:700;border-radius:20px;padding:3px 12px;letter-spacing:1px;margin-bottom:10px;}
+        .plan-badge.p980{background:rgba(155,89,182,0.2);color:#c39bd3;border:1px solid rgba(155,89,182,0.4);}
+        .plan-badge.p3980{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.35);}
+        .plan-title{font-family:'Cinzel',serif;font-size:16px;color:var(--gold2);letter-spacing:2px;margin-bottom:8px;}
+        .plan-price{font-family:'Cinzel',serif;font-size:32px;color:var(--gold);margin-bottom:8px;}
+        .plan-items{list-style:none;margin-bottom:16px;}
+        .plan-items li{font-size:13px;color:rgba(240,234,220,0.8);line-height:1.9;padding:3px 0;}
+        .plan-items li::before{content:'✦ ';color:var(--gold);font-size:10px;}
+        .plan-btn{display:block;width:100%;text-align:center;border-radius:10px;font-weight:700;font-size:14px;padding:14px;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;}
+        .plan-btn.p980{background:linear-gradient(135deg,#9b59b6,#6c3483);color:#fff;}
+        .plan-btn.p980:hover{box-shadow:0 6px 20px rgba(155,89,182,0.4);transform:translateY(-2px);}
+        .plan-btn.p3980{background:linear-gradient(135deg,#8a6a20,var(--gold),#8a6a20);color:#0a0e1a;}
+        .plan-btn.p3980:hover{box-shadow:0 6px 20px rgba(201,168,76,0.4);transform:translateY(-2px);}
+        .plan-note{font-size:11px;color:rgba(240,234,220,0.3);text-align:center;margin-top:8px;}
+
+        /* 診断例 */
+        .example{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(155,127,212,0.2);border-radius:16px;padding:24px;margin-bottom:20px;}
+        .example-title{font-family:'Cinzel',serif;font-size:11px;color:#c4a8f0;letter-spacing:3px;margin-bottom:16px;text-align:center;}
+        .example-box{background:rgba(10,14,26,0.5);border:1px solid rgba(155,127,212,0.15);border-radius:10px;padding:16px;font-size:13px;color:rgba(240,234,220,0.8);line-height:2.1;}
+        .example-label{font-size:10px;color:#c4a8f0;letter-spacing:2px;margin-bottom:8px;}
+
+        footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid rgba(201,168,76,0.1);font-size:11px;color:rgba(240,234,220,0.2);}
+      `}</style>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+JP:wght@300;400;500&display=swap" rel="stylesheet" />
+
+      <div className="wrap">
+        <a href="/star" className="back">← 占いポータルに戻る</a>
+
+        {/* ヒーロー */}
+        <div className="hero">
+          <div className="hero-badge">✦ Hand Reading ✦</div>
+          <h1 className="hero-title">手相診断</h1>
+          <div className="gold-line" />
+          <p className="hero-sub">
+            手のひらには、あなたの本質と<br/>
+            今の流れが刻まれています
+          </p>
+          <p style={{fontSize:'13px',color:'rgba(232,160,192,0.8)',marginTop:'8px',letterSpacing:'1px'}}>
+            最近うまくいかないと感じている方へ
+          </p>
+        </div>
+
+        <div className="hand-visual">🤲</div>
+
+        {/* ステップ説明 */}
+        <div className="steps">
+          <div className="steps-title">✦ 診断の流れ ✦</div>
+          <div className="step">
+            <div className="step-num">1</div>
+            <div className="step-body">
+              <div className="step-title">LINEに手のひらの写真を送る</div>
+              <div className="step-desc">両手（左右）の写真を撮って、LINEに送信するだけ。撮り方は下をご確認ください。</div>
+            </div>
+          </div>
+          <div className="step">
+            <div className="step-num">2</div>
+            <div className="step-body">
+              <div className="step-title">無料で簡易診断をお届け</div>
+              <div className="step-desc">本質の線・現在の流れ・今のあなたへのメッセージをお届けします。</div>
+            </div>
+          </div>
+          <div className="step">
+            <div className="step-num">3</div>
+            <div className="step-body">
+              <div className="step-title">もっと詳しく知りたい方へ（¥980）</div>
+              <div className="step-desc">ズレ分析・行動アドバイス・軽い未来予測を含む詳細診断へ進めます。</div>
+            </div>
+          </div>
+        </div>
+
+        {/* メインCTA（LINE） */}
+        <div className="main-cta">
+          <div className="main-cta-badge">🎁 まずは無料で診断</div>
+          <p style={{fontSize:'12px',color:'#4ede88',marginBottom:'10px',letterSpacing:'1px'}}>
+            ※現在、無料診断を受付中です
+          </p>
+          <div className="main-cta-title">
+            手のひらの写真を送るだけで<br/>あなたの本質がわかります
+          </div>
+          <div className="main-cta-desc">
+            LINEに登録して、両手の写真を送ってください。<br/>
+            簡易診断を無料でお届けします。<br/>
+            <span style={{fontSize:'12px',color:'rgba(240,234,220,0.5)',display:'block',marginTop:'6px'}}>
+              ※文字診断では分からない、あなたの"個別の線"を見て診断します
+            </span>
+          </div>
+          <a href={LINE_URL} className="line-btn" target="_blank" rel="noopener">
+            <span style={{fontSize:'20px'}}>💬</span>
+            無料で手相診断を受ける（LINE）
+          </a>
+          <div style={{fontSize:'13px',color:'#4ede88',marginTop:'10px',fontWeight:600}}>
+            LINEで「手相」と送るだけでOKです
+          </div>
+          <div style={{fontSize:'12px',color:'rgba(240,234,220,0.45)',marginTop:'6px'}}>
+            初めての方でも安心してご利用いただけます
+          </div>
+          <div className="main-cta-note">登録無料 · 写真を送るだけ · 順次診断をお届けします</div>
+        </div>
+
+        {/* 撮り方ガイド */}
+        <div className="howto">
+          <div className="howto-title">✦ 手相写真の撮り方 ✦</div>
+          <div className="howto-grid">
+            <div className="howto-item">
+              <span className="howto-icon">🫲</span>
+              <div className="howto-label">左手（本質）</div>
+              <div className="howto-desc">生まれ持った本来の性質・魂の傾向</div>
+            </div>
+            <div className="howto-item">
+              <span className="howto-icon">🫱</span>
+              <div className="howto-label">右手（現在）</div>
+              <div className="howto-desc">今の状態・これまでの経験の影響</div>
+            </div>
+          </div>
+          <div className="howto-tips">
+            <div className="howto-tip">明るい場所で撮影してください</div>
+            <div className="howto-tip">手のひら全体が写るように</div>
+            <div className="howto-tip">線がはっきり見える角度で</div>
+            <div className="howto-tip">左右それぞれ1枚ずつ送ってください</div>
+          </div>
+        </div>
+
+        {/* 診断例 */}
+        <div className="example">
+          <div className="example-title">✦ 診断文のイメージ ✦</div>
+          <div className="example-label">簡易診断（無料）の例：</div>
+          <div className="example-box">
+            左手の感情線が深く長く伸びていることから、あなたは本来、感受性が豊かで人を深く愛することができる方です。ただ右手では少し短めに変化していることから、今は少し感情を抑えている時期かもしれません。本来の豊かな感受性を大切にすることが、今のあなたへの大切なメッセージです。
+          </div>
+          <p style={{fontSize:'11px',color:'rgba(240,234,220,0.35)',marginTop:'10px',lineHeight:1.8}}>
+            ※実際の診断はあなたの手相に合わせて個別に作成されます
+          </p>
+        </div>
+
+        {/* 有料プラン */}
+        <div className="plans">
+          <div className="plans-title">✦ 詳しく知りたい方へ ✦</div>
+
+          <div className="plan-card p980">
+            <div className="plan-badge p980">手相詳細診断</div>
+            <div className="plan-title">本質とズレを深く読み解く</div>
+            <div className="plan-price">¥980</div>
+            <p style={{fontSize:'12px',color:'rgba(195,155,211,0.9)',marginBottom:'14px',lineHeight:1.8,background:'rgba(155,89,182,0.1)',border:'1px solid rgba(155,89,182,0.2)',borderRadius:8,padding:'10px 12px'}}>
+              あなたの"本来の自分"と"今の状態のズレ"を明確にします<br/>
+              <span style={{fontSize:'11px',color:'rgba(195,155,211,0.75)'}}>今なぜうまくいかないのか、その理由も見えてきます</span>
+            </p>
+            <ul className="plan-items">
+              <li>本質（左手）の詳細分析</li>
+              <li>現在（右手）の詳細分析</li>
+              <li>本来の自分とのズレ分析（最重要）</li>
+              <li>軽い未来の流れ</li>
+              <li>今すぐできる行動アドバイス（3つ）</li>
+            </ul>
+            <p style={{fontSize:'12px',color:'rgba(195,155,211,0.8)',textAlign:'center',marginBottom:'8px',letterSpacing:'1px'}}>
+              まずはここから始める方が多いです
+            </p>
+            <a href={STRIPE_980} className="plan-btn p980" target="_blank" rel="noopener">
+              ✦ 手相詳細診断を受ける（¥980）
+            </a>
+            <div className="plan-note">🔒 Stripe安全決済 · 鑑定結果は数十秒〜数分で表示されます</div>
+          </div>
+
+          <p style={{fontSize:'12px',color:'rgba(201,168,76,0.6)',textAlign:'center',margin:'4px 0 8px',letterSpacing:'1px'}}>
+            より深く人生全体を見たい方はこちら
+          </p>
+          <div className="plan-card p3980">
+            <div className="plan-badge p3980">AI総合鑑定</div>
+            <div className="plan-title">手相＋4占術で人生を完全解析</div>
+            <div className="plan-price">¥3,980</div>
+            <ul className="plan-items">
+              <li>手相詳細診断（全内容）</li>
+              <li>恋愛運・仕事運・金運</li>
+              <li>人生の流れ（時期・転機）</li>
+              <li>ホロスコープ＋四柱推命＋タロット</li>
+              <li>開運アクション</li>
+              <li>PDFダウンロード付き</li>
+            </ul>
+            <a href="/star/sogo" className="plan-btn p3980">
+              ✦ AI総合鑑定を受ける（¥3,980）
+            </a>
+            <div className="plan-note">🔒 Stripe安全決済 · 鑑定結果は数十秒〜数分で表示されます · PDF付き</div>
+          </div>
+        </div>
+
+        <div style={{textAlign:'center',margin:'20px 0 8px'}}>
+          <a href={LINE_URL} target="_blank" rel="noopener" style={{
+            display:'inline-flex',alignItems:'center',gap:'8px',
+            background:'linear-gradient(135deg,rgba(0,185,0,0.15),rgba(0,150,0,0.08))',
+            border:'1px solid rgba(6,199,85,0.4)',borderRadius:10,
+            color:'#4ede88',fontSize:'13px',fontWeight:600,
+            padding:'12px 24px',textDecoration:'none',letterSpacing:'1px',
+          }}>
+            💬 無料：手相診断はこちら（LINE）
+          </a>
+        </div>
+
+        <footer>© 2026 Twinkle Lab / Twinkle Star Oracle</footer>
+      </div>
+    </>
+  )
+}
