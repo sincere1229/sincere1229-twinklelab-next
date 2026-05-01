@@ -153,7 +153,7 @@ export default function StarPortal() {
             無料で手相診断を受ける（LINE）
           </a>
           <div style={{fontSize:'13px',color:'#9b4a7a',fontWeight:600,marginTop:'8px',letterSpacing:'1px'}}>
-            LINEで「手相」と送るだけでOKです
+            両手のひらの写真を送るだけで<br/>あなたの本質と今の状態を読み解きます
           </div>
           <div style={{fontSize:'12px',color:'rgba(155,74,122,0.7)',marginTop:'4px'}}>
             初めての方でも安心してご利用いただけます
