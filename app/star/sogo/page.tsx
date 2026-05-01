@@ -35,7 +35,6 @@ interface DrawnCard {
   reversed: boolean
 }
 
-// ★ MiniCta をコンポーネントの外に移動（React error #423の修正）
 function MiniCta({ label = '✦ 今すぐ鑑定する（¥3,980）' }: { label?: string }) {
   return (
     <div style={{ textAlign: 'center', margin: '16px 0' }}>
@@ -47,7 +46,7 @@ function MiniCta({ label = '✦ 今すぐ鑑定する（¥3,980）' }: { label?:
         fontFamily: 'Cinzel,serif', fontSize: '14px', fontWeight: 700,
         letterSpacing: '2px', padding: '12px 24px', textDecoration: 'none',
       }}>{label}</a>
-      <div style={{ fontSize: '10px', color: 'rgba(240,234,220,0.3)', marginTop: '6px' }}>🔒 Stripe安全決済 · 即時表示</div>
+      <div style={{ fontSize: '10px', color: 'rgba(240,234,220,0.3)', marginTop: '6px' }}>🔒 Stripe安全決済 · 結果はLINEでお届け</div>
     </div>
   )
 }
@@ -210,13 +209,15 @@ export default function SogoPage() {
         .hero{text-align:center;padding:50px 0 40px;border-bottom:1px solid rgba(201,168,76,0.15);}
         .back{display:inline-block;font-size:12px;color:rgba(201,168,76,0.6);text-decoration:none;margin-bottom:20px;letter-spacing:0.1em;}
         .hero-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;opacity:0.7;}
-        .hero-title{font-family:'Cinzel',serif;font-size:clamp(26px,6vw,44px);color:var(--gold2);letter-spacing:3px;margin-bottom:12px;line-height:1.3;}
-        .hero-catch{font-size:clamp(14px,3vw,19px);color:rgba(240,234,220,0.9);margin-bottom:20px;line-height:1.8;font-weight:500;}
+        .hero-title{font-family:'Cinzel',serif;font-size:clamp(22px,5vw,38px);color:var(--gold2);letter-spacing:2px;margin-bottom:12px;line-height:1.4;}
+        .hero-catch{font-size:clamp(13px,3vw,17px);color:rgba(240,234,220,0.9);margin-bottom:20px;line-height:1.8;font-weight:500;}
         .hero-tags{display:flex;flex-direction:column;gap:6px;margin-bottom:28px;}
         .hero-tag{font-size:14px;color:rgba(240,234,220,0.7);letter-spacing:1px;}
         .hero-tag::before{content:'▶ ';color:var(--gold);}
         .gold-line{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:0 auto 24px;}
-        .price-hero{font-family:'Cinzel',serif;font-size:44px;color:var(--gold);margin-bottom:20px;}
+        .price-hero-wrap{margin-bottom:20px;}
+        .price-hero-orig{font-size:13px;color:rgba(240,234,220,0.4);text-decoration:line-through;margin-bottom:4px;}
+        .price-hero{font-family:'Cinzel',serif;font-size:44px;color:var(--gold);}
         .urgency-bar{background:linear-gradient(135deg,rgba(232,122,122,0.15),rgba(200,60,60,0.08));border:1px solid rgba(232,122,122,0.35);border-radius:12px;padding:14px 18px;text-align:center;margin:16px 0;}
         .urgency-bar-text{color:#f5a0a0;font-size:14px;font-weight:600;letter-spacing:1px;margin-bottom:4px;}
         .urgency-bar-sub{color:rgba(232,213,183,0.6);font-size:12px;line-height:1.7;}
@@ -226,7 +227,7 @@ export default function SogoPage() {
         .cta-note{text-align:center;font-size:11px;color:rgba(240,234,220,0.3);letter-spacing:1px;margin-bottom:8px;}
         .section{background:linear-gradient(135deg,rgba(26,32,64,0.9),rgba(15,22,40,0.95));border:1px solid rgba(201,168,76,0.18);border-radius:16px;padding:28px;margin:20px 0;}
         .sec-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;opacity:0.7;}
-        .sec-title{font-size:clamp(18px,4vw,24px);color:var(--gold2);font-weight:600;margin-bottom:16px;line-height:1.5;}
+        .sec-title{font-size:clamp(17px,4vw,22px);color:var(--gold2);font-weight:600;margin-bottom:16px;line-height:1.5;}
         .sec-text{font-size:14px;color:rgba(240,234,220,0.8);line-height:2.1;}
         .worry-list{list-style:none;margin:16px 0;}
         .worry-list li{padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.08);font-size:14px;color:rgba(240,234,220,0.8);display:flex;align-items:center;gap:10px;line-height:1.6;}
@@ -237,6 +238,7 @@ export default function SogoPage() {
         .sol-icon{font-size:24px;margin-bottom:8px;}
         .sol-title{font-size:13px;color:var(--gold2);font-weight:600;margin-bottom:4px;}
         .sol-desc{font-size:12px;color:rgba(240,234,220,0.55);line-height:1.6;}
+        .sol-highlight{border-color:rgba(232,160,192,0.4)!important;background:rgba(232,160,192,0.08)!important;}
         .check-list{list-style:none;margin:12px 0;}
         .check-list li{padding:10px 0;border-bottom:1px solid rgba(201,168,76,0.06);font-size:14px;color:rgba(240,234,220,0.85);display:flex;align-items:flex-start;gap:10px;line-height:1.7;}
         .check-list li::before{content:'✔';color:var(--gold);font-size:14px;flex-shrink:0;margin-top:2px;}
@@ -244,6 +246,8 @@ export default function SogoPage() {
         @media(max-width:480px){.output-grid{grid-template-columns:1fr;}}
         .output-item{background:rgba(10,14,26,0.4);border:1px solid rgba(201,168,76,0.12);border-radius:8px;padding:12px 14px;font-size:13px;color:rgba(240,234,220,0.8);display:flex;align-items:center;gap:8px;}
         .output-item::before{content:'▸';color:var(--gold);flex-shrink:0;}
+        .output-item.highlight{border-color:rgba(232,160,192,0.35);color:rgba(232,160,192,0.9);}
+        .output-item.highlight::before{content:'🤲';font-size:12px;}
         .future-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
         @media(max-width:480px){.future-grid{grid-template-columns:1fr;}}
         .future-box{border-radius:14px;padding:20px;}
@@ -290,12 +294,16 @@ export default function SogoPage() {
         .form-input:focus{border-color:var(--gold);}
         select.form-input{appearance:none;cursor:pointer;}
         select.form-input option{background:#0f1628;}
+        .teso-notice{background:rgba(232,160,192,0.08);border:1px solid rgba(232,160,192,0.25);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:rgba(232,160,192,0.9);line-height:1.9;text-align:center;}
         .tarot-section-title{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-align:center;margin-bottom:8px;}
         .tarot-note{font-size:12px;color:rgba(240,234,220,0.5);margin-bottom:18px;line-height:1.8;text-align:center;}
         .tarot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
         @media(max-width:360px){.tarot-grid{gap:8px;}}
         @keyframes spin{to{transform:rotate(360deg);}}
         .disclaimer{font-size:11px;color:rgba(240,234,220,0.25);line-height:1.8;text-align:center;margin:16px 0;}
+        .line-nudge{background:linear-gradient(135deg,rgba(0,185,0,0.1),rgba(0,150,0,0.06));border:1px solid rgba(6,199,85,0.3);border-radius:12px;padding:16px;text-align:center;margin:20px 0;}
+        .line-nudge p{font-size:12px;color:rgba(240,234,220,0.7);line-height:1.8;margin-bottom:10px;}
+        .line-nudge-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#06c755,#04a844);color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:10px 20px;text-decoration:none;}
         .fixed-cta{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#1a0a20,#0a0e1a);border-top:1px solid rgba(201,168,76,0.4);padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.4);}
         .fixed-cta-text{flex:1;}
         .fixed-cta-label{font-size:10px;color:rgba(232,122,122,0.8);margin-bottom:2px;font-weight:600;}
@@ -310,21 +318,40 @@ export default function SogoPage() {
         <div className="hero">
           <a href="/star" className="back">← 占いポータルに戻る</a>
           <div className="hero-label">✦ AI Premium Reading ✦</div>
-          <h1 className="hero-title">あなたの人生の流れを、<br/>すべて読み解きます</h1>
+
+          {/* ① タイトル変更 */}
+          <h1 className="hero-title">AI総合鑑定<br/>（手相＋複数占術）</h1>
           <div className="gold-line"></div>
-          <p className="hero-catch">AI総合鑑定（完全版）<br/>ホロスコープ × 四柱推命 × タロット × 数秘術</p>
+
+          {/* ② キャッチに手相を追加 */}
+          <p className="hero-catch">
+            手相をベースに、ホロスコープ × 四柱推命 × タロット × 数秘術を組み合わせ、<br/>
+            人生全体の流れを読み解きます
+          </p>
+
+          {/* ③ hero-tags修正：手相を最上部に追加 */}
           <div className="hero-tags">
+            <span className="hero-tag">手相から本質分析（左手・右手の違いを読み解く）</span>
             <span className="hero-tag">過去・現在・未来を統合解析</span>
             <span className="hero-tag">恋愛・仕事・金運・健康すべて対応</span>
-            <span className="hero-tag">あなた専用の鑑定結果を即時表示</span>
+            <span className="hero-tag">鑑定結果はLINEでお届け＋PDF送付</span>
           </div>
+
           <div className="urgency-bar">
             <div className="urgency-bar-text">⚡ 今の選択が未来を変えます</div>
             <div className="urgency-bar-sub">あなたが迷っている今この瞬間も、運気は動いています<br/>知った瞬間から、未来は変わり始めます</div>
           </div>
-          <div className="price-hero">¥3,980</div>
+
+          {/* ⑨ 価格表示：通常4980→現在3980 */}
+          <div className="price-hero-wrap">
+            <div className="price-hero-orig">通常¥4,980相当</div>
+            <div className="price-hero">¥3,980</div>
+          </div>
+
           <a href="#form-section" className="cta-btn">✦ 今すぐ鑑定する ✦</a>
-          <p className="cta-note">🔒 Stripe安全決済 · 決済後すぐに表示 · PDFダウンロード付き</p>
+
+          {/* ④ 「即時表示」削除→LINEでお届けに変更 */}
+          <p className="cta-note">🔒 Stripe安全決済 · 鑑定結果はLINEでお届け · PDF送付</p>
           <p style={{fontSize:'12px',color:'rgba(232,122,122,0.9)',textAlign:'center',marginTop:'8px',letterSpacing:'1px'}}>
             ⚠️ 今のタイミングでしか見えない運命の流れがあります
           </p>
@@ -341,22 +368,24 @@ export default function SogoPage() {
           </ul>
           <p className="sec-text" style={{marginTop:'16px',padding:'16px',background:'rgba(10,14,26,0.4)',borderRadius:'10px',borderLeft:'3px solid rgba(201,168,76,0.5)'}}>
             その答えは「一つの占い」では見えません。<br/>
-            複数の視点を組み合わせることで、初めて全体像が見えてきます。
+            手相をベースに複数の視点を組み合わせることで、初めて全体像が見えてきます。
           </p>
         </div>
         <MiniCta label="✦ 今すぐ悩みを解消する（¥3,980）" />
 
+        {/* ⑥ 占術一覧に手相追加（最上部） */}
         <div className="section">
           <div className="sec-label">✦ 解決策</div>
-          <h2 className="sec-title">このAI総合鑑定では<br/>4つの占術を組み合わせて分析します</h2>
+          <h2 className="sec-title">手相をベースに<br/>5つの占術を組み合わせて分析します</h2>
           <div className="solution-grid">
             {[
+              {icon:'🤲', title:'手相リーディング', desc:'左手（本質）と右手（現在）の違いから、本来の自分と今のズレを読み解く', highlight: true},
               {icon:'🌐', title:'ホロスコープ', desc:'生まれ持った性質・才能・今の天体の影響'},
               {icon:'☯️', title:'四柱推命', desc:'人生全体の流れ・転機の時期・大運の読み解き'},
               {icon:'🃏', title:'タロット', desc:'今の状況と近未来・意識下のメッセージ'},
               {icon:'🔢', title:'数秘術', desc:'運命のテーマ・魂の使命・生まれ持った特質'},
             ].map(s => (
-              <div key={s.title} className="solution-item">
+              <div key={s.title} className={`solution-item${s.highlight ? ' sol-highlight' : ''}`}>
                 <div className="sol-icon">{s.icon}</div>
                 <div className="sol-title">{s.title}</div>
                 <div className="sol-desc">{s.desc}</div>
@@ -364,7 +393,8 @@ export default function SogoPage() {
             ))}
           </div>
           <p className="sec-text" style={{marginTop:'16px',textAlign:'center'}}>
-            バラバラの情報を「統合」することで<br/>
+            手相という「あなたの体に刻まれた情報」を軸に、<br/>
+            複数の占術を「統合」することで<br/>
             <strong style={{color:'var(--gold2)'}}>あなたの人生の全体像が見えます</strong>
           </p>
         </div>
@@ -405,27 +435,41 @@ export default function SogoPage() {
           <div className="sec-label">✦ この鑑定でわかること</div>
           <h2 className="sec-title">人生の全体像を<br/>完全解析します</h2>
           <ul className="check-list">
+            <li>手相から読み解く「本来の自分」と「今のズレ」</li>
             <li>人生の転機（いつ、何が変わるか）</li>
             <li>恋愛の未来（出会い・結婚・相性・今の関係性）</li>
             <li>仕事の方向性（向いている働き方・転職タイミング）</li>
             <li>金運の流れ（増える時期・注意すべき時期）</li>
             <li>健康運（体のサイン・注意すべき時期）</li>
             <li>今やるべき具体的な行動</li>
-            <li>年代別メッセージ（あなたの世代に合わせた内容）</li>
           </ul>
         </div>
         <MiniCta label="✦ 人生の全体像を知る（¥3,980）" />
 
+        {/* ⑦ 出力内容に手相分析追加 */}
         <div className="section">
           <div className="sec-label">✦ 出力内容</div>
           <h2 className="sec-title">約5,000文字以上の<br/>詳細鑑定レポート</h2>
           <div className="output-grid">
-            {['ホロスコープ図面（カラー）','四柱推命の命式・五行分析','タロット3枚の統合解釈','数秘術の運命数解読','過去 / 現在 / 未来の流れ','仕事運の詳細分析','恋愛運・パートナーシップ','金運・豊かさの流れ','健康運・注意時期','年代別メッセージ','今月・来月の運気予報','開運アドバイス・行動指針'].map(o => (
-              <div key={o} className="output-item">{o}</div>
+            {[
+              {label:'🤲 手相分析（左手・右手）', highlight: true},
+              {label:'本来の自分 × 今のズレ', highlight: true},
+              {label:'ホロスコープ図面（カラー）'},
+              {label:'四柱推命の命式・五行分析'},
+              {label:'タロット3枚の統合解釈'},
+              {label:'数秘術の運命数解読'},
+              {label:'過去 / 現在 / 未来の流れ'},
+              {label:'仕事運の詳細分析'},
+              {label:'恋愛運・パートナーシップ'},
+              {label:'金運・豊かさの流れ'},
+              {label:'開運アクション・行動指針'},
+              {label:'PDF完全版お届け'},
+            ].map(o => (
+              <div key={o.label} className={`output-item${o.highlight ? ' highlight' : ''}`}>{o.label}</div>
             ))}
           </div>
           <p className="sec-text" style={{textAlign:'center',marginTop:'14px'}}>
-            👉 一度だけでなく、<strong style={{color:'var(--gold2)'}}>何度も見返せます</strong>（PDFダウンロード可能）
+            👉 一度だけでなく、<strong style={{color:'var(--gold2)'}}>何度も見返せます</strong>（PDF送付）
           </p>
         </div>
 
@@ -438,8 +482,8 @@ export default function SogoPage() {
               <div className="compare-content">1つの占術だけ<br/>断片的な情報<br/>「なんとなく」の鑑定</div>
             </div>
             <div className="compare-box tso">
-              <div className="compare-title">✦ Twinkle Star Oracle</div>
-              <div className="compare-content">4つの占術を統合<br/>人生の全体像が見える<br/>AI による客観的分析</div>
+              <div className="compare-title">✦ AI総合鑑定</div>
+              <div className="compare-content">手相＋4占術を統合<br/>人生の全体像が見える<br/>あなただけの個別鑑定</div>
             </div>
           </div>
         </div>
@@ -450,9 +494,9 @@ export default function SogoPage() {
           <h2 className="sec-title">選ばれる4つの理由</h2>
           <div className="trust-grid">
             {[
-              {icon:'⚡', title:'即時表示', desc:'決済完了後、数秒で鑑定結果が表示されます。'},
+              {icon:'🤲', title:'手相ベースの個別鑑定', desc:'あなたの手に刻まれた情報をもとに、個別に作成した鑑定をLINEでお届けします。'},
               {icon:'🤖', title:'AI×占術の統合分析', desc:'感情に左右されない客観的な分析で高精度な鑑定を。'},
-              {icon:'📱', title:'スマホで完結', desc:'入力から結果表示・PDFダウンロードまでスマホのみで。'},
+              {icon:'📱', title:'LINEでお届け＋PDF', desc:'鑑定結果はLINEで送信＋PDFでも受け取れます。'},
               {icon:'🔒', title:'安全な決済', desc:'Stripe社の最高水準セキュリティで個人情報を保護。'},
             ].map(t => (
               <div key={t.title} className="trust-item">
@@ -470,8 +514,10 @@ export default function SogoPage() {
             <p style={{fontSize:'16px',color:'rgba(232,201,122,0.9)',marginBottom:'12px',fontWeight:'500'}}>あなたの人生の設計図を知る価格です</p>
             <div className="price-old">通常の対面鑑定レベル：10,000円〜30,000円</div>
             <div className="price-arrow">↓</div>
+            <div className="price-old" style={{fontSize:'16px'}}>通常¥4,980相当</div>
+            <div className="price-arrow">↓</div>
             <div className="price-main">¥3,980</div>
-            <div className="price-sub">PDFダウンロード付き · 即時表示 · 5,000文字以上</div>
+            <div className="price-sub">鑑定結果はLINEでお届け · PDF送付 · 5,000文字以上</div>
           </div>
         </div>
 
@@ -485,14 +531,37 @@ export default function SogoPage() {
           <p className="emotion-sub">あなただけの鑑定が、今すぐ手に入ります</p>
         </div>
 
+        {/* ⑧ LINE導線追加 */}
+        <div className="line-nudge">
+          <p>
+            まだ手相診断を受けていない方へ<br/>
+            <strong style={{color:'rgba(78,222,136,0.9)'}}>無料手相診断</strong>を先に受けると、<br/>
+            より精度の高い鑑定をお届けできます🌙
+          </p>
+          <a href="https://lin.ee/XHDFrA8" className="line-nudge-btn" target="_blank" rel="noopener">
+            💬 無料手相診断はこちら（LINE）
+          </a>
+        </div>
+
         <a href="#inp-name" className="cta-btn">✦ あなたの運命を今すぐ知る ✦</a>
-        <p className="cta-note">🔒 Stripe安全決済 · 即時表示 · PDFダウンロード付き</p>
+
+        {/* ④ 「即時表示」→「LINEでお届け」 */}
+        <p className="cta-note">🔒 Stripe安全決済 · 鑑定結果はLINEでお届け · PDF送付</p>
         <p style={{textAlign:'center',fontSize:'15px',color:'rgba(232,201,122,0.85)',margin:'8px 0 16px',lineHeight:'1.9',fontWeight:500,letterSpacing:'1px'}}>
           ここから先は、あなただけの鑑定になります
         </p>
 
         <div className="form-card" id="form-section">
           <div className="form-title">✦ あなたの情報を入力 ✦</div>
+
+          {/* ⑩ フォームに手相はLINE情報を使用する旨を追加 */}
+          <div className="teso-notice">
+            🤲 手相情報は、LINEでお送りいただいた画像を使用します<br/>
+            <span style={{fontSize:'11px',color:'rgba(232,160,192,0.7)'}}>
+              まだ送っていない方は、お申込み後に「手相」とLINEへお送りください
+            </span>
+          </div>
+
           <div className="form-group">
             <label className="form-label">お名前<span style={{fontSize:'10px',color:'rgba(240,234,220,0.4)',marginLeft:'8px'}}>※ニックネームでもOK</span></label>
             <input type="text" className="form-input" placeholder="例：さくら" id="inp-name" />
@@ -549,7 +618,9 @@ export default function SogoPage() {
           <button className="cta-btn" onClick={handlePay} disabled={paying}>
             {paying ? '決済ページへ移動中...' : '✦ ¥3,980 で今すぐ鑑定する ✦'}
           </button>
-          <p className="cta-note">🔒 Stripe による安全な決済 · 決済完了後すぐに表示 · PDFダウンロード付き</p>
+
+          {/* ④ 「即時表示」削除 */}
+          <p className="cta-note">🔒 Stripe による安全な決済 · 鑑定結果はLINEでお届け · PDF送付</p>
         </div>
 
         <div className="emotion-box">
@@ -572,7 +643,7 @@ export default function SogoPage() {
       <div className="fixed-cta">
         <div className="fixed-cta-text">
           <div className="fixed-cta-label">⚡ 今の選択が未来を変えます</div>
-          <div className="fixed-cta-main">あなたの運命を今すぐ知る</div>
+          <div className="fixed-cta-main">手相＋複数占術で人生を読み解く</div>
         </div>
         <a href="#form-section" className="fixed-cta-btn">¥3,980で鑑定する</a>
       </div>
