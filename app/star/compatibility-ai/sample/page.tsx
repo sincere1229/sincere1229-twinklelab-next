@@ -141,13 +141,35 @@ export default function CompatibilityAISamplePage() {
           <Link href="/star/compatibility-ai" style={styles.primaryBtn}>
             ✨ 自分の診断をしてみる（無料）
           </Link>
+        </div>
+
+        {/* LINE導線 */}
+        <div style={{
+          background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+          border: '2px solid #86efac',
+          borderRadius: '20px',
+          padding: '20px',
+          marginBottom: '16px',
+        }}>
+          <p style={{ fontSize: '15px', fontWeight: 900, color: '#166534', margin: '0 0 6px' }}>
+            📱 手相診断も気になりませんか？
+          </p>
+          <p style={{ fontSize: '13px', color: '#166534', lineHeight: 1.7, margin: '0 0 12px' }}>
+            LINEに登録すると<br />
+            手相診断の受付・占い結果のご質問ができます✨
+          </p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', fontSize: '13px', color: '#166534', lineHeight: 2 }}>
+            <li>🤲 手相診断の受付（両手の写真を送るだけ）</li>
+            <li>💬 占い結果へのご質問</li>
+            <li>🌟 Twinkle Star Oracleからのお知らせ（不定期）</li>
+          </ul>
           <a
             href="https://lin.ee/XHDFrA8"
             target="_blank"
             rel="noopener noreferrer"
             style={styles.lineBtn}
           >
-            🟢 LINEで改善ワークを受け取る
+            🟢 LINEで登録する（無料）
           </a>
         </div>
 
