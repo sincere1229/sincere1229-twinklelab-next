@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-06-20',
-})
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,18 +12,35 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Stripeで決済完了を直接検証（webhookに依存しない確実な方法）
-    let session
-    try {
-      session = await stripe.checkout.sessions.retrieve(sessionId)
-    } catch {
+    // Stripe APIで決済確認（stripeパッケージ不要・fetch直接呼び出し）
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ''
+    if (!stripeSecretKey) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe設定エラー' },
+        { status: 500 }
+      )
+    }
+
+    const stripeRes = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${sessionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${stripeSecretKey}`,
+        },
+      }
+    )
+
+    if (!stripeRes.ok) {
+      console.error('Stripe session fetch failed:', stripeRes.status)
       return NextResponse.json(
         { success: false, error: '決済情報の確認に失敗しました' },
         { status: 400 }
       )
     }
 
-    if (session.payment_status !== 'paid') {
+    const stripeSession = await stripeRes.json()
+
+    if (stripeSession.payment_status !== 'paid') {
       return NextResponse.json(
         { success: false, error: '決済が完了していません' },
         { status: 402 }
