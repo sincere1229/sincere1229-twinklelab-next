@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export const metadata = {
   title: 'Twinkle Star Oracle｜AI占いポータル',
   description: 'タロット・数秘術・九星気学・四柱推命・易占い・バードオラクルなど11種類のAI占いが楽しめる無料占いポータル。手相診断（LINE）も無料。AI総合鑑定（¥3,980）では手相＋複数占術で本格リーディングを提供します。',
@@ -258,6 +260,7 @@ export default function StarPortal() {
           </a>
         </div>
 
+        {/* ✦ 詳細鑑定セクション */}
         <div className="div-line"><span className="div-text">✦ 詳細鑑定 ✦</span></div>
         <div className="main-grid">
           {DEEP.map((d) => (
@@ -269,6 +272,54 @@ export default function StarPortal() {
             </a>
           ))}
         </div>
+
+        {/* ======================================
+            ① AI相性診断カード（詳細鑑定グリッド直後）
+            ====================================== */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '14px 16px',
+          background: 'linear-gradient(135deg, #fdf2f8, #fce7f3)',
+          borderRadius: '16px',
+          border: '2px solid #f472b6',
+          margin: '0 14px 16px',
+        }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+              <span>💘</span>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: '#1e1b4b' }}>AI相性診断</span>
+              <span style={{
+                background: 'linear-gradient(135deg, #f472b6, #a855f7)',
+                color: 'white',
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: '999px',
+              }}>NEW</span>
+            </div>
+            <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+              未来のすれ違いをやさしく解説
+            </p>
+          </div>
+          <Link
+            href="/star/compatibility-ai"
+            style={{
+              background: 'linear-gradient(135deg, #f472b6, #a855f7)',
+              color: 'white',
+              borderRadius: '12px',
+              padding: '8px 14px',
+              fontSize: '13px',
+              fontWeight: 700,
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ふたりの未来を見る
+          </Link>
+        </div>
+        {/* ====================================== */}
 
         {/* ★ 手相ナッジ（詳細鑑定下） */}
         <div className="teso-nudge">
@@ -307,42 +358,47 @@ export default function StarPortal() {
             ✦ 手相詳細診断を見る
           </a>
         </div>
-{/* AI相性診断プロモ */}
-<div style={{
-  background: 'linear-gradient(135deg, #fdf2f8, #fdf4ff)',
-  border: '2px solid #f472b6',
-  borderRadius: '20px',
-  padding: '20px',
-  marginBottom: '16px',
-  textAlign: 'center',
-}}>
-  <p style={{ fontSize: '12px', color: '#db2777', fontWeight: 700, margin: '0 0 4px' }}>
-    💘 AI相性診断
-  </p>
-  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e1b4b', margin: '0 0 4px' }}>
-    <span style={{ fontSize: '13px', textDecoration: 'line-through', color: '#94a3b8' }}>通常 ¥1,980</span>
-    {' → '}
-    <span style={{ color: '#db2777' }}>初回 ¥980</span>
-  </p>
-  <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px' }}>
-    同棲・結婚後のすれ違いまで見える体験型診断
-  </p>
-  <Link
-    href="/star/compatibility-ai"
-    style={{
-      display: 'block',
-      padding: '13px',
-      background: 'linear-gradient(135deg, #f472b6, #a855f7)',
-      color: 'white',
-      borderRadius: '12px',
-      textDecoration: 'none',
-      fontWeight: 700,
-      fontSize: '15px',
-    }}
-  >
-    すれ違いの原因を詳しく見る
-  </Link>
-</div>
+
+        {/* ======================================
+            ② AI相性診断プロモ（¥3,980 総合鑑定の直前）
+            ====================================== */}
+        <div style={{
+          background: 'linear-gradient(135deg, #fdf2f8, #fdf4ff)',
+          border: '2px solid #f472b6',
+          borderRadius: '20px',
+          padding: '20px',
+          margin: '0 14px 16px',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: '12px', color: '#db2777', fontWeight: 700, margin: '0 0 4px' }}>
+            💘 AI相性診断
+          </p>
+          <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e1b4b', margin: '0 0 4px' }}>
+            <span style={{ fontSize: '13px', textDecoration: 'line-through', color: '#94a3b8' }}>通常 ¥1,980</span>
+            {' → '}
+            <span style={{ color: '#db2777' }}>初回 ¥980</span>
+          </p>
+          <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px' }}>
+            同棲・結婚後のすれ違いまで見える体験型診断
+          </p>
+          <Link
+            href="/star/compatibility-ai"
+            style={{
+              display: 'block',
+              padding: '13px',
+              background: 'linear-gradient(135deg, #f472b6, #a855f7)',
+              color: 'white',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              fontWeight: 700,
+              fontSize: '15px',
+            }}
+          >
+            すれ違いの原因を詳しく見る
+          </Link>
+        </div>
+        {/* ====================================== */}
+
         {/* ★ ¥3,980 AI総合鑑定（手相＋複数占術） */}
         <div className="sogo">
           <div style={{fontSize:'12px',color:'rgba(138,96,16,0.7)',marginBottom:'8px',letterSpacing:'1px'}}>
