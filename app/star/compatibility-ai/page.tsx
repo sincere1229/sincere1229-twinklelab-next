@@ -148,7 +148,7 @@ function CompatibilityAIInner() {
       })
       const data = await res.json()
       if (data.success) {
-        // Stripe決済後に復元できるよう保存（localStorageで別ドメイン遷移後も保持）
+        // 結果表示と同時にlocalStorageへ保存（有料ボタンクリック前に確実に保存）
         localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
         localStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
         setResult(data.result)
@@ -599,14 +599,8 @@ function CompatibilityAIInner() {
               {/* ④ 有料CTA */}
               <a
                 href="https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06"
-                target="_blank"
                 rel="noopener noreferrer"
                 style={styles.primaryBtn as React.CSSProperties}
-                onClick={() => {
-                  // 決済前に入力データを保存
-                  localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-                  if (result) localStorage.setItem('compatibility_free_result', JSON.stringify(result))
-                }}
               >
                 💘 この関係を壊さない方法を見る（¥980）
               </a>
