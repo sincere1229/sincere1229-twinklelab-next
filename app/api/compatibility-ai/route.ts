@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
-
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
 
 export async function POST(req: NextRequest) {
   try {
@@ -73,16 +68,30 @@ export async function POST(req: NextRequest) {
 
 ${mode === 'free' ? '※無料版なので、realScene・familyAndFriendImpact・conflictReason・advice[].detail・advice[].conversationExample・futureStoryFullは空文字にしてください' : '※有料版なので、すべての項目を詳しく記述してください'}`
 
-    const message = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-latest',
-      max_tokens: mode === 'paid' ? 2000 : 1000,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt }
-      ]
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY || '',
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-latest',
+        max_tokens: mode === 'paid' ? 2000 : 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
     })
 
-    const rawText = message.content[0].type === 'text' ? message.content[0].text : ''
+    if (!apiRes.ok) {
+      const errBody = await apiRes.text()
+      console.error('Anthropic API error:', errBody)
+      throw new Error(`Anthropic API returned ${apiRes.status}`)
+    }
+
+    const apiData = await apiRes.json()
+    const rawText: string =
+      apiData.content?.[0]?.type === 'text' ? apiData.content[0].text : ''
     
     // JSONを抽出してパース
     const jsonMatch = rawText.match(/\{[\s\S]*\}/)
