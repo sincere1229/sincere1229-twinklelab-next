@@ -117,8 +117,10 @@ function CompatibilityAIInner() {
       const data = await res.json()
       if (data.success) {
         // 結果表示と同時にlocalStorageへ保存（有料ボタンクリック前に確実に保存）
-        localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-        localStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+          window.localStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
+        }
         setResult(data.result)
         setStep(5)
       } else {
@@ -159,16 +161,24 @@ function CompatibilityAIInner() {
   }
 
   // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
-  // ※ handlePaidDiagnoseWithSessionの定義後に配置（関数参照エラー防止）
   useEffect(() => {
+    // クライアントサイドのみで実行（SSR対策）
+    if (typeof window === 'undefined') return
+
     const sessionId = searchParams.get('session_id')
     console.log('[DEBUG] session_id:', sessionId)
-    
-    // session_idがない場合は何もしない
-    if (!sessionId || sessionId === 'null' || sessionId === '') return
+    if (!sessionId) return
 
-    const savedInputs = localStorage.getItem('compatibility_inputs')
-    const savedResult = localStorage.getItem('compatibility_free_result')
+    let savedInputs: string | null = null
+    let savedResult: string | null = null
+    try {
+      savedInputs = window.localStorage.getItem('compatibility_inputs')
+      savedResult = window.localStorage.getItem('compatibility_free_result')
+    } catch (e) {
+      console.error('[DEBUG] localStorage read error:', e)
+      return
+    }
+
     console.log('[DEBUG] savedInputs:', savedInputs ? 'あり' : 'なし')
     console.log('[DEBUG] savedResult:', savedResult ? 'あり' : 'なし')
 
@@ -177,37 +187,31 @@ function CompatibilityAIInner() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
     }).then(r => r.json()).then(d => {
-      console.log('[DEBUG] Stripe check result:', JSON.stringify(d))
-    }).catch(e => console.error('[DEBUG] debug-stripe error:', e))
+      console.log('[DEBUG] Stripe check:', JSON.stringify(d))
+    }).catch(e => console.error('[DEBUG] debug error:', e))
 
     if (savedInputs && savedResult) {
       try {
         const parsedInputs = JSON.parse(savedInputs) as FormInputs
         const parsedResult = JSON.parse(savedResult) as DiagnosisResult
-        localStorage.removeItem('compatibility_inputs')
-        localStorage.removeItem('compatibility_free_result')
+        window.localStorage.removeItem('compatibility_inputs')
+        window.localStorage.removeItem('compatibility_free_result')
         setInputs(parsedInputs)
         setResult(parsedResult)
         setStep(5)
-        // 少し遅延させてstateが確定してから呼び出す
-        setTimeout(() => {
-          handlePaidDiagnoseWithSession(sessionId, parsedInputs)
-        }, 100)
+        setTimeout(() => handlePaidDiagnoseWithSession(sessionId, parsedInputs), 200)
       } catch (e) {
-        console.error('[DEBUG] localStorage parse error:', e)
+        console.error('[DEBUG] parse error:', e)
       }
     } else {
-      console.log('[DEBUG] No saved data')
       setStep(5)
-      setTimeout(() => {
-        handlePaidDiagnoseWithSession(sessionId, {
-          yourType: '', yourWeekend: '', yourAloneTime: '', yourFriends: '',
-          yourFamily: '', yourFamilyPriority: '', yourHobbies: '',
-          partnerType: '', partnerWeekend: '', partnerAloneTime: '', partnerFriends: '',
-          partnerFamily: '', partnerFamilyPriority: '', partnerHobbies: '',
-          recentEvent: '', recentHappy: '', memorableEvent: '',
-        })
-      }, 100)
+      setTimeout(() => handlePaidDiagnoseWithSession(sessionId, {
+        yourType: '', yourWeekend: '', yourAloneTime: '', yourFriends: '',
+        yourFamily: '', yourFamilyPriority: '', yourHobbies: '',
+        partnerType: '', partnerWeekend: '', partnerAloneTime: '', partnerFriends: '',
+        partnerFamily: '', partnerFamilyPriority: '', partnerHobbies: '',
+        recentEvent: '', recentHappy: '', memorableEvent: '',
+      }), 200)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
