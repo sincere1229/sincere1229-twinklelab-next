@@ -106,9 +106,14 @@ function CompatibilityAIInner() {
     const sessionId = searchParams.get('session_id')
     if (!sessionId) return
 
-    // sessionIdをsessionStorageから入力データと共に復元
-    const savedInputs = sessionStorage.getItem('compatibility_inputs')
-    const savedResult = sessionStorage.getItem('compatibility_free_result')
+    console.log('session_id detected:', sessionId)
+
+    // localStorageから入力データを復元（sessionStorageはStripe遷移で消えるためlocalStorage使用）
+    const savedInputs = localStorage.getItem('compatibility_inputs')
+    const savedResult = localStorage.getItem('compatibility_free_result')
+
+    console.log('savedInputs:', savedInputs ? 'あり' : 'なし')
+    console.log('savedResult:', savedResult ? 'あり' : 'なし')
 
     if (savedInputs && savedResult) {
       const parsedInputs = JSON.parse(savedInputs)
@@ -116,8 +121,15 @@ function CompatibilityAIInner() {
       setInputs(parsedInputs)
       setResult(parsedResult)
       setStep(5)
-      // 有料診断を自動実行
       handlePaidDiagnoseWithSession(sessionId, parsedInputs)
+      // 使用済みデータを削除
+      localStorage.removeItem('compatibility_inputs')
+      localStorage.removeItem('compatibility_free_result')
+    } else {
+      // データがない場合はローディング表示でAPIのみ実行
+      setPaidLoading(true)
+      setStep(5)
+      handlePaidDiagnoseWithSession(sessionId, inputs)
     }
   }, [searchParams])
 
@@ -136,9 +148,9 @@ function CompatibilityAIInner() {
       })
       const data = await res.json()
       if (data.success) {
-        // Stripe決済後に復元できるよう保存
-        sessionStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-        sessionStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
+        // Stripe決済後に復元できるよう保存（localStorageで別ドメイン遷移後も保持）
+        localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+        localStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
         setResult(data.result)
         setStep(5)
       } else {
@@ -592,8 +604,8 @@ function CompatibilityAIInner() {
                 style={styles.primaryBtn as React.CSSProperties}
                 onClick={() => {
                   // 決済前に入力データを保存
-                  sessionStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-                  if (result) sessionStorage.setItem('compatibility_free_result', JSON.stringify(result))
+                  localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+                  if (result) localStorage.setItem('compatibility_free_result', JSON.stringify(result))
                 }}
               >
                 💘 この関係を壊さない方法を見る（¥980）
