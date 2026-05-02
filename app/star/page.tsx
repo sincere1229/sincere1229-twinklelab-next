@@ -307,7 +307,42 @@ export default function StarPortal() {
             ✦ 手相詳細診断を見る
           </a>
         </div>
-
+{/* AI相性診断プロモ */}
+<div style={{
+  background: 'linear-gradient(135deg, #fdf2f8, #fdf4ff)',
+  border: '2px solid #f472b6',
+  borderRadius: '20px',
+  padding: '20px',
+  marginBottom: '16px',
+  textAlign: 'center',
+}}>
+  <p style={{ fontSize: '12px', color: '#db2777', fontWeight: 700, margin: '0 0 4px' }}>
+    💘 AI相性診断
+  </p>
+  <p style={{ fontSize: '18px', fontWeight: 900, color: '#1e1b4b', margin: '0 0 4px' }}>
+    <span style={{ fontSize: '13px', textDecoration: 'line-through', color: '#94a3b8' }}>通常 ¥1,980</span>
+    {' → '}
+    <span style={{ color: '#db2777' }}>初回 ¥980</span>
+  </p>
+  <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 16px' }}>
+    同棲・結婚後のすれ違いまで見える体験型診断
+  </p>
+  <Link
+    href="/star/compatibility-ai"
+    style={{
+      display: 'block',
+      padding: '13px',
+      background: 'linear-gradient(135deg, #f472b6, #a855f7)',
+      color: 'white',
+      borderRadius: '12px',
+      textDecoration: 'none',
+      fontWeight: 700,
+      fontSize: '15px',
+    }}
+  >
+    すれ違いの原因を詳しく見る
+  </Link>
+</div>
         {/* ★ ¥3,980 AI総合鑑定（手相＋複数占術） */}
         <div className="sogo">
           <div style={{fontSize:'12px',color:'rgba(138,96,16,0.7)',marginBottom:'8px',letterSpacing:'1px'}}>
