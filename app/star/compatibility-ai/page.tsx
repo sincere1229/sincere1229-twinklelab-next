@@ -104,16 +104,22 @@ function CompatibilityAIInner() {
   // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
   useEffect(() => {
     const sessionId = searchParams.get('session_id')
+    console.log('[DEBUG] session_id:', sessionId)
     if (!sessionId) return
 
-    console.log('session_id detected:', sessionId)
-
-    // localStorageから入力データを復元（sessionStorageはStripe遷移で消えるためlocalStorage使用）
     const savedInputs = localStorage.getItem('compatibility_inputs')
     const savedResult = localStorage.getItem('compatibility_free_result')
+    console.log('[DEBUG] savedInputs:', savedInputs ? 'あり' : 'なし')
+    console.log('[DEBUG] savedResult:', savedResult ? 'あり' : 'なし')
 
-    console.log('savedInputs:', savedInputs ? 'あり' : 'なし')
-    console.log('savedResult:', savedResult ? 'あり' : 'なし')
+    // デバッグAPI呼び出し
+    fetch('/api/debug-stripe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    }).then(r => r.json()).then(d => {
+      console.log('[DEBUG] Stripe check result:', JSON.stringify(d))
+    })
 
     if (savedInputs && savedResult) {
       const parsedInputs = JSON.parse(savedInputs)
@@ -122,11 +128,10 @@ function CompatibilityAIInner() {
       setResult(parsedResult)
       setStep(5)
       handlePaidDiagnoseWithSession(sessionId, parsedInputs)
-      // 使用済みデータを削除
       localStorage.removeItem('compatibility_inputs')
       localStorage.removeItem('compatibility_free_result')
     } else {
-      // データがない場合はローディング表示でAPIのみ実行
+      console.log('[DEBUG] No saved data, showing loading...')
       setPaidLoading(true)
       setStep(5)
       handlePaidDiagnoseWithSession(sessionId, inputs)
