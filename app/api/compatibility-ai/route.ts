@@ -19,10 +19,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // 他のTSOアプリで動作実績のあるモデルを使用
     const model =
       process.env.ANTHROPIC_MODEL ||
       process.env.VITE_ANTHROPIC_MODEL ||
-      'claude-3-5-sonnet-20241022'
+      'claude-haiku-4-5-20251001'
 
     const systemPrompt = `あなたはカップルの相性を優しく・前向きに分析するAIです。
 
