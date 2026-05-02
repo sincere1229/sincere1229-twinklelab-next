@@ -94,7 +94,10 @@ export default function CompatibilityAIPage() {
   const [result, setResult] = useState<DiagnosisResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isPaid] = useState(false) // Stripe実装後にtrueにする
+  const [isPaid, setIsPaid] = useState(false)
+  const [paidResult, setPaidResult] = useState<DiagnosisResult | null>(null)
+  const [paidLoading, setPaidLoading] = useState(false)
+  const [paidError, setPaidError] = useState('')
 
   const update = (key: keyof FormInputs, value: string) => {
     setInputs(prev => ({ ...prev, [key]: value }))
@@ -120,6 +123,34 @@ export default function CompatibilityAIPage() {
       setError('通信エラーが発生しました。もう一度お試しください。')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 有料診断（Stripe決済後に呼び出す想定 / 現在はボタンから直接呼び出してデモ）
+  const handlePaidDiagnose = async () => {
+    setPaidLoading(true)
+    setPaidError('')
+    try {
+      const res = await fetch('/api/compatibility-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs, mode: 'paid' }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setPaidResult(data.result)
+        setIsPaid(true)
+        // 結果が出たら少し下にスクロール
+        setTimeout(() => {
+          document.getElementById('paid-result-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 300)
+      } else {
+        setPaidError(data.error || 'エラーが発生しました')
+      }
+    } catch {
+      setPaidError('通信エラーが発生しました。もう一度お試しください。')
+    } finally {
+      setPaidLoading(false)
     }
   }
 
@@ -457,6 +488,7 @@ export default function CompatibilityAIPage() {
     return (
       <div style={styles.page}>
         <div style={styles.container}>
+
           {/* スコア */}
           <div style={styles.scoreCard}>
             <p style={styles.scoreLabel}>💘 ふたりの相性スコア</p>
@@ -480,14 +512,43 @@ export default function CompatibilityAIPage() {
             <p style={styles.storyTitle}>📖 1年後のふたりのストーリー...</p>
             <p style={styles.storyText}>{result.futureStoryPreview}</p>
             <div style={styles.storyBlur}>
-              <p style={styles.storyBlurText}>続きは有料版で...</p>
+              <p style={styles.storyBlurText}>続きは詳細版で...</p>
             </div>
           </div>
 
-          {/* 有料ロック */}
-          {!isPaid && (
+          {/* ぴよちゃんメッセージ */}
+          <div style={styles.piyoCard}>
+            <div style={styles.piyoBig}>🐥</div>
+            <p style={styles.piyoText}>{result.piyochanMessage}</p>
+          </div>
+
+          {/* ⑤ 無料結果直後LINE導線（改善版） */}
+          <div style={styles.lineCardFree}>
+            <p style={styles.lineFreeEyecatch}>📱 少しでも「わかる…」と思ったあなたへ</p>
+            <p style={styles.lineFreeDesc}>
+              LINE登録で<br />
+              すれ違いを減らすためのヒントを無料でお届けします✨
+            </p>
+            <ul style={styles.lineList}>
+              <li>🎁 小さなズレを整えるワーク</li>
+              <li>🎁 そのまま使える会話例</li>
+              <li>🎁 Twinkle Star Oracleからのサポートメッセージ（不定期）</li>
+            </ul>
+            <p style={styles.lineNudge}>👇 今の気持ちを大切にしたい方へ</p>
+            <a
+              href="https://lin.ee/XHDFrA8"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.lineBtn}
+            >
+              🟢 無料で受け取る
+            </a>
+          </div>
+
+          {/* 有料ロック または 有料結果 */}
+          {!isPaid ? (
             <div style={styles.lockCard}>
-              <p style={styles.lockTitle}>🔒 詳細診断（有料版）</p>
+              <p style={styles.lockTitle}>🔒 詳細診断でもっと深く知る</p>
               <ul style={styles.lockList}>
                 <li>✨ 具体的なすれ違いシーン</li>
                 <li>✨ 家族・友人関係の影響</li>
@@ -500,53 +561,134 @@ export default function CompatibilityAIPage() {
                 {' → '}
                 <span style={styles.lockSale}>初回限定 ¥980</span>
               </p>
+              {/* ④ 有料CTAコピー改善 */}
               <a
                 href="https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={styles.primaryBtn as React.CSSProperties}
               >
-                💘 すれ違いの原因を詳しく見る（¥980）
+                💘 この関係を壊さない方法を見る（¥980）
               </a>
               <Link href="/star/compatibility-ai/sample" style={styles.sampleFallback}>
                 📋 まずサンプルを見てみる
               </Link>
+
+              {/* ② 購入後画面：同一ページ内デモボタン（Stripe webhook連携後は削除） */}
+              <div style={styles.demoSection}>
+                <p style={styles.demoNote}>
+                  ※ 購入後はこのページがそのまま更新されます。<br />
+                  下のボタンは動作確認用です（開発中）
+                </p>
+                {paidLoading ? (
+                  <div style={styles.paidLoading}>
+                    <div style={styles.paidLoadingSpinner}>✨</div>
+                    <p style={styles.paidLoadingText}>
+                      あなた専用の続きを読み解いています…
+                    </p>
+                  </div>
+                ) : (
+                  <button
+                    style={styles.demoBtn}
+                    onClick={handlePaidDiagnose}
+                    disabled={paidLoading}
+                  >
+                    🔓 有料版を表示（テスト）
+                  </button>
+                )}
+                {paidError && <p style={styles.errorText}>{paidError}</p>}
+              </div>
+            </div>
+          ) : (
+            // ② 購入後の有料結果表示
+            <div id="paid-result-anchor">
+              {paidLoading ? (
+                <div style={styles.paidLoading}>
+                  <div style={styles.paidLoadingSpinner}>✨</div>
+                  <p style={styles.paidLoadingText}>
+                    あなた専用の続きを読み解いています…
+                  </p>
+                </div>
+              ) : paidResult ? (
+                <>
+                  <div style={styles.paidHeader}>
+                    <span style={styles.paidBadge}>💘 詳細診断</span>
+                    <p style={styles.paidHeaderTitle}>ふたりのすれ違いの全貌</p>
+                  </div>
+
+                  {paidResult.realScene && (
+                    <ResultSection title="🎬 実際のすれ違いシーン" text={paidResult.realScene} />
+                  )}
+                  {paidResult.familyAndFriendImpact && (
+                    <ResultSection title="👨‍👩‍👧 家族・友人関係の影響" text={paidResult.familyAndFriendImpact} />
+                  )}
+                  {paidResult.conflictReason && (
+                    <ResultSection title="💥 喧嘩になる理由" text={paidResult.conflictReason} />
+                  )}
+
+                  {paidResult.advice && paidResult.advice.length > 0 && (
+                    <div style={styles.adviceBlock}>
+                      <p style={styles.adviceBlockTitle}>💡 改善策＆会話テンプレート</p>
+                      {paidResult.advice.map((a, i) => (
+                        <div key={i} style={styles.adviceItem}>
+                          <p style={styles.adviceTitle}>✦ {a.title}</p>
+                          {a.detail && <p style={styles.adviceDetail}>{a.detail}</p>}
+                          {a.conversationExample && (
+                            <div style={styles.conversationBox}>
+                              <p style={styles.conversationLabel}>💬 会話例</p>
+                              <p style={styles.conversationText}>{a.conversationExample}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {paidResult.futureStoryFull && (
+                    <div style={styles.storyCardFull}>
+                      <p style={styles.storyTitle}>📖 1年後のふたりのストーリー（完全版）</p>
+                      <p style={styles.storyText}>{paidResult.futureStoryFull}</p>
+                    </div>
+                  )}
+
+                  {/* ③ 有料結果直後LINE導線 */}
+                  <div style={styles.lineCardPaid}>
+                    <p style={styles.linePaidEyecatch}>📱 この結果、あとで見返したくなりませんか？</p>
+                    <p style={styles.linePaidDesc}>
+                      LINE登録で<br />
+                      診断結果の活用方法や、<br />
+                      関係をより良くするヒントをお届けします✨
+                    </p>
+                    <ul style={styles.lineList}>
+                      <li>🎁 診断結果の見方ガイド</li>
+                      <li>🎁 状況別アドバイス</li>
+                      <li>🎁 Twinkle Star Oracleからのメッセージ（不定期）</li>
+                    </ul>
+                    <a
+                      href="https://lin.ee/XHDFrA8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.lineBtn}
+                    >
+                      🟢 LINEで保存する（無料）
+                    </a>
+                  </div>
+                </>
+              ) : null}
             </div>
           )}
 
-          {/* ぴよちゃんメッセージ */}
-          <div style={styles.piyoCard}>
-            <div style={styles.piyoBig}>🐥</div>
-            <p style={styles.piyoText}>{result.piyochanMessage}</p>
-          </div>
-
-          {/* LINE導線 */}
-          <div style={styles.lineCard}>
-            <p style={styles.lineTitle}>📱 診断結果を保存したい方へ</p>
-            <p style={styles.lineDesc}>LINE登録で無料プレゼント✨</p>
-            <ul style={styles.lineList}>
-              <li>🎁 改善ワークシート</li>
-              <li>🎁 会話テンプレート</li>
-              <li>🎁 ぴよちゃんの毎日メッセージ</li>
-            </ul>
-            <a
-              href="https://lin.ee/XHDFrA8"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={styles.lineBtn}
-            >
-              🟢 LINEで受け取る（無料）
-            </a>
-          </div>
-
           {/* 注意文 */}
           <p style={styles.disclaimer}>{result.disclaimer}</p>
-
-          {/* データ非保存の明示 */}
           <p style={styles.privacyNote}>🔒 入力された情報はサーバーに保存されません。セッション終了後に自動削除されます。</p>
 
           {/* もう一度 */}
-          <button style={styles.retryBtn} onClick={() => { setStep(0); setResult(null) }}>
+          <button style={styles.retryBtn} onClick={() => {
+            setStep(0)
+            setResult(null)
+            setPaidResult(null)
+            setIsPaid(false)
+          }}>
             🔄 もう一度診断する
           </button>
         </div>
@@ -1088,42 +1230,6 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.7,
     margin: 0,
   },
-  // LINE
-  lineCard: {
-    background: 'linear-gradient(135deg, #dcfce7, #d1fae5)',
-    borderRadius: '20px',
-    padding: '24px',
-    marginBottom: '16px',
-    textAlign: 'center',
-  },
-  lineTitle: {
-    fontSize: '15px',
-    fontWeight: 700,
-    color: '#166534',
-    margin: '0 0 4px',
-  },
-  lineDesc: {
-    fontSize: '14px',
-    color: '#166534',
-    margin: '0 0 12px',
-  },
-  lineList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: '0 0 16px',
-    fontSize: '13px',
-    color: '#166534',
-  },
-  lineBtn: {
-    display: 'block',
-    background: '#22c55e',
-    color: 'white',
-    padding: '14px',
-    borderRadius: '12px',
-    textDecoration: 'none',
-    fontWeight: 700,
-    fontSize: '16px',
-  },
   // Disclaimer
   disclaimer: {
     fontSize: '11px',
@@ -1164,5 +1270,191 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#f8fafc',
     borderRadius: '8px',
     border: '1px dashed #cbd5e1',
+  },
+  // ⑤ 無料結果直後LINE（改善版）
+  lineCardFree: {
+    background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
+    border: '2px solid #86efac',
+    borderRadius: '20px',
+    padding: '20px',
+    marginBottom: '16px',
+  },
+  lineFreeEyecatch: {
+    fontSize: '15px',
+    fontWeight: 900,
+    color: '#166534',
+    margin: '0 0 6px',
+  },
+  lineFreeDesc: {
+    fontSize: '13px',
+    color: '#166534',
+    lineHeight: 1.7,
+    margin: '0 0 12px',
+  },
+  lineNudge: {
+    fontSize: '13px',
+    color: '#166534',
+    fontWeight: 700,
+    margin: '0 0 10px',
+    textAlign: 'center',
+  },
+  lineList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: '0 0 16px',
+    fontSize: '13px',
+    color: '#166534',
+    lineHeight: 2,
+  },
+  lineBtn: {
+    display: 'block',
+    background: '#22c55e',
+    color: 'white',
+    padding: '14px',
+    borderRadius: '12px',
+    textDecoration: 'none',
+    fontWeight: 700,
+    fontSize: '16px',
+    textAlign: 'center',
+  },
+  // ③ 有料結果直後LINE
+  lineCardPaid: {
+    background: 'linear-gradient(135deg, #fdf2f8, #f0fdf4)',
+    border: '2px solid #86efac',
+    borderRadius: '20px',
+    padding: '20px',
+    marginBottom: '16px',
+  },
+  linePaidEyecatch: {
+    fontSize: '15px',
+    fontWeight: 900,
+    color: '#166534',
+    margin: '0 0 6px',
+  },
+  linePaidDesc: {
+    fontSize: '13px',
+    color: '#166534',
+    lineHeight: 1.7,
+    margin: '0 0 12px',
+  },
+  // 有料結果ヘッダー
+  paidHeader: {
+    textAlign: 'center',
+    padding: '20px 0 8px',
+    marginBottom: '8px',
+  },
+  paidBadge: {
+    display: 'inline-block',
+    background: 'linear-gradient(135deg, #f472b6, #a855f7)',
+    color: 'white',
+    fontSize: '12px',
+    fontWeight: 700,
+    padding: '4px 16px',
+    borderRadius: '999px',
+    marginBottom: '8px',
+  },
+  paidHeaderTitle: {
+    fontSize: '20px',
+    fontWeight: 900,
+    color: textMain,
+    margin: '8px 0 0',
+  },
+  // アドバイスブロック
+  adviceBlock: {
+    background: 'white',
+    borderRadius: '20px',
+    padding: '20px',
+    marginBottom: '16px',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+  },
+  adviceBlockTitle: {
+    fontSize: '15px',
+    fontWeight: 700,
+    color: textMain,
+    margin: '0 0 14px',
+  },
+  adviceItem: {
+    marginBottom: '20px',
+    paddingBottom: '20px',
+    borderBottom: '1px solid #f1f5f9',
+  },
+  adviceTitle: {
+    fontSize: '14px',
+    fontWeight: 700,
+    color: purple,
+    margin: '0 0 8px',
+  },
+  adviceDetail: {
+    fontSize: '13px',
+    color: textSub,
+    lineHeight: 1.7,
+    margin: '0 0 10px',
+  },
+  conversationBox: {
+    background: pinkLight,
+    borderRadius: '12px',
+    padding: '12px',
+  },
+  conversationLabel: {
+    fontSize: '11px',
+    color: pinkDark,
+    fontWeight: 700,
+    margin: '0 0 4px',
+  },
+  conversationText: {
+    fontSize: '13px',
+    color: pinkDark,
+    lineHeight: 1.7,
+    margin: 0,
+  },
+  // ストーリー完全版
+  storyCardFull: {
+    background: 'linear-gradient(135deg, #fdf4ff, #fce7f3)',
+    borderRadius: '20px',
+    padding: '20px',
+    marginBottom: '16px',
+  },
+  // ② ローディング
+  paidLoading: {
+    textAlign: 'center',
+    padding: '32px 20px',
+    background: 'linear-gradient(135deg, #fdf2f8, #fdf4ff)',
+    borderRadius: '20px',
+    marginBottom: '16px',
+  },
+  paidLoadingSpinner: {
+    fontSize: '36px',
+    marginBottom: '12px',
+  },
+  paidLoadingText: {
+    fontSize: '15px',
+    color: pinkDark,
+    fontWeight: 700,
+    lineHeight: 1.6,
+    margin: 0,
+  },
+  // デモボタン（開発用）
+  demoSection: {
+    marginTop: '16px',
+    paddingTop: '16px',
+    borderTop: '1px dashed #e2e8f0',
+  },
+  demoNote: {
+    fontSize: '11px',
+    color: textSub,
+    textAlign: 'center',
+    marginBottom: '8px',
+    lineHeight: 1.6,
+  },
+  demoBtn: {
+    display: 'block',
+    width: '100%',
+    padding: '12px',
+    background: '#f1f5f9',
+    border: '1px dashed #94a3b8',
+    borderRadius: '10px',
+    fontSize: '14px',
+    color: textSub,
+    cursor: 'pointer',
   },
 }
