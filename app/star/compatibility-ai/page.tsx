@@ -522,19 +522,18 @@ export default function CompatibilityAIPage() {
             <p style={styles.piyoText}>{result.piyochanMessage}</p>
           </div>
 
-          {/* ⑤ 無料結果直後LINE導線（改善版） */}
+          {/* ⑤ 無料結果直後LINE導線 */}
           <div style={styles.lineCardFree}>
-            <p style={styles.lineFreeEyecatch}>📱 少しでも「わかる…」と思ったあなたへ</p>
+            <p style={styles.lineFreeEyecatch}>📱 手相診断も気になりませんか？</p>
             <p style={styles.lineFreeDesc}>
-              LINE登録で<br />
-              すれ違いを減らすためのヒントを無料でお届けします✨
+              LINEに登録すると<br />
+              手相診断の受付・占い結果のご質問ができます✨
             </p>
             <ul style={styles.lineList}>
-              <li>🎁 小さなズレを整えるワーク</li>
-              <li>🎁 そのまま使える会話例</li>
-              <li>🎁 Twinkle Star Oracleからのサポートメッセージ（不定期）</li>
+              <li>🤲 手相診断の受付（両手の写真を送るだけ）</li>
+              <li>💬 占い結果へのご質問</li>
+              <li>🌟 Twinkle Star Oracleからのお知らせ（不定期）</li>
             </ul>
-            <p style={styles.lineNudge}>👇 今の気持ちを大切にしたい方へ</p>
             <a
               href="https://lin.ee/XHDFrA8"
               target="_blank"
@@ -653,16 +652,15 @@ export default function CompatibilityAIPage() {
 
                   {/* ③ 有料結果直後LINE導線 */}
                   <div style={styles.lineCardPaid}>
-                    <p style={styles.linePaidEyecatch}>📱 この結果、あとで見返したくなりませんか？</p>
+                    <p style={styles.linePaidEyecatch}>📱 手相診断も合わせて受けてみませんか？</p>
                     <p style={styles.linePaidDesc}>
-                      LINE登録で<br />
-                      診断結果の活用方法や、<br />
-                      関係をより良くするヒントをお届けします✨
+                      LINEに登録すると<br />
+                      手相診断の受付・占い結果のご質問ができます✨
                     </p>
                     <ul style={styles.lineList}>
-                      <li>🎁 診断結果の見方ガイド</li>
-                      <li>🎁 状況別アドバイス</li>
-                      <li>🎁 Twinkle Star Oracleからのメッセージ（不定期）</li>
+                      <li>🤲 手相診断の受付（両手の写真を送るだけ）</li>
+                      <li>💬 占い結果へのご質問</li>
+                      <li>🌟 Twinkle Star Oracleからのお知らせ（不定期）</li>
                     </ul>
                     <a
                       href="https://lin.ee/XHDFrA8"
@@ -670,7 +668,7 @@ export default function CompatibilityAIPage() {
                       rel="noopener noreferrer"
                       style={styles.lineBtn}
                     >
-                      🟢 LINEで保存する（無料）
+                      🟢 LINEで登録する（無料）
                     </a>
                   </div>
                 </>
