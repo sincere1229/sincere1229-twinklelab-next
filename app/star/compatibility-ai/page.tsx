@@ -101,43 +101,6 @@ function CompatibilityAIInner() {
   const [paidLoading, setPaidLoading] = useState(false)
   const [paidError, setPaidError] = useState('')
 
-  // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
-  useEffect(() => {
-    const sessionId = searchParams.get('session_id')
-    console.log('[DEBUG] session_id:', sessionId)
-    if (!sessionId) return
-
-    const savedInputs = localStorage.getItem('compatibility_inputs')
-    const savedResult = localStorage.getItem('compatibility_free_result')
-    console.log('[DEBUG] savedInputs:', savedInputs ? 'あり' : 'なし')
-    console.log('[DEBUG] savedResult:', savedResult ? 'あり' : 'なし')
-
-    // デバッグAPI呼び出し
-    fetch('/api/debug-stripe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
-    }).then(r => r.json()).then(d => {
-      console.log('[DEBUG] Stripe check result:', JSON.stringify(d))
-    })
-
-    if (savedInputs && savedResult) {
-      const parsedInputs = JSON.parse(savedInputs)
-      const parsedResult = JSON.parse(savedResult)
-      setInputs(parsedInputs)
-      setResult(parsedResult)
-      setStep(5)
-      handlePaidDiagnoseWithSession(sessionId, parsedInputs)
-      localStorage.removeItem('compatibility_inputs')
-      localStorage.removeItem('compatibility_free_result')
-    } else {
-      console.log('[DEBUG] No saved data, showing loading...')
-      setPaidLoading(true)
-      setStep(5)
-      handlePaidDiagnoseWithSession(sessionId, inputs)
-    }
-  }, [searchParams])
-
   const update = (key: keyof FormInputs, value: string) => {
     setInputs(prev => ({ ...prev, [key]: value }))
   }
@@ -194,6 +157,44 @@ function CompatibilityAIInner() {
       setPaidLoading(false)
     }
   }
+
+  // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
+  // ※ handlePaidDiagnoseWithSessionの定義後に配置（関数参照エラー防止）
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id')
+    console.log('[DEBUG] session_id:', sessionId)
+    if (!sessionId) return
+
+    const savedInputs = localStorage.getItem('compatibility_inputs')
+    const savedResult = localStorage.getItem('compatibility_free_result')
+    console.log('[DEBUG] savedInputs:', savedInputs ? 'あり' : 'なし')
+    console.log('[DEBUG] savedResult:', savedResult ? 'あり' : 'なし')
+
+    fetch('/api/debug-stripe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    }).then(r => r.json()).then(d => {
+      console.log('[DEBUG] Stripe check result:', JSON.stringify(d))
+    })
+
+    if (savedInputs && savedResult) {
+      const parsedInputs = JSON.parse(savedInputs)
+      const parsedResult = JSON.parse(savedResult)
+      setInputs(parsedInputs)
+      setResult(parsedResult)
+      setStep(5)
+      handlePaidDiagnoseWithSession(sessionId, parsedInputs)
+      localStorage.removeItem('compatibility_inputs')
+      localStorage.removeItem('compatibility_free_result')
+    } else {
+      console.log('[DEBUG] No saved data, showing loading...')
+      setPaidLoading(true)
+      setStep(5)
+      handlePaidDiagnoseWithSession(sessionId, inputs)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   // ============================================================
   // LANDING
