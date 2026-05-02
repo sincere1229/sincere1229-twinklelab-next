@@ -224,8 +224,8 @@ export default function StarPortal() {
         <div className="line-teso">
           <div className="line-teso-text">
             <strong>🤲 無料占いのあとは手相診断へ</strong>
-            LINEに両手の写真を送るだけで、あなたの本質と今の流れがわかります<br/>
-            <span style={{fontSize:'11px',color:'rgba(106,74,112,0.8)'}}>LINEで「手相」と送るだけでOKです</span>
+            あなたの本質や人生の流れは手相にも表れます。<br/>
+            <span style={{fontSize:'11px',color:'rgba(106,74,112,0.8)'}}>LINEに両手の写真を送るだけで、あなたの本質と今の流れがわかります</span>
           </div>
           <a href="https://lin.ee/XHDFrA8" className="line-teso-btn" target="_blank" rel="noopener">
             💬 無料で診断
