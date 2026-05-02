@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 // ============================================================
@@ -83,7 +84,8 @@ const FAMILY_PRIORITY = [
 // コンポーネント
 // ============================================================
 export default function CompatibilityAIPage() {
-  const [step, setStep] = useState(0) // 0=landing, 1-4=form steps, 5=result
+  const searchParams = useSearchParams()
+  const [step, setStep] = useState(0)
   const [inputs, setInputs] = useState<FormInputs>({
     yourType: '', yourWeekend: '', yourAloneTime: '', yourFriends: '',
     yourFamily: '', yourFamilyPriority: '', yourHobbies: '',
@@ -98,6 +100,26 @@ export default function CompatibilityAIPage() {
   const [paidResult, setPaidResult] = useState<DiagnosisResult | null>(null)
   const [paidLoading, setPaidLoading] = useState(false)
   const [paidError, setPaidError] = useState('')
+
+  // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id')
+    if (!sessionId) return
+
+    // sessionIdをsessionStorageから入力データと共に復元
+    const savedInputs = sessionStorage.getItem('compatibility_inputs')
+    const savedResult = sessionStorage.getItem('compatibility_free_result')
+
+    if (savedInputs && savedResult) {
+      const parsedInputs = JSON.parse(savedInputs)
+      const parsedResult = JSON.parse(savedResult)
+      setInputs(parsedInputs)
+      setResult(parsedResult)
+      setStep(5)
+      // 有料診断を自動実行
+      handlePaidDiagnoseWithSession(sessionId, parsedInputs)
+    }
+  }, [searchParams])
 
   const update = (key: keyof FormInputs, value: string) => {
     setInputs(prev => ({ ...prev, [key]: value }))
@@ -114,6 +136,9 @@ export default function CompatibilityAIPage() {
       })
       const data = await res.json()
       if (data.success) {
+        // Stripe決済後に復元できるよう保存
+        sessionStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+        sessionStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
         setResult(data.result)
         setStep(5)
       } else {
@@ -126,21 +151,20 @@ export default function CompatibilityAIPage() {
     }
   }
 
-  // 有料診断（Stripe決済後に呼び出す想定 / 現在はボタンから直接呼び出してデモ）
-  const handlePaidDiagnose = async () => {
+  // Stripeセッション検証付き有料診断
+  const handlePaidDiagnoseWithSession = async (sessionId: string, inputData: FormInputs) => {
     setPaidLoading(true)
     setPaidError('')
     try {
-      const res = await fetch('/api/compatibility-ai', {
+      const res = await fetch('/api/compatibility-paid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, mode: 'paid' }),
+        body: JSON.stringify({ inputs: inputData, sessionId }),
       })
       const data = await res.json()
       if (data.success) {
         setPaidResult(data.result)
         setIsPaid(true)
-        // 結果が出たら少し下にスクロール
         setTimeout(() => {
           document.getElementById('paid-result-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         }, 300)
@@ -560,43 +584,24 @@ export default function CompatibilityAIPage() {
                 {' → '}
                 <span style={styles.lockSale}>初回限定 ¥980</span>
               </p>
-              {/* ④ 有料CTAコピー改善 */}
+              {/* ④ 有料CTA */}
               <a
-                href="https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05"
+                href="https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={styles.primaryBtn as React.CSSProperties}
+                onClick={() => {
+                  // 決済前に入力データを保存
+                  sessionStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+                  if (result) sessionStorage.setItem('compatibility_free_result', JSON.stringify(result))
+                }}
               >
                 💘 この関係を壊さない方法を見る（¥980）
               </a>
               <Link href="/star/compatibility-ai/sample" style={styles.sampleFallback}>
                 📋 まずサンプルを見てみる
               </Link>
-
-              {/* ② 購入後画面：同一ページ内デモボタン（Stripe webhook連携後は削除） */}
-              <div style={styles.demoSection}>
-                <p style={styles.demoNote}>
-                  ※ 購入後はこのページがそのまま更新されます。<br />
-                  下のボタンは動作確認用です（開発中）
-                </p>
-                {paidLoading ? (
-                  <div style={styles.paidLoading}>
-                    <div style={styles.paidLoadingSpinner}>✨</div>
-                    <p style={styles.paidLoadingText}>
-                      あなた専用の続きを読み解いています…
-                    </p>
-                  </div>
-                ) : (
-                  <button
-                    style={styles.demoBtn}
-                    onClick={handlePaidDiagnose}
-                    disabled={paidLoading}
-                  >
-                    🔓 有料版を表示（テスト）
-                  </button>
-                )}
-                {paidError && <p style={styles.errorText}>{paidError}</p>}
-              </div>
+              {paidError && <p style={styles.errorText}>{paidError}</p>}
             </div>
           ) : (
             // ② 購入後の有料結果表示
