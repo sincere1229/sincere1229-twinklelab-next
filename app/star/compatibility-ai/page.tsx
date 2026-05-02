@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -81,9 +81,9 @@ const FAMILY_PRIORITY = [
 ]
 
 // ============================================================
-// コンポーネント
+// コンポーネント（useSearchParamsはSuspense内で使用）
 // ============================================================
-export default function CompatibilityAIPage() {
+function CompatibilityAIInner() {
   const searchParams = useSearchParams()
   const [step, setStep] = useState(0)
   const [inputs, setInputs] = useState<FormInputs>({
@@ -1460,4 +1460,27 @@ const styles: Record<string, React.CSSProperties> = {
     color: textSub,
     cursor: 'pointer',
   },
+}
+
+// Suspenseラッパー（useSearchParams対応）
+export default function CompatibilityAIPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #f0f9ff 50%, #fdf4ff 100%)',
+        fontFamily: "'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif",
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🐥</div>
+          <p style={{ color: '#db2777', fontWeight: 700 }}>読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <CompatibilityAIInner />
+    </Suspense>
+  )
 }
