@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 // ============================================================
@@ -81,10 +80,9 @@ const FAMILY_PRIORITY = [
 ]
 
 // ============================================================
-// コンポーネント（useSearchParamsはSuspense内で使用）
+// コンポーネント
 // ============================================================
 function CompatibilityAIInner() {
-  const searchParams = useSearchParams()
   const [step, setStep] = useState(0)
   const [inputs, setInputs] = useState<FormInputs>({
     yourType: '', yourWeekend: '', yourAloneTime: '', yourFriends: '',
@@ -162,10 +160,11 @@ function CompatibilityAIInner() {
 
   // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
   useEffect(() => {
-    // クライアントサイドのみで実行（SSR対策）
     if (typeof window === 'undefined') return
 
-    const sessionId = searchParams.get('session_id')
+    // window.location.searchから直接session_idを取得（useSearchParams不使用）
+    const params = new URLSearchParams(window.location.search)
+    const sessionId = params.get('session_id')
     console.log('[DEBUG] session_id:', sessionId)
     if (!sessionId) return
 
@@ -1494,25 +1493,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
 }
 
-// Suspenseラッパー（useSearchParams対応）
+// export default（Suspense不要・useSearchParams未使用）
 export default function CompatibilityAIPage() {
-  return (
-    <Suspense fallback={
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #fdf2f8 0%, #f0f9ff 50%, #fdf4ff 100%)',
-        fontFamily: "'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif",
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🐥</div>
-          <p style={{ color: '#db2777', fontWeight: 700 }}>読み込み中...</p>
-        </div>
-      </div>
-    }>
-      <CompatibilityAIInner />
-    </Suspense>
-  )
+  return <CompatibilityAIInner />
 }
