@@ -163,7 +163,9 @@ function CompatibilityAIInner() {
   useEffect(() => {
     const sessionId = searchParams.get('session_id')
     console.log('[DEBUG] session_id:', sessionId)
-    if (!sessionId) return
+    
+    // session_idがない場合は何もしない
+    if (!sessionId || sessionId === 'null' || sessionId === '') return
 
     const savedInputs = localStorage.getItem('compatibility_inputs')
     const savedResult = localStorage.getItem('compatibility_free_result')
@@ -176,25 +178,39 @@ function CompatibilityAIInner() {
       body: JSON.stringify({ sessionId }),
     }).then(r => r.json()).then(d => {
       console.log('[DEBUG] Stripe check result:', JSON.stringify(d))
-    })
+    }).catch(e => console.error('[DEBUG] debug-stripe error:', e))
 
     if (savedInputs && savedResult) {
-      const parsedInputs = JSON.parse(savedInputs)
-      const parsedResult = JSON.parse(savedResult)
-      setInputs(parsedInputs)
-      setResult(parsedResult)
-      setStep(5)
-      handlePaidDiagnoseWithSession(sessionId, parsedInputs)
-      localStorage.removeItem('compatibility_inputs')
-      localStorage.removeItem('compatibility_free_result')
+      try {
+        const parsedInputs = JSON.parse(savedInputs) as FormInputs
+        const parsedResult = JSON.parse(savedResult) as DiagnosisResult
+        localStorage.removeItem('compatibility_inputs')
+        localStorage.removeItem('compatibility_free_result')
+        setInputs(parsedInputs)
+        setResult(parsedResult)
+        setStep(5)
+        // 少し遅延させてstateが確定してから呼び出す
+        setTimeout(() => {
+          handlePaidDiagnoseWithSession(sessionId, parsedInputs)
+        }, 100)
+      } catch (e) {
+        console.error('[DEBUG] localStorage parse error:', e)
+      }
     } else {
-      console.log('[DEBUG] No saved data, showing loading...')
-      setPaidLoading(true)
+      console.log('[DEBUG] No saved data')
       setStep(5)
-      handlePaidDiagnoseWithSession(sessionId, inputs)
+      setTimeout(() => {
+        handlePaidDiagnoseWithSession(sessionId, {
+          yourType: '', yourWeekend: '', yourAloneTime: '', yourFriends: '',
+          yourFamily: '', yourFamilyPriority: '', yourHobbies: '',
+          partnerType: '', partnerWeekend: '', partnerAloneTime: '', partnerFriends: '',
+          partnerFamily: '', partnerFamilyPriority: '', partnerHobbies: '',
+          recentEvent: '', recentHappy: '', memorableEvent: '',
+        })
+      }, 100)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams])
+  }, [])
 
   // ============================================================
   // LANDING
