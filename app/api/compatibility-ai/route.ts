@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
 ・最後は安心感で終わる
 ・ぴよちゃんの口調：「〜だよ」「〜だね」「大丈夫だよ」
 
-返答は必ず以下のJSONのみ。前置き・説明・マークダウン（バッククォート）は一切不要。
+返答は必ず以下のJSONのみ。前置き・説明・マークダウン（バッククォート）は一切不要。JSONの外に文字を書かないこと。
 
-{"score":"70","positiveSummary":"...","coreGap":"...","realScene":"","familyAndFriendImpact":"","conflictReason":"","advice":[{"title":"...","detail":"","conversationExample":""}],"futureStoryPreview":"...","futureStoryFull":"","piyochanMessage":"...","disclaimer":"この診断はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
+{"score":"70","positiveSummary":"ここに記入","coreGap":"ここに記入","realScene":"ここに記入","familyAndFriendImpact":"ここに記入","conflictReason":"ここに記入","advice":[{"title":"タイトル","detail":"ここに記入","conversationExample":"ここに記入"}],"futureStoryPreview":"ここに記入","futureStoryFull":"ここに記入","piyochanMessage":"ここに記入","disclaimer":"この診断はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
 
     const userPrompt = `カップルの相性診断をしてください。
 モード：${mode === 'paid' ? '有料版（全項目詳しく）' : '無料版（realScene・familyAndFriendImpact・conflictReason・advice[].detail・advice[].conversationExample・futureStoryFullは空文字）'}
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model,
-        max_tokens: mode === 'paid' ? 2000 : 1200,
+        max_tokens: mode === 'paid' ? 3000 : 1200,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
