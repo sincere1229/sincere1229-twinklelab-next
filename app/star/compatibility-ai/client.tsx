@@ -316,7 +316,7 @@ export function CompatibilityAIClient() {
               <span style={s.lockOrig}>通常 ¥1,980</span>{' → '}
               <span style={s.lockSale}>初回限定 ¥980</span>
             </p>
-            <a href="https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06" rel="noopener noreferrer" style={s.primaryBtn as React.CSSProperties}>
+            <a href={process.env.NEXT_PUBLIC_STRIPE_COMPATIBILITY_URL || 'https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06'} rel="noopener noreferrer" style={s.primaryBtn as React.CSSProperties}>
               💘 この関係を壊さない方法を見る（¥980）
             </a>
             <Link href="/star/compatibility-ai/sample" style={s.sampleFallback}>📋 まずサンプルを見てみる</Link>
