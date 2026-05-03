@@ -19,30 +19,20 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 他のTSOアプリで動作実績のあるモデルを使用
-    const model =
-      process.env.ANTHROPIC_MODEL ||
-      process.env.VITE_ANTHROPIC_MODEL ||
-      'claude-haiku-4-5-20251001'
+    // 有料版はより高性能なモデルを使用
+    const model = mode === 'paid'
+      ? (process.env.ANTHROPIC_MODEL_PAID || process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001')
+      : (process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001')
 
-    const systemPrompt = `あなたはカップルの相性を優しく・前向きに分析するAIです。
+    const systemPrompt = `カップルの相性をやさしく前向きに分析するAIです。
+断定禁止・相手を悪者にしない・最後は安心感で終わる。
+ぴよちゃんの口調：「〜だよ」「〜だね」
 
-【絶対ルール】
-・断定禁止（「〜かもしれません」「〜の傾向があります」という表現を使う）
-・相手を悪者にしない
-・すれ違いは「善意のすれ違い」として説明する
-・内向型/外向型に優劣をつけない
-・家族観は文化差として扱う
-・必ず改善策と会話例を提示する
-・最後は安心感で終わる
-・ぴよちゃんの口調：「〜だよ」「〜だね」「大丈夫だよ」
-
-返答は必ず以下のJSONのみ。前置き・説明・マークダウン（バッククォート）は一切不要。JSONの外に文字を書かないこと。
-
-{"score":"70","positiveSummary":"ここに記入","coreGap":"ここに記入","realScene":"ここに記入","familyAndFriendImpact":"ここに記入","conflictReason":"ここに記入","advice":[{"title":"タイトル","detail":"ここに記入","conversationExample":"ここに記入"}],"futureStoryPreview":"ここに記入","futureStoryFull":"ここに記入","piyochanMessage":"ここに記入","disclaimer":"この診断はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
+必ず以下のJSONのみ返す。バッククォート不要。JSON以外の文字列を含めないこと。
+{"score":"70","positiveSummary":"200字以内","coreGap":"200字以内","realScene":"${mode==='paid'?'200字以内':''}","familyAndFriendImpact":"${mode==='paid'?'150字以内':''}","conflictReason":"${mode==='paid'?'150字以内':''}","advice":[{"title":"タイトル","detail":"${mode==='paid'?'100字以内':''}","conversationExample":"${mode==='paid'?'会話例':''}"}],"futureStoryPreview":"150字以内","futureStoryFull":"${mode==='paid'?'200字以内':''}","piyochanMessage":"100字以内","disclaimer":"この診断はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
 
     const userPrompt = `カップルの相性診断をしてください。
-モード：${mode === 'paid' ? '有料版（全項目詳しく）' : '無料版（realScene・familyAndFriendImpact・conflictReason・advice[].detail・advice[].conversationExample・futureStoryFullは空文字）'}
+モード：${mode === 'paid' ? '有料版（全項目を100文字以上で詳しく記述。adviceは2つ）' : '無料版（realScene・familyAndFriendImpact・conflictReason・advice[].detail・advice[].conversationExample・futureStoryFullは空文字）'}
 
 【あなた】
 性格：${inputs.yourType || '未入力'}
@@ -78,7 +68,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model,
-        max_tokens: mode === 'paid' ? 3000 : 1200,
+        max_tokens: mode === 'paid' ? 2048 : 1200,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
