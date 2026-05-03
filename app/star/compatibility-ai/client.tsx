@@ -103,14 +103,67 @@ export function CompatibilityAIClient() {
     }
   }
 
-  const handlePaidTest = async () => {
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
+
+  const handleCheckout = async () => {
+    setCheckoutLoading(true)
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs }),
+      })
+      const data = await res.json()
+      if (data.success && data.url) {
+        // session_idをlocalStorageに保存してからStripeへ遷移
+        if (typeof window !== 'undefined') {
+          try {
+            window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+            if (result) window.localStorage.setItem('compatibility_free_result', JSON.stringify(result))
+          } catch(e) { console.error('localStorage error:', e) }
+        }
+        window.location.href = data.url
+      } else {
+        alert(data.error || '決済の準備に失敗しました')
+      }
+    } catch {
+      alert('通信エラーが発生しました')
+    } finally {
+      setCheckoutLoading(false)
+    }
+  }
+
+  // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
+  const [stripeProcessed, setStripeProcessed] = useState(false)
+  if (typeof window !== 'undefined' && !stripeProcessed) {
+    const params = new URLSearchParams(window.location.search)
+    const sessionId = params.get('session_id')
+    if (sessionId) {
+      setStripeProcessed(true)
+      const savedInputs = (() => { try { return window.localStorage.getItem('compatibility_inputs') } catch { return null } })()
+      const savedResult = (() => { try { return window.localStorage.getItem('compatibility_free_result') } catch { return null } })()
+      if (savedInputs) { try { setInputs(JSON.parse(savedInputs)) } catch { /* ignore */ } }
+      if (savedResult) { try { setResult(JSON.parse(savedResult)) } catch { /* ignore */ } }
+      if (savedInputs || savedResult) {
+        try { window.localStorage.removeItem('compatibility_inputs') } catch { /* ignore */ }
+        try { window.localStorage.removeItem('compatibility_free_result') } catch { /* ignore */ }
+      }
+      setStep(5)
+      setTimeout(() => {
+        const inp = savedInputs ? JSON.parse(savedInputs) : inputs
+        handlePaidDiagnoseWithSession(sessionId, inp)
+      }, 300)
+    }
+  }
+
+  const handlePaidDiagnoseWithSession = async (sessionId: string, inputData: FormInputs) => {
     setPaidLoading(true)
     setPaidError('')
     try {
-      const res = await fetch('/api/compatibility-ai', {
+      const res = await fetch('/api/compatibility-paid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, mode: 'paid' }),
+        body: JSON.stringify({ inputs: inputData, sessionId }),
       })
       const data = await res.json()
       if (data.success && data.result) {
@@ -316,17 +369,37 @@ export function CompatibilityAIClient() {
               <span style={s.lockOrig}>通常 ¥1,980</span>{' → '}
               <span style={s.lockSale}>初回限定 ¥980</span>
             </p>
-            <a href={process.env.NEXT_PUBLIC_STRIPE_COMPATIBILITY_URL || 'https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06'} rel="noopener noreferrer" style={s.primaryBtn as React.CSSProperties}>
-              💘 この関係を壊さない方法を見る（¥980）
-            </a>
+            <button
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+              style={{...s.primaryBtn as React.CSSProperties, opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer'}}
+            >
+              {checkoutLoading ? '⏳ 決済画面を準備中...' : '💘 この関係を壊さない方法を見る（¥980）'}
+            </button>
             <Link href="/star/compatibility-ai/sample" style={s.sampleFallback}>📋 まずサンプルを見てみる</Link>
             {/* テストボタン */}
             <div style={s.demoSection}>
-              <p style={s.demoNote}>※ 購入後はこのページが更新されます。下は動作確認用です。</p>
+              <p style={s.demoNote}>※ 下は動作確認用です（開発中）</p>
               {paidLoading ? (
                 <div style={s.paidLoading}><p style={s.paidLoadingText}>✨ あなた専用の続きを読み解いています…</p></div>
               ) : (
-                <button style={s.demoBtn} onClick={handlePaidTest} disabled={paidLoading}>🔓 有料版を表示（テスト）</button>
+                <button style={s.demoBtn} onClick={async () => {
+                setPaidLoading(true)
+                setPaidError('')
+                try {
+                  const res = await fetch('/api/compatibility-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ inputs, mode: 'paid' }),
+                  })
+                  const data = await res.json()
+                  if (data.success && data.result) {
+                    setPaidResult(data.result)
+                    setIsPaid(true)
+                    setTimeout(() => document.getElementById('paid-result-anchor')?.scrollIntoView({ behavior: 'smooth' }), 300)
+                  } else { setPaidError(data.error || 'エラー') }
+                } catch { setPaidError('通信エラー') } finally { setPaidLoading(false) }
+              }} disabled={paidLoading}>🔓 有料版を表示（テスト）</button>
               )}
               {paidError && <p style={s.errorText}>{paidError}</p>}
             </div>
