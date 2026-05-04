@@ -408,7 +408,7 @@ export default function KidsPage() {
         </div>
       </div>
  
-</div>
+
     </>
   );
 }
