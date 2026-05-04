@@ -407,6 +407,31 @@ export default function KidsPage() {
           </div>
         </div>
       </div>
+      <div class="fixed-block">
+  <h2>学年別おすすめ絵本・読み物</h2>
+
+  <div class="book-item">
+    <div class="book-title">低学年（1〜2年生）向けおすすめ50冊</div>
+    <p class="small-note">
+      「読みやすさ」と「感想が書きやすい」本を中心にセレクトしています。
+    </p>
+    <a class="amazon-link"
+       href="https://www.amazon.co.jp/s?k=小学生+低学年+おすすめ+絵本&tag=sincere1229-22"
+       target="_blank">Amazonで見る</a>
+    <!-- ここに、noteやKindle版150冊リストへのリンクも追加可能 -->
+    <!-- <a href="あなたのnote/Kindle URL" target="_blank" class="amazon-link" style="background:#6c5ce7;color:#fff;margin-left:8px;">150冊リストを見る</a> -->
+  </div>
+
+  <div class="book-item">
+    <div class="book-title">中〜高学年（3〜6年生）向けおすすめ50冊</div>
+    <p class="small-note">
+      読書感想文にも使いやすい、心に残る物語を中心に選んでいます。
+    </p>
+    <a class="amazon-link"
+       href="https://www.amazon.co.jp/s?k=小学生+高学年+読み物&tag=sincere1229-22"
+       target="_blank">Amazonで見る</a>
+  </div>
+</div>
     </>
   );
 }
