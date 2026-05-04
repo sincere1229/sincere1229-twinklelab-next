@@ -239,8 +239,8 @@ export default function Home() {
       {/* ② LINE文言を強化 */}
       <div className="catch-section">
         <p className="catch-text">
-          LINEに登録すると、あなたの未来3ヶ月の無料診断と限定占いイベントを受け取れます🎁<br />
-          ルーン占い・ケルト十字・満月リーディングなど特別コンテンツ多数
+          LINEに登録すると、占いイベントを受け取れます🎁<br />
+        
         </p>
         <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">
           💬 無料で未来診断を受け取る
