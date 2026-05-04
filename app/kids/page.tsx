@@ -411,27 +411,5 @@ export default function KidsPage() {
     </>
   );
 }
- <div class="fixed-block">
-  <h2>親子で楽しむ絵本・児童書</h2>
 
-  <div class="book-item">
-    <div class="book-title">年長〜小2向けおすすめ絵本リスト</div>
-    <p class="small-note">
-      読み聞かせや音読にぴったりな絵本を、年齢別に10冊ずつセレクトしたnote記事です。
-    </p>
-    <a class="amazon-link"
-       href="【低学年絵本noteのURL】"
-       target="_blank">リストを見る</a>
-  </div>
-
-  <div class="book-item">
-    <div class="book-title">小3〜小6向け物語・児童書リスト</div>
-    <p class="small-note">
-      自分読みを始めた子どもが「続きが気になる」と感じやすい物語を集めています。
-    </p>
-    <a class="amazon-link"
-       href="【高学年絵本noteのURL】"
-       target="_blank">リストを見る</a>
-  </div>
-</div>
 
