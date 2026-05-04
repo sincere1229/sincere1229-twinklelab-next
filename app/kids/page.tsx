@@ -407,6 +407,10 @@ export default function KidsPage() {
           </div>
         </div>
       </div>
+
+    </>
+  );
+}
  <div class="fixed-block">
   <h2>親子で楽しむ絵本・児童書</h2>
 
@@ -431,6 +435,3 @@ export default function KidsPage() {
   </div>
 </div>
 
-    </>
-  );
-}
