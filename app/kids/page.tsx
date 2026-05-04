@@ -352,7 +352,52 @@ export default function KidsPage() {
           </button>
           <div className="quiz-result">{quizResult}</div>
         </div>
+ <div className="fixed-block">
+          <h2>読み聞かせ・絵本えらびのヒント</h2>
+          <div className="book-item">
+            <div className="book-title">年長〜小2向け：読み聞かせにおすすめの絵本リスト</div>
+            <p className="small-note">
+              「1回10分くらいで読める」「親子で感想を話しやすい」絵本を中心にまとめたnote記事です。
+            </p>
+            <a
+              className="amazon-link"
+              href="【絵本noteのURL】"
+              target="_blank"
+            >
+              noteで見る
+            </a>
+          </div>
+        </div>
 
+        <div className="fixed-block">
+          <h2>読書感想文が書きやすい本リスト</h2>
+          <div className="book-item">
+            <div className="book-title">小1〜小3向け：読書感想文に書きやすい本リスト</div>
+            <p className="small-note">
+              「読みやすさ」と「書きやすさ」で選んだ本を、学年別にまとめたnote記事です。
+            </p>
+            <a
+              className="amazon-link"
+              href="【低学年感想文noteのURL】"
+              target="_blank"
+            >
+              noteで見る
+            </a>
+          </div>
+          <div className="book-item">
+            <div className="book-title">小4〜小6向け：読書感想文に書きやすい本リスト</div>
+            <p className="small-note">
+              心に残りやすいストーリーや、考えをまとめやすい本を中心にした高学年向けリストです。
+            </p>
+            <a
+              className="amazon-link"
+              href="【高学年感想文noteのURL】"
+              target="_blank"
+            >
+              noteで見る
+            </a>
+          </div>
+        </div>
         <div className="columns">
           <h2>学習コラム</h2>
 
