@@ -195,9 +195,15 @@ export default function Home() {
           <div className="logo">Twinkle Lab</div>
           <div className="logo-sub">トゥインクル ラボ</div>
           <div className="gold-line"></div>
-          <p className="tagline">
-            AI × 占い × 親子教育<br />
-            星の導きと最新AIで、あなたの毎日をもっと輝かせる
+         <p className="tagline">
+            AI × 占いで、あなたとお子さんの「適性」と<br>
+「好き・得意」を見つけるTwinkle Lab<br />
+            Twinkle Labは、星の導きや手相などの占いと、<br>
+最新AIを組み合わせて、大人と子どもの「適性」と<br>
+「好き・得意」を見つけるための診断・学びのヒントを届けるサイトです。<br>
+サラリーマンの適性診断や若い女性向けの手相リーディングから<br>
+お子さんの学習タイプ診断・ドリル選びのナビまで、<br>
+「自分らしい選び方」を一緒に考える場を目指しています。
           </p>
           {/* ① ヒーロー下CTA（新規追加） */}
           <div className="hero-cta">
