@@ -75,13 +75,19 @@ export default function KidsPage() {
 
   const handleSearch = () => {
     const area = document.getElementById("study-result");
-    if (!area) return;
-    const key = keyword.trim();
-    if (!key) {
-      area.innerHTML =
-        '「小1 くりあがり」「小1 ひらがな」「小3 漢字」などと入力してください。';
-      return;
-    }
+   if (!area) return;
+
+  // 入力取得
+  let key = keyword;
+
+  // ★ ここで全角スペースを半角に統一し、前後の空白を削除
+  key = key.replace(/\u3000/g, " ").trim();
+
+  if (!key) {
+    area.innerHTML =
+      '「小1 くりあがり」「小1 ひらがな」「小3 漢字」などと入力してください。';
+    return;
+  }
     const list = studyData[key];
     if (!list) {
       area.innerHTML = `<div class="result-card"><p>「${key}」に対応するデータはまだ準備中です。</p></div>`;
