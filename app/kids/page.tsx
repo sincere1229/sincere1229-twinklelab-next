@@ -1,5 +1,6 @@
 // app/kids/page.tsx
 "use client";
+
 import React, { useState } from "react";
 import type { Metadata } from "next";
 
@@ -16,14 +17,12 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-import React, { useState } from "react";
 
 type StudyItem = {
   level: "初歩" | "つまずき" | "高度";
   name: string;
   reason: string;
 };
-
 const studyData: Record<string, StudyItem[]> = {
     "小1 くりさがり": [
     {
@@ -376,7 +375,7 @@ export default function KidsPage() {
             </p>
             <a
               className="amazon-link"
-              href="【絵本noteのURL】"
+              href="#"
               target="_blank"
             >
               noteで見る
@@ -393,7 +392,7 @@ export default function KidsPage() {
             </p>
             <a
               className="amazon-link"
-              href="【低学年感想文noteのURL】"
+              href="#"
               target="_blank"
             >
               noteで見る
@@ -406,7 +405,7 @@ export default function KidsPage() {
             </p>
             <a
               className="amazon-link"
-              href="【高学年感想文noteのURL】"
+              href="#"
               target="_blank"
             >
               noteで見る
