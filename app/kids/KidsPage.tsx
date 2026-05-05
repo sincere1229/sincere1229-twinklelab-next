@@ -142,69 +142,73 @@ export default function KidsPage() {
   const [keyword, setKeyword] = useState("");
   const [quizResult, setQuizResult] = useState<string>("");
 
-  const handleSearch = () => {
-  const area = document.getElementById("study-result");
-  if (!area) return;
+   const handleSearch = () => {
+    const area = document.getElementById("study-result");
+    if (!area) return;
 
-  let key = keyword;
+    let key = keyword;
 
-  // 全角スペース → 半角、前後の空白を削除
-  key = key.replace(/\u3000/g, " ").trim();
+    // 全角スペース → 半角、前後の空白を削除
+    key = key.replace(/\u3000/g, " ").trim();
 
-  // すべて全角数字を半角に
-  key = key.replace(/[０-９]/g, (s) =>
-    String.fromCharCode(s.charCodeAt(0) - 0xfee0)
-  );
+    // すべて全角数字を半角に
+    key = key.replace(/[０-９]/g, (s) =>
+      String.fromCharCode(s.charCodeAt(0) - 0xfee0)
+    );
 
-  // 学年表記のゆれを統一
-  key = key
-    .replace(/1年/g, "小1")
-    .replace(/２年/g, "小2")
-    .replace(/2年/g, "小2")
-    .replace(/３年/g, "小3")
-    .replace(/3年/g, "小3");
+    // 学年表記のゆれを統一
+    key = key
+      .replace(/1年/g, "小1")
+      .replace(/１年/g, "小1")
+      .replace(/2年/g, "小2")
+      .replace(/２年/g, "小2")
+      .replace(/3年/g, "小3")
+      .replace(/３年/g, "小3");
 
-  // 「小1算数くりあがり」などスペースなしを補正（ざっくり版）
-  key = key.replace(/(小[1-6])\s*(算数|国語|英語)?\s*(くりあがり|くりさがり|九九|音読|漢字)/, "$1 $3");
+    // 「小1算数くりあがり」などスペースなしを補正（ざっくり版）
+    key = key.replace(
+      /(小[1-6])\s*(算数|国語|英語)?\s*(くりあがり|くりさがり|九九|音読|漢字)/,
+      "$1 $3"
+    );
 
-  // 単元の表記ゆれ（漢字→ひらがな）をざっくり吸収
-  key = key
-    .replace(/繰り上がり/g, "くりあがり")
-    .replace(/くり上がり/g, "くりあがり")
-    .replace(/繰り下がり/g, "くりさがり")
-    .replace(/くり下がり/g, "くりさがり");
+    // 単元の表記ゆれ（漢字→ひらがな）をざっくり吸収
+    key = key
+      .replace(/繰り上がり/g, "くりあがり")
+      .replace(/くり上がり/g, "くりあがり")
+      .replace(/繰り下がり/g, "くりさがり")
+      .replace(/くり下がり/g, "くりさがり");
 
-  if (!key) {
-    area.innerHTML =
-      '「小1 くりあがり」「小1 ひらがな」「小2 九九」「小2 音読」「小3 漢字」などと入力してください。';
-    return;
-  }
+    if (!key) {
+      area.innerHTML =
+        '「小1 くりあがり」「小1 ひらがな」「小2 九九」「小2 音読」「小3 漢字」などと入力してください。';
+      return;
+    }
 
-  const list = studyData[key];
+    const list = studyData[key];
 
-  if (!list) {
-    area.innerHTML = `<div class="result-card"><p>「${key}」に対応するデータはまだ準備中です。</p></div>`;
-    return;
-  }
+    if (!list) {
+      area.innerHTML = `<div class="result-card"><p>「${key}」に対応するデータはまだ準備中です。</p></div>`;
+      return;
+    }
 
-  let html = `<div class="result-card"><h2>${key} のおすすめドリル</h2>`;
-  list.forEach((item) => {
-    const tagClass = levelClass(item.level);
-    html += `
-      <div class="book-item">
-        <span class="level-tag ${tagClass}">${item.level}</span>
-        <div class="book-title">${item.name}</div>
-        <p>${item.reason}</p>
-        <a class="amazon-link"
-           href="https://www.amazon.co.jp/s?k=${encodeURIComponent(
-             item.name
-           )}&tag=sincere1229-22"
-           target="_blank">Amazonで見る</a>
-      </div>`;
-  });
-  html += `</div>`;
-  area.innerHTML = html;
-};
+    let html = `<div class="result-card"><h2>${key} のおすすめドリル</h2>`;
+    list.forEach((item) => {
+      const tagClass = levelClass(item.level);
+      html += `
+        <div class="book-item">
+          <span class="level-tag ${tagClass}">${item.level}</span>
+          <div class="book-title">${item.name}</div>
+          <p>${item.reason}</p>
+          <a class="amazon-link"
+             href="https://www.amazon.co.jp/s?k=${encodeURIComponent(
+               item.name
+             )}&tag=sincere1229-22"
+             target="_blank">Amazonで見る</a>
+        </div>`;
+    });
+    html += `</div>`;
+    area.innerHTML = html;
+  };
     let html = `<div class="result-card"><h2>${key} のおすすめドリル</h2>`;
     list.forEach((item) => {
       const tagClass = levelClass(item.level);
