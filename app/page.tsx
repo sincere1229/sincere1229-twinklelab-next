@@ -54,7 +54,6 @@ export default function Home() {
           margin: 0 auto 32px;
         }
 
-        /* ① ヒーロー下CTA（新規追加） */
         .hero-cta {
           display: flex;
           gap: 12px;
@@ -106,7 +105,7 @@ export default function Home() {
           padding: 40px 24px 80px;
         }
         @media(min-width:600px) {
-          .nav-grid { grid-template-columns: repeat(4,1fr); }
+          .nav-grid { grid-template-columns: repeat(3,1fr); }
         }
 
         .nav-card {
@@ -164,7 +163,6 @@ export default function Home() {
           color: var(--text-s);
           line-height: 2;
         }
-        /* ② LINE ボタン文言変更 */
         .line-btn {
           display: inline-block;
           margin-top: 20px;
@@ -195,17 +193,16 @@ export default function Home() {
           <div className="logo">Twinkle Lab</div>
           <div className="logo-sub">トゥインクル ラボ</div>
           <div className="gold-line"></div>
-         <p className="tagline">
-  AI × 占いで、あなたとお子さんの「適性」と<br />
-  「好き・得意」を見つけるTwinkle Lab<br />
-  Twinkle Labは、星の導きや手相などの占いと、<br />
-  最新AIを組み合わせて、大人と子どもの「適性」と<br />
-  「好き・得意」を見つけるための診断・学びのヒントを届けるサイトです。<br />
-  サラリーマンの適性診断や若い女性向けの手相リーディングから<br />
-  お子さんの学習タイプ診断・ドリル選びのナビまで、<br />
-  「自分らしい選び方」を一緒に考える場を目指しています。
-</p>
-          {/* ① ヒーロー下CTA（新規追加） */}
+          <p className="tagline">
+            AI × 占いで、あなたとお子さんの「適性」と<br />
+            「好き・得意」を見つけるTwinkle Lab<br />
+            Twinkle Labは、星の導きや手相などの占いと、<br />
+            最新AIを組み合わせて、大人と子どもの「適性」と<br />
+            「好き・得意」を見つけるための診断・学びのヒントを届けるサイトです。<br />
+            サラリーマンの適性診断や若い女性向けの手相リーディングから<br />
+            お子さんの学習タイプ診断・ドリル選びのナビまで、<br />
+            「自分らしい選び方」を一緒に考える場を目指しています。
+          </p>
           <div className="hero-cta">
             <a href="/star" className="hero-cta-main">🔮 無料で占ってみる</a>
             <a href="/star/sogo" className="hero-cta-sub">✦ AI総合鑑定を見る</a>
@@ -214,7 +211,6 @@ export default function Home() {
       </div>
 
       <div className="nav-grid">
-        {/* ③ 占いポータルカード説明を強化 */}
         <a href="/star" className="nav-card">
           <span className="nav-icon">🔮</span>
           <div className="nav-en">Twinkle Star Oracle</div>
@@ -231,8 +227,16 @@ export default function Home() {
         <a href="/kids" className="nav-card">
           <span className="nav-icon">📚</span>
           <div className="nav-en">Twinkle Kids</div>
-          <div className="nav-jp">学習シリーズ</div>
-          <div className="nav-desc">AIを使った楽しい学習アプリ</div>
+          <div className="nav-jp">学習ナビ</div>
+          <div className="nav-desc">つまずき別ドリル検索・読書感想文リスト・勉強タイプ診断</div>
+        </a>
+        {/* 好きナビ：新規追加 */}
+        <a href="/sukinavi" className="nav-card">
+          <span className="nav-icon">🔍</span>
+          <div className="nav-en">Suki Navi</div>
+          <div className="nav-jp">好きナビ</div>
+          <div className="nav-desc">好きな作家・アーティストを入力するとAIが似たおすすめをナビ。コメントも書けます</div>
+          <span className="new-badge">NEW</span>
         </a>
         <a href="/company" className="nav-card">
           <span className="nav-icon">✨</span>
@@ -242,11 +246,9 @@ export default function Home() {
         </a>
       </div>
 
-      {/* ② LINE文言を強化 */}
       <div className="catch-section">
         <p className="catch-text">
           LINEに登録すると、占いイベントを受け取れます🎁<br />
-        
         </p>
         <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">
           💬 無料で未来診断を受け取る
