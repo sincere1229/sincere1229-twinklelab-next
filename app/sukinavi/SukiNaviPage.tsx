@@ -3,7 +3,9 @@ import { useState } from "react";
 
 type RecItem = { name: string; type: string; axis: string; reason: string };
 type Comment = { name: string; comment: string; date: string };
+type SearchedInfo = { category: "artist" | "author" | "unknown"; links: { label: string; url: string }[] };
 
+const AMAZON_TAG = "sincere1229-22";
 const DECADES = [
   {
     year: "1970年代", title: "フォークと内省の時代",
@@ -55,11 +57,33 @@ function getAxisStyle(axis: string) {
   return AXIS_COLOR[key] ?? { bg: "#f5f5f5", text: "#888", label: axis };
 }
 
+function buildAmazonLinks(keyword: string, category: "artist" | "author" | "unknown"): { label: string; url: string }[] {
+  const base = `https://www.amazon.co.jp/s?tag=${AMAZON_TAG}&k=`;
+  if (category === "artist") {
+    return [
+      { label: "📀 CDをAmazonで見る", url: `${base}${encodeURIComponent(keyword + " CD")}` },
+      { label: "📦 グッズをAmazonで見る", url: `${base}${encodeURIComponent(keyword + " グッズ")}` },
+      { label: "📚 関連書籍を見る", url: `${base}${encodeURIComponent(keyword + " 本")}` },
+    ];
+  } else if (category === "author") {
+    return [
+      { label: "📚 小説・作品をAmazonで見る", url: `${base}${encodeURIComponent(keyword)}` },
+      { label: "📖 エッセイ・関連本を見る", url: `${base}${encodeURIComponent(keyword + " エッセイ")}` },
+      { label: "🎧 オーディオブックを見る", url: `${base}${encodeURIComponent(keyword + " オーディオブック")}` },
+    ];
+  } else {
+    return [
+      { label: "🔍 Amazonで検索する", url: `${base}${encodeURIComponent(keyword)}` },
+    ];
+  }
+}
+
 export default function SukiNaviPage() {
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<RecItem[]>([]);
   const [searched, setSearched] = useState("");
+  const [searchedInfo, setSearchedInfo] = useState<SearchedInfo | null>(null);
   const [error, setError] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
   const [myName, setMyName] = useState("");
@@ -79,6 +103,7 @@ export default function SukiNaviPage() {
     setLoading(true);
     setError("");
     setResults([]);
+    setSearchedInfo(null);
     setComments([]);
     try {
       const res = await fetch("/api/sukinavi-recommend", {
@@ -90,6 +115,12 @@ export default function SukiNaviPage() {
       if (data.error) throw new Error(data.error);
       setResults(data.items);
       setSearched(kw);
+      // カテゴリ判定：最初の推薦結果のtypeから推測
+      const firstType = data.items?.[0]?.type ?? "";
+      const category: "artist" | "author" | "unknown" =
+        firstType.includes("アーティスト") ? "artist" :
+        firstType.includes("作家") ? "author" : "unknown";
+      setSearchedInfo({ category, links: buildAmazonLinks(kw, category) });
       await fetchComments(kw);
     } catch {
       setError("取得に失敗しました。もう一度お試しください。");
@@ -127,6 +158,12 @@ export default function SukiNaviPage() {
         .container{max-width:800px;margin:0 auto;padding:24px 20px;}
         .section-title{font-size:1.15em;font-weight:bold;color:#1a1a2e;margin:32px 0 12px;padding-left:10px;border-left:4px solid #e94560;}
 
+        .subject-panel{background:#fff;border-radius:14px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:20px;}
+        .subject-name{font-size:1.3em;font-weight:bold;color:#1a1a2e;margin:0 0 14px;}
+        .amazon-links{display:flex;flex-wrap:wrap;gap:8px;}
+        .amazon-link-btn{display:inline-block;padding:9px 18px;border-radius:24px;background:#ffc107;color:#333;font-size:0.88em;font-weight:bold;text-decoration:none;cursor:pointer;border:none;transition:background .15s;}
+        .amazon-link-btn:hover{background:#e6ac00;}
+
         .axis-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
         .axis-pill{padding:4px 12px;border-radius:20px;font-size:0.78em;font-weight:bold;}
 
@@ -142,7 +179,7 @@ export default function SukiNaviPage() {
         .rec-body{flex:1;}
         .rec-name{font-weight:bold;color:#1a1a2e;font-size:0.98em;margin-bottom:4px;}
         .rec-reason{font-size:0.86em;color:#555;margin:0 0 8px;line-height:1.6;}
-        .amazon-btn{display:inline-block;padding:4px 12px;background:#ffc107;color:#333;border-radius:20px;font-size:0.8em;font-weight:bold;text-decoration:none;cursor:pointer;border:none;}
+        .amazon-btn{display:inline-block;padding:4px 12px;background:#ffc107;color:#333;border-radius:20px;font-size:0.8em;font-weight:bold;cursor:pointer;border:none;}
         .amazon-btn:hover{background:#e6ac00;}
 
         .comment-panel{background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:24px;}
@@ -202,9 +239,9 @@ export default function SukiNaviPage() {
       <div className="container">
 
         {/* 軸の凡例 */}
-        <div className="axis-legend" style={{marginTop: 20}}>
+        <div className="axis-legend" style={{marginTop:20}}>
           {Object.values(AXIS_COLOR).map((a) => (
-            <span key={a.label} className="axis-pill" style={{background: a.bg, color: a.text}}>{a.label}</span>
+            <span key={a.label} className="axis-pill" style={{background:a.bg,color:a.text}}>{a.label}</span>
           ))}
         </div>
 
@@ -216,6 +253,24 @@ export default function SukiNaviPage() {
         )}
 
         {error && <div className="error">{error}</div>}
+
+        {/* 検索対象のAmazonリンクパネル */}
+        {searchedInfo && (
+          <div className="subject-panel">
+            <p className="subject-name">🎯 {searched}</p>
+            <div className="amazon-links">
+              {searchedInfo.links.map((link, i) => (
+                <button
+                  key={i}
+                  className="amazon-link-btn"
+                  onClick={() => window.open(link.url, "_blank")}
+                >
+                  {link.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 推薦結果 */}
         {results.length > 0 && (
@@ -229,7 +284,7 @@ export default function SukiNaviPage() {
                     <span className={`rec-badge ${item.type?.includes("アーティスト") ? "badge-artist" : "badge-author"}`}>
                       {item.type}
                     </span>
-                    <span className="axis-badge" style={{background: axStyle.bg, color: axStyle.text}}>
+                    <span className="axis-badge" style={{background:axStyle.bg,color:axStyle.text}}>
                       {axStyle.label}
                     </span>
                   </div>
@@ -238,7 +293,7 @@ export default function SukiNaviPage() {
                     <div className="rec-reason">{item.reason}</div>
                     <button
                       className="amazon-btn"
-                      onClick={() => window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(item.name)}&tag=sincere1229-22`, "_blank")}
+                      onClick={() => window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(item.name)}&tag=${AMAZON_TAG}`, "_blank")}
                     >
                       Amazonで見る
                     </button>
@@ -254,7 +309,7 @@ export default function SukiNaviPage() {
           <div className="comment-panel">
             <p className="section-title" style={{marginTop:0}}>「{searched}」の思い出・おすすめポイント</p>
             <div className="comment-intro">
-              {searched}との思い出や、好きになったきっかけ、おすすめの作品・曲など、自由に書いてシェアしてください。あなたのコメントが次に好きになる人へのナビになります！
+              {searched}との思い出や、好きになったきっかけ、おすすめの作品・曲など自由に書いてシェアしてください。あなたのコメントが次に好きになる人へのナビになります！
             </div>
             <div className="comment-form">
               <input
