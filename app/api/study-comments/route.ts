@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL!;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
+const UPSTASH_URL = process.env.KV_REST_API_URL!;
+const UPSTASH_TOKEN = process.env.KV_REST_API_TOKEN!;
 
 async function upstashSingle(cmd: string[]) {
   const res = await fetch(`${UPSTASH_URL}/${cmd.map(encodeURIComponent).join("/")}`, {
