@@ -317,9 +317,9 @@ export default function KidsPage() {
         .small-note{font-size:0.9em;color:#666;}
       `}</style>
 
-      <div className="back-link">
-        <a href="https://www.twinkle-lab.jp">← Twinkle Lab トップに戻る</a>
-      </div>
+     <div className="back-link">
+  <a href="https://www.twinkle-lab.jp">← Twinkle Lab トップに戻る</a>
+</div>
 
       <div className="container">
         <h1>Twinkle Kids 学習ナビ</h1>
