@@ -134,40 +134,16 @@ export default function KidsPage() {
     if (!canSearch) return;
     setResult({ status: "loading", items: [] });
 
-    const prompt = `あなたは小学生の学習支援の専門家です。
-以下の条件に最適な市販ドリル・参考書を3冊推薦してください。
-
-学年: ${grade}
-教科: ${subject}
-単元: ${unit}
-
-以下のJSON形式のみで回答してください。説明文は不要です。マークダウン記法も不要です。
-[
-  {"level":"やさしい","name":"書籍名（実在する市販ドリル）","reason":"50字以内でこの本を選んだ理由"},
-  {"level":"ふつう","name":"書籍名（実在する市販ドリル）","reason":"50字以内でこの本を選んだ理由"},
-  {"level":"むずかしい","name":"書籍名（実在する市販ドリル）","reason":"50字以内でこの本を選んだ理由"}
-]
-
-注意：
-- 必ず実在する市販ドリルの正式書名を使用してください
-- 学研・くもん・Z会・旺文社・受験研究社などの実在する出版社の本を選んでください
-- levelは必ず「やさしい」「ふつう」「むずかしい」の3種類にしてください`;
-
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/kids-drill", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        }),
+        body: JSON.stringify({ grade, subject, unit }),
       });
 
       const data = await res.json();
-      const text = data.content?.[0]?.text ?? "";
-      const clean = text.replace(/```json|```/g, "").trim();
-      const items: DrillItem[] = JSON.parse(clean);
+      if (!res.ok || data.error) throw new Error(data.error ?? "error");
+      const items: DrillItem[] = data.items;
 
       setResult({ status: "done", items, grade, subject, unit });
     } catch {
@@ -386,9 +362,9 @@ export default function KidsPage() {
                 </span>
                 <p className="book-name">{item.name}</p>
                 <p className="book-reason">{item.reason}</p>
-                <a className="amazon-btn" href={amazonUrl(item.name)} target="_blank" rel="noopener noreferrer">
+                <button className="amazon-btn" onClick={() => window.open(amazonUrl(item.name), "_blank")}>
                   Amazonで見る
-                </a>
+                </button>
               </div>
             ))}
           </div>
@@ -400,12 +376,12 @@ export default function KidsPage() {
           <div className="fixed-book">
             <p className="fixed-book-name">百マス計算ドリル</p>
             <p className="fixed-note">毎日5〜10分で計算力の土台を作りたいときに。</p>
-            <a className="amazon-btn" href={`https://www.amazon.co.jp/s?k=${encodeURIComponent("百マス計算 ドリル")}&tag=${AMAZON_TAG}`} target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+            <button className="amazon-btn" onClick={() => window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent("百マス計算 ドリル")}&tag=${AMAZON_TAG}`, "_blank")}>Amazonで見る</button>
           </div>
           <div className="fixed-book">
             <p className="fixed-book-name">九九ドリル</p>
             <p className="fixed-note">2年生以降、どの学年でも「暗記のやり直し」に使えます。</p>
-            <a className="amazon-btn" href={`https://www.amazon.co.jp/s?k=${encodeURIComponent("九九 ドリル")}&tag=${AMAZON_TAG}`} target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+            <button className="amazon-btn" onClick={() => window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent("九九 ドリル")}&tag=${AMAZON_TAG}`, "_blank")}>Amazonで見る</button>
           </div>
         </div>
 
@@ -438,7 +414,7 @@ export default function KidsPage() {
                   <tr key={i}>
                     <td>
                       <div className="essay-title">{b.title}</div>
-                      <a className="essay-amazon" href={`https://www.amazon.co.jp/s?k=${encodeURIComponent(b.title)}&tag=${AMAZON_TAG}`} target="_blank" rel="noopener noreferrer">Amazonで見る</a>
+                      <button className="essay-amazon" onClick={() => window.open(`https://www.amazon.co.jp/s?k=${encodeURIComponent(b.title)}&tag=${AMAZON_TAG}`, "_blank")}>Amazonで見る</button>
                     </td>
                     <td>
                       <span className={`level-star ${b.level === "★☆☆" ? "lv1" : b.level === "★★☆" ? "lv2" : "lv3"}`}>{b.level}</span>
