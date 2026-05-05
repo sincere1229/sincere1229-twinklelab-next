@@ -191,24 +191,7 @@ export default function KidsPage() {
       return;
     }
 
-    let html = `<div class="result-card"><h2>${key} のおすすめドリル</h2>`;
-    list.forEach((item) => {
-      const tagClass = levelClass(item.level);
-      html += `
-        <div class="book-item">
-          <span class="level-tag ${tagClass}">${item.level}</span>
-          <div class="book-title">${item.name}</div>
-          <p>${item.reason}</p>
-          <a class="amazon-link"
-             href="https://www.amazon.co.jp/s?k=${encodeURIComponent(
-               item.name
-             )}&tag=sincere1229-22"
-             target="_blank">Amazonで見る</a>
-        </div>`;
-    });
-    html += `</div>`;
-    area.innerHTML = html;
-  };
+  
     let html = `<div class="result-card"><h2>${key} のおすすめドリル</h2>`;
     list.forEach((item) => {
       const tagClass = levelClass(item.level);
