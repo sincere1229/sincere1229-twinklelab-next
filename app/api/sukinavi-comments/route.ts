@@ -1,51 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const KV_URL = process.env.KV_REST_API_URL ?? "";
-const KV_TOKEN = process.env.KV_REST_API_TOKEN ?? "";
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL!;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
 
-async function kvGet(key: string) {
-  const res = await fetch(`${KV_URL}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${KV_TOKEN}` },
+async function upstashSingle(cmd: string[]) {
+  const res = await fetch(`${UPSTASH_URL}/${cmd.map(encodeURIComponent).join("/")}`, {
+    headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` },
   });
-  const data = await res.json();
-  return data.result ? JSON.parse(data.result) : [];
+  return res.json();
 }
 
-async function kvSet(key: string, value: unknown) {
-  await fetch(`${KV_URL}/set/${encodeURIComponent(key)}`, {
+async function upstashPipeline(commands: string[][]) {
+  const res = await fetch(`${UPSTASH_URL}/pipeline`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${KV_TOKEN}`,
+      Authorization: `Bearer ${UPSTASH_TOKEN}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(value),
+    body: JSON.stringify(commands),
   });
+  return res.json();
 }
 
-// GET: コメント取得
 export async function GET(req: NextRequest) {
-  const keyword = req.nextUrl.searchParams.get("keyword") ?? "";
-  if (!keyword) return NextResponse.json([]);
-  const comments = await kvGet(`comments:${keyword}`);
-  return NextResponse.json(comments);
+  try {
+    const kw = req.nextUrl.searchParams.get("keyword") ?? "";
+    const key = `sukinavi-comments:${kw}`;
+    const data = await upstashSingle(["lrange", key, "0", "29"]);
+    const items = (data.result ?? []).map((s: string) => {
+      try { return JSON.parse(s); } catch { return null; }
+    }).filter(Boolean);
+    return NextResponse.json(items);
+  } catch (e) {
+    console.error("GET sukinavi comments error:", e);
+    return NextResponse.json([]);
+  }
 }
 
-// POST: コメント投稿
 export async function POST(req: NextRequest) {
-  const { keyword, name, comment } = await req.json();
-  if (!keyword || !comment) return NextResponse.json({ error: "missing fields" }, { status: 400 });
-
-  const key = `comments:${keyword}`;
-  const existing: { name: string; comment: string; date: string }[] = await kvGet(key);
-
-  const newComment = {
-    name: name?.trim() || "匿名",
-    comment: comment.trim().slice(0, 200),
-    date: new Date().toLocaleDateString("ja-JP"),
-  };
-
-  const updated = [newComment, ...existing].slice(0, 50); // 最大50件
-  await kvSet(key, updated);
-
-  return NextResponse.json({ ok: true });
+  try {
+    const { keyword, name, comment } = await req.json();
+    if (!keyword || !comment) return NextResponse.json({ ok: false });
+    const key = `sukinavi-comments:${keyword}`;
+    const entry = JSON.stringify({ name, comment, createdAt: new Date().toISOString() });
+    await upstashPipeline([
+      ["lpush", key, entry],
+      ["expire", key, "7776000"],
+    ]);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("POST sukinavi comments error:", e);
+    return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
+  }
 }
