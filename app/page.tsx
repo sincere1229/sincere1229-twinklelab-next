@@ -92,9 +92,7 @@ export default function Home() {
           text-decoration: none;
           transition: all 0.3s;
         }
-        .hero-cta-sub:hover {
-          background: rgba(201,168,76,0.1);
-        }
+        .hero-cta-sub:hover { background: rgba(201,168,76,0.1); }
 
         .nav-grid {
           display: grid;
@@ -186,6 +184,20 @@ export default function Home() {
           font-size: 12px;
           color: rgba(120,80,100,0.4);
         }
+        .footer-links {
+          display: flex;
+          justify-content: center;
+          gap: 1.5rem;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+        .footer-links a {
+          font-size: 0.78rem;
+          color: rgba(120,80,100,0.6);
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--gold); }
       `}</style>
 
       <div className="hero">
@@ -230,7 +242,6 @@ export default function Home() {
           <div className="nav-jp">学習ナビ</div>
           <div className="nav-desc">つまずき別ドリル検索・読書感想文リスト・勉強タイプ診断</div>
         </a>
-        {/* 好きナビ：新規追加 */}
         <a href="/sukinavi" className="nav-card">
           <span className="nav-icon">🔍</span>
           <div className="nav-en">Suki Navi</div>
@@ -238,32 +249,13 @@ export default function Home() {
           <div className="nav-desc">好きな作家・アーティストを入力するとAIが似たおすすめをナビ。コメントも書けます</div>
           <span className="new-badge">NEW</span>
         </a>
-        
-<a href="/study" style={{
-  display: "block",
-  background: "linear-gradient(135deg, #0f1f3d 0%, #1a3160 100%)",
-  border: "1px solid #c9973a",
-  borderRadius: "0.8rem",
-  padding: "1.5rem",
-  textDecoration: "none",
-  color: "#fff",
-  position: "relative",
-  overflow: "hidden",
-  transition: "transform 0.15s, box-shadow 0.15s",
-}}>
-  <span style={{
-    position: "absolute", top: "0.75rem", right: "0.75rem",
-    background: "#c9973a", color: "#fff",
-    fontSize: "0.65rem", fontWeight: 700,
-    padding: "0.2rem 0.6rem", borderRadius: "2rem",
-    letterSpacing: "0.05em",
-  }}>NEW</span>
-  <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📚</div>
-  <div style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.3rem" }}>勉強ナビ</div>
-  <div style={{ fontSize: "0.78rem", opacity: 0.75, lineHeight: 1.55 }}>
-    資格・スキルアップのおすすめ本をAIが紹介。社会人向け学習ナビ。
-  </div>
-</a>
+        <a href="/study" className="nav-card">
+          <span className="nav-icon">📖</span>
+          <div className="nav-en">Benkyo Navi</div>
+          <div className="nav-jp">勉強ナビ</div>
+          <div className="nav-desc">資格・スキルアップのおすすめ本をAIが紹介。社会人向け学習ナビ。</div>
+          <span className="new-badge">NEW</span>
+        </a>
         <a href="/company" className="nav-card">
           <span className="nav-icon">✨</span>
           <div className="nav-en">About</div>
@@ -282,17 +274,11 @@ export default function Home() {
       </div>
 
       <footer>
-        <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap" }}>
-  <a href="/privacy" style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
-    プライバシーポリシー
-  </a>
-  <a href="/sukinavi" style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
-    好きナビ
-  </a>
-  <a href="/study" style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
-    勉強ナビ
-  </a>
-</div>
+        <div className="footer-links">
+          <a href="/privacy">プライバシーポリシー</a>
+          <a href="/sukinavi">好きナビ</a>
+          <a href="/study">勉強ナビ</a>
+        </div>
         © 2026 Twinkle Lab. All rights reserved.
       </footer>
     </>
