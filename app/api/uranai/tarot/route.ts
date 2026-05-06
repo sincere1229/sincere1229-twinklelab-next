@@ -2,57 +2,48 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { imageL, imageR, mimeTypeL, mimeTypeR, memo } = body
+    const { name, gender, birthdate, birthtime, birthplace, question, cards } = await req.json()
 
-    if (!imageL && !imageR) {
-      return NextResponse.json({ error: '画像が必要です' }, { status: 400 })
+    if (!name || !gender || !birthdate || !question || !cards) {
+      return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
 
-    const handNote = imageL && imageR
-      ? '左手・右手の両方の画像を添付しています。'
-      : imageL
-        ? '左手のみの画像です。右手は未提出のため、左手から読み解ける範囲で鑑定してください。'
-        : '右手のみの画像です。左手は未提出のため、右手から読み解ける範囲で鑑定してください。'
+    const cardInfo = cards.map((c: any) =>
+      `【${c.position}】${c.num} ${c.name}${c.reversed ? ' (逆位置)' : ' (正位置)'}`
+    ).join('\n')
 
-    const userNote = memo ? `\n【お客様から】${memo}` : '\n【補足情報】なし'
+    const prompt = `【お客様情報】
+お名前：${name}様
+性別：${gender}
+生年月日：${birthdate}
+出生時間：${birthtime || '不明'}
+出生地：${birthplace || '不明'}
+ご質問・テーマ：${question}
 
-    const content: any[] = []
-    if (imageL) {
-      content.push({ type: 'text', text: '【左手の画像】' })
-      content.push({ type: 'image', source: { type: 'base64', media_type: mimeTypeL, data: imageL } })
-    }
-    if (imageR) {
-      content.push({ type: 'text', text: '【右手の画像】' })
-      content.push({ type: 'image', source: { type: 'base64', media_type: mimeTypeR, data: imageR } })
-    }
+【引いたタロットカード（5枚）】
+${cardInfo}
 
-    const prompt = `${handNote}
-添付された手相画像を読み取り、以下の条件で手相詳細診断文（¥980）を作成してください。
+以下の構成でタロット5枚引き＋ホロスコープ総合リーディング（¥1,980）を作成してください。
 
 【出力条件】
-1000〜1400文字
-やさしく・寄り添う・断定しすぎない
-でも核心はしっかり伝える
-「当たっている」と感じさせる個別性を必ず入れる
-読みやすいテキスト形式で出力する
+1200〜1800文字
+やさしく・深く・寄り添う
+「当たってる」と感じさせる具体性を入れる
+マークダウン記号（##、**、---など）は一切使わない
+普通のテキストのみで出力する
 
 【構成】
-① 冒頭（お礼＋特別感）
-② 左手（本来の自分）性格・本質・強み・価値観
-③ 右手（現在の状態）今の状況・考え方・疲れやズレ
-④ ズレ分析（最重要）本来の自分 vs 今の状態のズレ
-⑤ 核心の一言 例：「本来のあなたはもっと○○な人です」
-⑥ 未来の流れ（軽め）
-⑦ 行動アドバイス（3つ）
-⑧ クロージング
-⑨ 次への導線（必ず入れる）
-今回の内容は手相の中でも一部になりますが、実はこの先の流れや運気のタイミングも見えています。より深く人生全体を見たい方には、恋愛・仕事・金運を含めた総合鑑定もご用意しています🌙
-AI総合鑑定（¥3,980）はこちらから👇
-https://buy.stripe.com/aFa5kw8Hs6C6dR3fRx33W02
-${userNote}`
-
-    content.push({ type: 'text', text: prompt })
+① 冒頭：「${name}様のカードを引きました」から始め、全体の印象を一言で
+② カード5枚の総合読み：各カードの意味を「${question}」というテーマで統合して流れとして読む
+③ ホロスコープからの補足：生年月日・出生地から見える星の特徴・今の運気・タイミング
+④ 統合メッセージ：タロットと星が一致して伝えていること
+⑤ 核心の一言：ドキッとするが優しい一言
+⑥ 具体的アドバイス：今すぐできること3つ
+⑦ クロージング：前向きに締める
+⑧ 次への導線（必ず入れる）：
+「今回のリーディングは、あなたの今この瞬間を映し出しています。手相と組み合わせることで、より深い人生全体の流れも見えてきます。手相付き総合鑑定（¥3,980）では、恋愛・仕事・金運を含めた本格鑑定をお届けしています🌙
+ご希望の方はこちらから👇
+https://buy.stripe.com/aFa5kw8Hs6C6dR3fRx33W02」`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -63,8 +54,8 @@ ${userNote}`
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content }],
+        max_tokens: 2500,
+        messages: [{ role: 'user', content: prompt }],
       }),
     })
 
