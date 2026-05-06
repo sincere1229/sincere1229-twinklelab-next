@@ -150,7 +150,7 @@ export default function TesouPage() {
                 <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, color: '#f0d080' }}>鑑定結果</div>
               </div>
               <div style={{ width: 70, height: 1, background: 'linear-gradient(90deg,transparent,#d4a843,transparent)', margin: '0 auto 20px' }} />
-              <div style={{ background: 'rgba(253,246,240,0.04)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 14, padding: 22, fontSize: 13, lineHeight: 2, color: 'rgba(253,246,240,0.85)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 500, overflowY: 'auto', marginBottom: 16 }}>
+              <div style={{ background: 'rgba(253,246,240,0.04)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 14, padding: 22, fontSize: 13, lineHeight: 2, color: 'rgba(253,246,240,0.85)', whiteSpace: 'pre-wrap', wordBreak: 'break-word', marginBottom: 16 }}>
                 {result}
               </div>
               <button onClick={copy} style={{ width: '100%', padding: 13, border: `1px solid ${copied ? 'rgba(240,168,192,0.5)' : 'rgba(212,168,67,0.4)'}`, borderRadius: 12, background: 'transparent', color: copied ? '#f0a8c0' : '#f0d080', fontFamily: "'Noto Serif JP',serif", fontSize: 13, cursor: 'pointer', marginBottom: 10, transition: 'all 0.3s' }}>
