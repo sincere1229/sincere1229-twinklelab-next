@@ -200,7 +200,7 @@ export default function SogoPage() {
               <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたタロットカード</div>
               <CardGrid cardList={cards} />
 
-              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', maxHeight:500, overflowY:'auto', margin:'16px 0' }}>
+              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>
                 {result}
               </div>
 
