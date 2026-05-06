@@ -2,17 +2,28 @@
 import { useState, useRef } from 'react'
 
 const DECK = [
-  {num:'0',name:'愚者',symbol:'🌟'},{num:'I',name:'魔術師',symbol:'⚗️'},
-  {num:'II',name:'女教皇',symbol:'🌙'},{num:'III',name:'女帝',symbol:'👑'},
-  {num:'IV',name:'皇帝',symbol:'⚔️'},{num:'V',name:'法王',symbol:'🔑'},
-  {num:'VI',name:'恋人',symbol:'💕'},{num:'VII',name:'戦車',symbol:'🏆'},
-  {num:'VIII',name:'力',symbol:'🦁'},{num:'IX',name:'隠者',symbol:'🔦'},
-  {num:'X',name:'運命の輪',symbol:'🎡'},{num:'XI',name:'正義',symbol:'⚖️'},
-  {num:'XII',name:'吊られた男',symbol:'🔄'},{num:'XIII',name:'死神',symbol:'🌿'},
-  {num:'XIV',name:'節制',symbol:'🌊'},{num:'XV',name:'悪魔',symbol:'🔗'},
-  {num:'XVI',name:'塔',symbol:'⚡'},{num:'XVII',name:'星',symbol:'⭐'},
-  {num:'XVIII',name:'月',symbol:'🌕'},{num:'XIX',name:'太陽',symbol:'☀️'},
-  {num:'XX',name:'審判',symbol:'🎺'},{num:'XXI',name:'世界',symbol:'🌍'},
+  {num:'0',name:'愚者',symbol:'🌟',img:'/tarot/card_00_fool.jpg'},
+  {num:'I',name:'魔術師',symbol:'⚗️',img:'/tarot/card_01_magician.jpg'},
+  {num:'II',name:'女教皇',symbol:'🌙',img:'/tarot/card_02_high-priestess.jpg'},
+  {num:'III',name:'女帝',symbol:'👑',img:'/tarot/card_03_empress.jpg'},
+  {num:'IV',name:'皇帝',symbol:'⚔️',img:'/tarot/card_04_emperor.jpg'},
+  {num:'V',name:'法王',symbol:'🔑',img:'/tarot/card_05_hierophant.jpg'},
+  {num:'VI',name:'恋人',symbol:'💕',img:'/tarot/card_06_lovers.jpg'},
+  {num:'VII',name:'戦車',symbol:'🏆',img:'/tarot/card_07_chariot.jpg'},
+  {num:'VIII',name:'力',symbol:'🦁',img:'/tarot/card_08_strength.jpg'},
+  {num:'IX',name:'隠者',symbol:'🔦',img:'/tarot/card_09_hermit.jpg'},
+  {num:'X',name:'運命の輪',symbol:'🎡',img:'/tarot/card_10_wheel-of-fortune.jpg'},
+  {num:'XI',name:'正義',symbol:'⚖️',img:'/tarot/card_11_justice.jpg'},
+  {num:'XII',name:'吊られた男',symbol:'🔄',img:'/tarot/card_12_hanged-man.jpg'},
+  {num:'XIII',name:'死神',symbol:'🌿',img:'/tarot/card_13_death.jpg'},
+  {num:'XIV',name:'節制',symbol:'🌊',img:'/tarot/card_14_temperance.jpg'},
+  {num:'XV',name:'悪魔',symbol:'🔗',img:'/tarot/card_15_devil.jpg'},
+  {num:'XVI',name:'塔',symbol:'⚡',img:'/tarot/card_16_tower.jpg'},
+  {num:'XVII',name:'星',symbol:'⭐',img:'/tarot/card_17_star.jpg'},
+  {num:'XVIII',name:'月',symbol:'🌕',img:'/tarot/card_18_moon.jpg'},
+  {num:'XIX',name:'太陽',symbol:'☀️',img:'/tarot/card_19_sun.jpg'},
+  {num:'XX',name:'審判',symbol:'🎺',img:'/tarot/card_20_judgement.jpg'},
+  {num:'XXI',name:'世界',symbol:'🌍',img:'/tarot/card_21_world.jpg'},
 ]
 const POSITIONS = ['過去','現在','未来','課題','アドバイス']
 function drawCards() {
@@ -60,8 +71,6 @@ export default function SogoPage() {
     if (!canStart) return
     setLoading(true); setError(''); setResult('')
     const drawn = drawCards()
-    setCards(drawn)
-    drawnCardsRef.current = drawn
     try {
       const res = await fetch('/api/uranai/sogo', {
         method: 'POST',
@@ -70,6 +79,8 @@ export default function SogoPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '鑑定に失敗しました')
+      drawnCardsRef.current = drawn
+      setCards([...drawn])
       setResult(data.result)
     } catch (err: any) {
       setError(err.message || '鑑定中にエラーが発生しました')
@@ -86,11 +97,13 @@ export default function SogoPage() {
   const CardGrid = ({cardList}:{cardList:any[]}) => (
     <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
       {cardList.map((card,i)=>(
-        <div key={i} style={{ aspectRatio:'2/3', borderRadius:10, background:'linear-gradient(135deg,#1a0a30,#2a1050)', border:'1px solid rgba(196,160,216,0.35)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'6px 4px', textAlign:'center' }}>
-          <div style={{ fontSize:8, color:'#d4a843', marginBottom:3 }}>{card.num}</div>
-          <div style={{ fontSize:16, marginBottom:3, transform:card.reversed?'rotate(180deg)':'' }}>{card.symbol}</div>
-          <div style={{ fontSize:8, color:'#c4a0d8', lineHeight:1.3 }}>{card.name}{card.reversed&&<><br /><span style={{fontSize:7,color:'#f0a8c0'}}>逆位置</span></>}</div>
-          <div style={{ fontSize:7, color:'rgba(253,246,240,0.4)', marginTop:2 }}>{card.position}</div>
+        <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+          <div style={{ position:'relative', width:'100%', aspectRatio:'2/3', borderRadius:10, overflow:'hidden', border:'1px solid rgba(196,160,216,0.4)', transform:card.reversed?'rotate(180deg)':'' }}>
+            <img src={card.img} alt={card.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+          </div>
+          <div style={{ fontSize:8, color:'#c4a0d8', textAlign:'center', lineHeight:1.3 }}>{card.name}</div>
+          <div style={{ fontSize:7, color:'rgba(253,246,240,0.4)', textAlign:'center' }}>{card.position}</div>
+          {card.reversed && <div style={{ fontSize:7, color:'#f0a8c0' }}>逆位置</div>}
         </div>
       ))}
     </div>
