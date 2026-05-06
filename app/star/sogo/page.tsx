@@ -126,8 +126,8 @@ export default function SogoPage() {
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                   <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>お名前 <span style={{color:'#f0a8c0'}}>*</span></div><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="山田 花子" /></div>
                   <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>性別 <span style={{color:'#f0a8c0'}}>*</span></div>
-                    <select style={{...s.input,appearance:'none' as any}} value={gender} onChange={e=>setGender(e.target.value)}>
-                      <option value="">選択</option><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option>
+                    <select style={{...s.input, color:'#fdf6f0', backgroundColor:'#1e0a28'}} value={gender} onChange={e=>setGender(e.target.value)}>
+                      <option value="" style={{background:'#1e0a28',color:'#fdf6f0'}}>選択</option><option value="女性" style={{background:'#1e0a28',color:'#fdf6f0'}}>女性</option><option value="男性" style={{background:'#1e0a28',color:'#fdf6f0'}}>男性</option><option value="その他" style={{background:'#1e0a28',color:'#fdf6f0'}}>その他</option>
                     </select>
                   </div>
                 </div>
