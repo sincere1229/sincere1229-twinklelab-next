@@ -45,8 +45,6 @@ export default function Tarot5Page() {
     if (!canStart) return
     setLoading(true); setError(''); setResult('')
     const drawn = drawCards()
-    setCards(drawn)
-    drawnCardsRef.current = drawn
     try {
       const res = await fetch('/api/uranai/tarot5', {
         method: 'POST',
@@ -55,6 +53,8 @@ export default function Tarot5Page() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || '鑑定に失敗しました')
+      drawnCardsRef.current = drawn
+      setCards([...drawn])
       setResult(data.result)
     } catch (err: any) {
       setError(err.message || '鑑定中にエラーが発生しました')
@@ -143,11 +143,11 @@ export default function Tarot5Page() {
 
           {loading && (
             <div style={{ textAlign:'center', padding:'52px 0' }}>
-              {cards.length > 0 && (
+              {drawnCardsRef.current.length > 0 && (
                 <div style={{ marginBottom:28 }}>
                   <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, color:'#f0d080', marginBottom:14 }}>🃏 あなたのカード</div>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
-                    {cards.map((card,i)=>(
+                    {drawnCardsRef.current.map((card,i)=>(
                       <div key={i} style={{ aspectRatio:'2/3', borderRadius:10, background:'linear-gradient(135deg,#1a0a30,#2a1050)', border:'1px solid rgba(138,155,224,0.4)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'6px 4px', textAlign:'center' }}>
                         <div style={{ fontSize:8, color:'#d4a843', marginBottom:3 }}>{card.num}</div>
                         <div style={{ fontSize:18, marginBottom:3, transform:card.reversed?'rotate(180deg)':'' }}>{card.symbol}</div>
