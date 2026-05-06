@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
 やさしく・寄り添う・断定しすぎない
 でも核心はしっかり伝える
 「当たっている」と感じさせる個別性を必ず入れる
-読みやすいテキスト形式で出力する
+マークダウン記号（##、**、---など）は一切使わない
+普通のテキストのみで出力する
 
 【構成】
 ① 冒頭（お礼＋特別感）
@@ -63,7 +64,7 @@ ${userNote}`
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
+        max_tokens: 2000,
         messages: [{ role: 'user', content }],
       }),
     })
