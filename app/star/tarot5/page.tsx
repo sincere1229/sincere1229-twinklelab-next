@@ -183,7 +183,7 @@ export default function Tarot5Page() {
                 ))}
               </div>
 
-              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(74,90,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.82)', whiteSpace:'pre-wrap', wordBreak:'break-word', maxHeight:420, overflowY:'auto', marginBottom:16 }}>
+              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(74,90,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.82)', whiteSpace:'pre-wrap', wordBreak:'break-word', marginBottom:16 }}>
                 {result}
               </div>
 
