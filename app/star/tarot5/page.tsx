@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const DECK = [
   {num:'0',name:'愚者',symbol:'🌟'},{num:'I',name:'魔術師',symbol:'⚗️'},
@@ -32,6 +32,7 @@ export default function Tarot5Page() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
   const [cards, setCards] = useState<any[]>([])
+  const drawnCardsRef = useRef<any[]>([])
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
   const [paymentSuccess] = useState(
@@ -45,6 +46,7 @@ export default function Tarot5Page() {
     setLoading(true); setError(''); setResult('')
     const drawn = drawCards()
     setCards(drawn)
+    drawnCardsRef.current = drawn
     try {
       const res = await fetch('/api/uranai/tarot5', {
         method: 'POST',
@@ -173,7 +175,7 @@ export default function Tarot5Page() {
 
               <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたカード</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8, marginBottom:20 }}>
-                {cards.map((card,i)=>(
+                {(drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards).map((card,i)=>(
                   <div key={i} style={{ aspectRatio:'2/3', borderRadius:10, background:'linear-gradient(135deg,#1a0a30,#2a1050)', border:'1px solid rgba(138,155,224,0.4)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'6px 4px', textAlign:'center' }}>
                     <div style={{ fontSize:8, color:'#d4a843', marginBottom:3 }}>{card.num}</div>
                     <div style={{ fontSize:16, marginBottom:3, transform:card.reversed?'rotate(180deg)':'' }}>{card.symbol}</div>
