@@ -1,224 +1,87 @@
-'use client'
-import { useState } from 'react'
+import { NextRequest, NextResponse } from 'next/server'
 
-const DECK = [
-  {num:'0',name:'愚者',symbol:'🌟'},{num:'I',name:'魔術師',symbol:'⚗️'},
-  {num:'II',name:'女教皇',symbol:'🌙'},{num:'III',name:'女帝',symbol:'👑'},
-  {num:'IV',name:'皇帝',symbol:'⚔️'},{num:'V',name:'法王',symbol:'🔑'},
-  {num:'VI',name:'恋人',symbol:'💕'},{num:'VII',name:'戦車',symbol:'🏆'},
-  {num:'VIII',name:'力',symbol:'🦁'},{num:'IX',name:'隠者',symbol:'🔦'},
-  {num:'X',name:'運命の輪',symbol:'🎡'},{num:'XI',name:'正義',symbol:'⚖️'},
-  {num:'XII',name:'吊られた男',symbol:'🔄'},{num:'XIII',name:'死神',symbol:'🌿'},
-  {num:'XIV',name:'節制',symbol:'🌊'},{num:'XV',name:'悪魔',symbol:'🔗'},
-  {num:'XVI',name:'塔',symbol:'⚡'},{num:'XVII',name:'星',symbol:'⭐'},
-  {num:'XVIII',name:'月',symbol:'🌕'},{num:'XIX',name:'太陽',symbol:'☀️'},
-  {num:'XX',name:'審判',symbol:'🎺'},{num:'XXI',name:'世界',symbol:'🌍'},
-]
-const POSITIONS = ['過去','現在','未来','課題','アドバイス']
-function drawCards() {
-  return [...DECK].sort(()=>Math.random()-0.5).slice(0,5).map((card,i)=>({...card, position:POSITIONS[i], reversed:Math.random()>0.7}))
-}
+export async function POST(req: NextRequest) {
+  try {
+    const { name, gender, birthdate, birthtime, birthplace, concern, imageL, imageR, mimeTypeL, mimeTypeR, cards } = await req.json()
 
-export default function SogoPage() {
-  const [name, setName] = useState('')
-  const [gender, setGender] = useState('')
-  const [birthdate, setBirthdate] = useState('')
-  const [birthtime, setBirthtime] = useState('')
-  const [birthplace, setBirthplace] = useState('')
-  const [concern, setConcern] = useState('')
-  const [imageL, setImageL] = useState<string|null>(null)
-  const [imageR, setImageR] = useState<string|null>(null)
-  const [mimeTypeL, setMimeTypeL] = useState('image/jpeg')
-  const [mimeTypeR, setMimeTypeR] = useState('image/jpeg')
-  const [cards, setCards] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState('')
-  const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
-  const [paymentSuccess] = useState(
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('payment') === 'success'
-  )
-
-  const hasImage = imageL || imageR
-  const canStart = name && gender && birthdate && concern && hasImage
-
-  const handleImage = (side: 'L'|'R', file: File) => {
-    if (!file.type.startsWith('image/')) { setError('画像ファイルを選択してください'); return }
-    if (file.size > 10*1024*1024) { setError('10MB以下の画像を選択してください'); return }
-    const reader = new FileReader()
-    reader.onload = e => {
-      const base64 = (e.target?.result as string).split(',')[1]
-      if (side==='L') { setImageL(base64); setMimeTypeL(file.type) }
-      else { setImageR(base64); setMimeTypeR(file.type) }
-      setError('')
+    if (!name || !gender || !birthdate || !concern || (!imageL && !imageR) || !cards) {
+      return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 })
     }
-    reader.readAsDataURL(file)
-  }
 
-  const analyze = async () => {
-    if (!canStart) return
-    setLoading(true); setError(''); setResult('')
-    const drawn = drawCards()
-    setCards(drawn)
-    try {
-      const res = await fetch('/api/uranai/sogo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, gender, birthdate, birthtime, birthplace, concern, imageL, imageR, mimeTypeL, mimeTypeR, cards: drawn }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || '鑑定に失敗しました')
-      setResult(data.result)
-    } catch (err: any) {
-      setError(err.message || '鑑定中にエラーが発生しました')
-    } finally {
-      setLoading(false)
+    const cardInfo = cards.map((c: any) =>
+      `【${c.position}】${c.num} ${c.name}${c.reversed ? ' (逆位置)' : ' (正位置)'}`
+    ).join('\n')
+
+    const customerInfo = `【お客様情報】
+お名前：${name}様
+生年月日：${birthdate}
+性別：${gender}
+出生時間：${birthtime || '不明'}
+出生地：${birthplace || '不明'}
+相談内容：${concern}
+
+【引いたタロットカード（5枚）】
+${cardInfo}`
+
+    const content: any[] = []
+    if (imageL) {
+      content.push({ type: 'text', text: '【左手の手相画像】' })
+      content.push({ type: 'image', source: { type: 'base64', media_type: mimeTypeL, data: imageL } })
     }
+    if (imageR) {
+      content.push({ type: 'text', text: '【右手の手相画像】' })
+      content.push({ type: 'image', source: { type: 'base64', media_type: mimeTypeR, data: imageR } })
+    }
+
+    const prompt = `${customerInfo}
+
+以下の構成で総合鑑定文（2000〜3000文字）を作成してください。
+
+① 冒頭：お礼＋「手相・タロット・星、すべてが同じことを伝えています」という導入
+② 人生の本質：性格の核・生き方の特徴（手相から読む）
+③ タロット5枚の流れ：過去→現在→未来→課題→アドバイスを一つのストーリーとして読む
+④ 現在の状態：今の流れ・停滞 or 変化（手相＋タロット統合）
+⑤ 未来の流れ：今後の運気・変化のタイミング（ホロスコープ・数秘術）
+⑥ 分野別鑑定
+　恋愛運：具体的に
+　仕事運：具体的に
+　金運：具体的に
+⑦ ズレの本質：人生レベルでのズレ
+⑧ 開運アクション：具体的に3〜5個
+⑨ 重要メッセージ：手相・タロット・星が一致して伝える最も大切なこと
+⑩ クロージング：前向きに・安心させる
+
+やさしく・深く・人生相談レベルのトーンで。
+マークダウン記号（##、**、---など）は一切使わない。普通のテキストのみで出力する。
+使用占術：手相をベースに、タロット5枚・数秘術・ホロスコープを統合して読み解く`
+
+    content.push({ type: 'text', text: prompt })
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content }],
+      }),
+    })
+
+    if (!response.ok) {
+      const err = await response.json()
+      throw new Error(err.error?.message || '鑑定に失敗しました')
+    }
+
+    const data = await response.json()
+    const result = data.content[0]?.text || ''
+    return NextResponse.json({ result })
+
+  } catch (err: any) {
+    console.error(err)
+    return NextResponse.json({ error: err.message || '鑑定に失敗しました' }, { status: 500 })
   }
-
-  const copy = async () => { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),3000) }
-  const reset = () => { setName(''); setGender(''); setBirthdate(''); setBirthtime(''); setBirthplace(''); setConcern(''); setImageL(null); setImageR(null); setCards([]); setResult(''); setError('') }
-
-  const s = { input: { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' as const } }
-
-  const CardGrid = ({cardList}:{cardList:any[]}) => (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
-      {cardList.map((card,i)=>(
-        <div key={i} style={{ aspectRatio:'2/3', borderRadius:10, background:'linear-gradient(135deg,#1a0a30,#2a1050)', border:'1px solid rgba(196,160,216,0.35)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'6px 4px', textAlign:'center' }}>
-          <div style={{ fontSize:8, color:'#d4a843', marginBottom:3 }}>{card.num}</div>
-          <div style={{ fontSize:16, marginBottom:3, transform:card.reversed?'rotate(180deg)':'' }}>{card.symbol}</div>
-          <div style={{ fontSize:8, color:'#c4a0d8', lineHeight:1.3 }}>{card.name}{card.reversed&&<><br /><span style={{fontSize:7,color:'#f0a8c0'}}>逆位置</span></>}</div>
-          <div style={{ fontSize:7, color:'rgba(253,246,240,0.4)', marginTop:2 }}>{card.position}</div>
-        </div>
-      ))}
-    </div>
-  )
-
-  return (
-    <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#120818,#1e0a28,#120618)', padding:'40px 20px 80px', fontFamily:"'Noto Serif JP',serif", color:'#fdf6f0' }}>
-      <div style={{ maxWidth:620, margin:'0 auto' }}>
-
-        <div style={{ textAlign:'center', marginBottom:40 }}>
-          <div style={{ fontSize:12, letterSpacing:'0.35em', color:'#d4a843', textTransform:'uppercase', marginBottom:12 }}>✦ Twinkle Star Oracle ✦</div>
-          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, marginBottom:6 }}>
-            AI<span style={{ color:'#c4a0d8', fontStyle:'italic' }}>総合鑑定</span>
-          </h1>
-          <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'12px auto' }} />
-          <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.9 }}>手相・タロット・数秘術・ホロスコープを統合した<br />あなただけの本格リーディング</p>
-        </div>
-
-        {paymentSuccess && (
-          <div style={{ background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.25)', borderRadius:12, padding:'14px 18px', textAlign:'center', fontSize:13, color:'#f0d080', marginBottom:24 }}>
-            ✨ お支払いが完了しました。以下のフォームにご入力の上、手相画像をアップロードしてください。
-          </div>
-        )}
-
-        <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px', backdropFilter:'blur(12px)' }}>
-
-          {!result && !loading && (
-            <>
-              <div style={{ textAlign:'center', marginBottom:24 }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:17, color:'#c4a0d8', marginBottom:6 }}>🌙 お客様情報</div>
-                <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.8 }}>正確な鑑定のため、できる限りご入力ください</p>
-              </div>
-
-              <div style={{ display:'grid', gap:14 }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>お名前 <span style={{color:'#f0a8c0'}}>*</span></div><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="山田 花子" /></div>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>性別 <span style={{color:'#f0a8c0'}}>*</span></div>
-                    <select style={{...s.input}} value={gender} onChange={e=>setGender(e.target.value)}>
-                      <option value="">選択</option><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>生年月日 <span style={{color:'#f0a8c0'}}>*</span></div><input style={s.input} type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} /></div>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生時間（任意）</div><input style={s.input} type="time" value={birthtime} onChange={e=>setBirthtime(e.target.value)} /></div>
-                </div>
-                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生地（任意）</div><input style={s.input} value={birthplace} onChange={e=>setBirthplace(e.target.value)} placeholder="例：東京都新宿区" /></div>
-                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>相談内容 <span style={{color:'#f0a8c0'}}>*</span></div><textarea style={{...s.input,resize:'none',height:80,lineHeight:1.7}} value={concern} onChange={e=>setConcern(e.target.value)} placeholder="例：仕事を変えるべきか迷っています。恋愛がうまくいかず悩んでいます。など" /></div>
-
-                {/* 手相アップロード */}
-                <div>
-                  <div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:8 }}>手相画像 <span style={{color:'#f0a8c0'}}>*</span>（左右どちらか1枚以上）</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                    {(['L','R'] as const).map(side=>(
-                      <div key={side}>
-                        <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginBottom:6 }}>{side==='L'?'🤚 左手':'🤚 右手'}</div>
-                        {(side==='L'?imageL:imageR) ? (
-                          <div style={{ position:'relative' }}>
-                            <img src={`data:${side==='L'?mimeTypeL:mimeTypeR};base64,${side==='L'?imageL:imageR}`} style={{ width:'100%', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', maxHeight:160, objectFit:'cover' }} alt="" />
-                            <button onClick={()=>side==='L'?setImageL(null):setImageR(null)} style={{ position:'absolute', top:6, right:6, background:'rgba(200,96,122,0.8)', border:'none', color:'white', width:24, height:24, borderRadius:'50%', cursor:'pointer', fontSize:12 }}>✕</button>
-                          </div>
-                        ) : (
-                          <label style={{ border:'2px dashed rgba(155,106,176,0.3)', borderRadius:14, padding:'20px 10px', textAlign:'center', cursor:'pointer', display:'block', background:'rgba(155,106,176,0.02)' }}>
-                            <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>e.target.files?.[0]&&handleImage(side,e.target.files[0])} />
-                            <div style={{ fontSize:22, marginBottom:5 }}>{side==='L'?'✋':'🤚'}</div>
-                            <div style={{ fontSize:11, color:'rgba(253,246,240,0.55)' }}>タップして選択</div>
-                          </label>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ fontSize:10, color:'rgba(253,246,240,0.3)', textAlign:'center', marginTop:8 }}>明るい場所で撮影・ピントを合わせてください</div>
-                </div>
-              </div>
-
-              {error && <div style={{ background:'rgba(200,96,122,0.1)', border:'1px solid rgba(200,96,122,0.3)', borderRadius:10, padding:'12px 16px', fontSize:12, color:'#f0a8c0', textAlign:'center', marginTop:12 }}>{error}</div>}
-
-              <button onClick={analyze} disabled={!canStart}
-                style={{ width:'100%', padding:17, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:14, letterSpacing:'0.1em', cursor:canStart?'pointer':'not-allowed', opacity:canStart?1:0.4, marginTop:20, transition:'all 0.3s' }}>
-                🔮 AI総合鑑定をはじめる
-              </button>
-            </>
-          )}
-
-          {loading && (
-            <div style={{ textAlign:'center', padding:'52px 0' }}>
-              {cards.length>0 && (
-                <div style={{ marginBottom:28 }}>
-                  <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, color:'#f0d080', marginBottom:14 }}>🃏 あなたのタロットカード</div>
-                  <CardGrid cardList={cards} />
-                  <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginTop:10 }}>カードと手相・星の配置を統合しています…</div>
-                </div>
-              )}
-              <div style={{ fontSize:56, marginBottom:20 }}>🌟</div>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:10 }}>深く読み解いています…</div>
-              <div style={{ fontSize:12, color:'rgba(253,246,240,0.4)', lineHeight:2 }}>手相・タロット・数秘術・ホロスコープ<br />すべてを統合して鑑定しています</div>
-            </div>
-          )}
-
-          {result && (
-            <>
-              <div style={{ textAlign:'center', marginBottom:20 }}>
-                <div style={{ fontSize:40, marginBottom:10 }}>✨</div>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:'#c4a0d8' }}>総合鑑定結果</div>
-                <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', marginTop:4 }}>{name}様 | Twinkle Star Oracle</div>
-              </div>
-              <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'0 auto 16px' }} />
-
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたタロットカード</div>
-              <CardGrid cardList={cards} />
-
-              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>
-                {result}
-              </div>
-
-              <button onClick={copy} style={{ width:'100%', padding:13, border:`1px solid ${copied?'rgba(240,168,192,0.5)':'rgba(155,106,176,0.4)'}`, borderRadius:12, background:'transparent', color:copied?'#f0a8c0':'#c4a0d8', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10, transition:'all 0.3s' }}>
-                {copied?'✅ コピーしました！':'📋 テキストをコピー'}
-              </button>
-              <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.04)', color:'rgba(253,246,240,0.35)', fontFamily:"'Noto Serif JP',serif", fontSize:11, cursor:'pointer' }}>
-                最初からやり直す
-              </button>
-            </>
-          )}
-        </div>
-
-        <div style={{ marginTop:24, padding:14, background:'rgba(155,106,176,0.04)', borderRadius:12, fontSize:11, color:'rgba(253,246,240,0.28)', lineHeight:1.9, textAlign:'center' }}>
-          ご入力いただいた情報・画像は鑑定後に保持されません<br />結果はコピーして保存してください
-        </div>
-      </div>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Serif+JP:wght@300;400&display=swap');`}</style>
-    </div>
-  )
 }
