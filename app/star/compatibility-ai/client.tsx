@@ -54,7 +54,7 @@ const purple = '#a855f7'
 const textMain = '#1e1b4b'
 const textSub = '#64748b'
 
-const STRIPE_LINK = 'https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05'
+const STRIPE_LINK = 'https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06'
 const SHARE_URL = 'https://twinkle-lab.jp/star/compatibility-ai'
 
 export function CompatibilityAIClient() {
