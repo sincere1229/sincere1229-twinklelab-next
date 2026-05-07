@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-const STRIPE_LINK = 'https://buy.stripe.com/00w14g2j46C66oBcFl33W04'
+const STRIPE_LINK = 'https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05'
 
 export default function TesouPage() {
   const [step, setStep] = useState('top')
