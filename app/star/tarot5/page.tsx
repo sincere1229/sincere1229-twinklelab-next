@@ -83,7 +83,7 @@ export default function Tarot5Page() {
     if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname)
   }
 
-  const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(74,90,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' }
+  const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(74,90,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' as const }
 
   const CardGrid = ({cardList}) => (
     <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
