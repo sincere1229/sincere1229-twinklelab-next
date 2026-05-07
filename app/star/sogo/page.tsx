@@ -134,6 +134,9 @@ export default function SogoPage() {
     `)
     printWindow.document.close()
   }
+
+  const copy = async () => { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),3000) }
+
   const reset = () => {
     setStep('top'); setName(''); setGender(''); setBirthdate(''); setBirthtime('')
     setBirthplace(''); setConcern(''); setImageL(null); setImageR(null)
