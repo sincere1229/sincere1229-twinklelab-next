@@ -160,10 +160,11 @@ export default function Home() {
           font-size: 13px;
           color: var(--text-s);
           line-height: 2;
+          margin-bottom: 20px;
         }
-        .line-btn {
+        .share-btn {
           display: inline-block;
-          margin-top: 20px;
+          margin: 0 6px;
           background: rgba(201,168,76,0.12);
           border: 1px solid var(--gold);
           color: #8a6010;
@@ -175,7 +176,7 @@ export default function Home() {
           text-decoration: none;
           transition: all 0.3s;
         }
-        .line-btn:hover { background: rgba(201,168,76,0.25); }
+        .share-btn:hover { background: rgba(201,168,76,0.25); }
 
         footer {
           text-align: center;
@@ -210,10 +211,7 @@ export default function Home() {
             「好き・得意」を見つけるTwinkle Lab<br />
             Twinkle Labは、星の導きや手相などの占いと、<br />
             最新AIを組み合わせて、大人と子どもの「適性」と<br />
-            「好き・得意」を見つけるための診断・学びのヒントを届けるサイトです。<br />
-            サラリーマンの適性診断や若い女性向けの手相リーディングから<br />
-            お子さんの学習タイプ診断・ドリル選びのナビまで、<br />
-            「自分らしい選び方」を一緒に考える場を目指しています。
+            「好き・得意」を見つけるための診断・学びのヒントを届けるサイトです。
           </p>
           <div className="hero-cta">
             <a href="/star" className="hero-cta-main">🔮 無料で占ってみる</a>
@@ -227,7 +225,7 @@ export default function Home() {
           <span className="nav-icon">🔮</span>
           <div className="nav-en">Twinkle Star Oracle</div>
           <div className="nav-jp">占いポータル</div>
-          <div className="nav-desc">無料占いからAI総合鑑定まで。タロット・数秘術・四柱推命など11種類の占い</div>
+          <div className="nav-desc">無料占いからAI総合鑑定まで。タロット・数秘術・四柱推命など多彩な占い</div>
           <span className="new-badge">NEW</span>
         </a>
         <a href="/heart" className="nav-card">
@@ -246,7 +244,7 @@ export default function Home() {
           <span className="nav-icon">🔍</span>
           <div className="nav-en">Suki Navi</div>
           <div className="nav-jp">好きナビ</div>
-          <div className="nav-desc">好きな作家・アーティストを入力するとAIが似たおすすめをナビ。コメントも書けます</div>
+          <div className="nav-desc">好きな作家・アーティストを入力するとAIが似たおすすめをナビ</div>
           <span className="new-badge">NEW</span>
         </a>
         <a href="/study" className="nav-card">
@@ -266,11 +264,18 @@ export default function Home() {
 
       <div className="catch-section">
         <p className="catch-text">
-          LINEに登録すると、占いイベントを受け取れます🎁<br />
+          Twinkle Star Oracleで占ってみよう✨<br />
+          タロット・手相・相性診断・AI総合鑑定が楽しめます
         </p>
-        <a href="https://lin.ee/XHDFrA8" target="_blank" className="line-btn">
-          💬 無料で未来診断を受け取る
-        </a>
+        <div>
+          <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Twinkle Lab｜AI×占いで自分の適性と好きを見つけよう✨\nhttps://twinkle-lab.jp')}`}
+            target="_blank" rel="noopener noreferrer" className="share-btn">
+            𝕏 シェア
+          </a>
+          <a href="/star" className="share-btn">
+            🔮 占いポータルへ
+          </a>
+        </div>
       </div>
 
       <footer>
