@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 interface FormInputs {
@@ -54,6 +54,9 @@ const purple = '#a855f7'
 const textMain = '#1e1b4b'
 const textSub = '#64748b'
 
+const STRIPE_LINK = 'https://buy.stripe.com/cNieV6f5Q1hM00d48P33W05'
+const SHARE_URL = 'https://twinkle-lab.jp/star/compatibility-ai'
+
 export function CompatibilityAIClient() {
   const [step, setStep] = useState(0)
   const [inputs, setInputs] = useState<FormInputs>({
@@ -66,125 +69,64 @@ export function CompatibilityAIClient() {
   const [result, setResult] = useState<DiagnosisResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isPaid, setIsPaid] = useState(false)
-  const [paidResult, setPaidResult] = useState<DiagnosisResult | null>(null)
-  const [paidLoading, setPaidLoading] = useState(false)
-  const [paidError, setPaidError] = useState('')
 
   const update = (key: keyof FormInputs, value: string) =>
     setInputs(prev => ({ ...prev, [key]: value }))
 
-  const handleDiagnose = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/compatibility-ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, mode: 'free' }),
-      })
-      const data = await res.json()
-      if (data.success && data.result) {
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-            window.localStorage.setItem('compatibility_free_result', JSON.stringify(data.result))
-          } catch(e) { console.error('localStorage error:', e) }
-        }
-        setResult(data.result)
-        setStep(5)
-      } else {
-        setError(data.error || 'エラーが発生しました')
-      }
-    } catch {
-      setError('通信エラーが発生しました。もう一度お試しください。')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
-
-  const handleCheckout = async () => {
-    setCheckoutLoading(true)
-    try {
-      const res = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs }),
-      })
-      const data = await res.json()
-      if (data.success && data.url) {
-        // session_idをlocalStorageに保存してからStripeへ遷移
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-            if (result) window.localStorage.setItem('compatibility_free_result', JSON.stringify(result))
-          } catch(e) { console.error('localStorage error:', e) }
-        }
-        window.location.href = data.url
-      } else {
-        alert(data.error || '決済の準備に失敗しました')
-      }
-    } catch {
-      alert('通信エラーが発生しました')
-    } finally {
-      setCheckoutLoading(false)
-    }
-  }
-
-  // Stripe決済後：?session_id=xxx でリダイレクトされてきた場合
-  const [stripeProcessed, setStripeProcessed] = useState(false)
-  if (typeof window !== 'undefined' && !stripeProcessed) {
+  // Stripe決済後：?payment=success でリダイレクトされてきた場合
+  useEffect(() => {
+    if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    const sessionId = params.get('session_id')
-    if (sessionId) {
-      setStripeProcessed(true)
-      const savedInputs = (() => { try { return window.localStorage.getItem('compatibility_inputs') } catch { return null } })()
-      const savedResult = (() => { try { return window.localStorage.getItem('compatibility_free_result') } catch { return null } })()
-      if (savedInputs) { try { setInputs(JSON.parse(savedInputs)) } catch { /* ignore */ } }
-      if (savedResult) { try { setResult(JSON.parse(savedResult)) } catch { /* ignore */ } }
-      if (savedInputs || savedResult) {
-        try { window.localStorage.removeItem('compatibility_inputs') } catch { /* ignore */ }
-        try { window.localStorage.removeItem('compatibility_free_result') } catch { /* ignore */ }
-      }
-      setStep(5)
-      setTimeout(() => {
-        const inp = savedInputs ? JSON.parse(savedInputs) : inputs
-        handlePaidDiagnoseWithSession(sessionId, inp)
-      }, 300)
-    }
-  }
+    if (params.get('payment') !== 'success') return
 
-  const handlePaidDiagnoseWithSession = async (sessionId: string, inputData: FormInputs) => {
-    setPaidLoading(true)
-    setPaidError('')
+    // localStorageから入力データを復元
     try {
-      const res = await fetch('/api/compatibility-paid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs: inputData, sessionId }),
-      })
-      const data = await res.json()
-      if (data.success && data.result) {
-        setPaidResult(data.result)
-        setIsPaid(true)
-        setTimeout(() => {
-          document.getElementById('paid-result-anchor')?.scrollIntoView({ behavior: 'smooth' })
-        }, 300)
-      } else {
-        setPaidError(data.error || 'エラーが発生しました')
+      const saved = window.localStorage.getItem('compatibility_inputs')
+      if (saved) {
+        const savedInputs = JSON.parse(saved)
+        setInputs(savedInputs)
+        window.localStorage.removeItem('compatibility_inputs')
+        setStep(5)
+        setLoading(true)
+        // 有料診断を実行
+        fetch('/api/compatibility-ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inputs: savedInputs, mode: 'paid' }),
+        }).then(res => res.json()).then(data => {
+          if (data.success && data.result) {
+            setResult(data.result)
+          } else {
+            setError(data.error || 'エラーが発生しました')
+          }
+        }).catch(() => {
+          setError('通信エラーが発生しました。もう一度お試しください。')
+        }).finally(() => {
+          setLoading(false)
+        })
       }
-    } catch {
-      setPaidError('通信エラーが発生しました。もう一度お試しください。')
-    } finally {
-      setPaidLoading(false)
+    } catch(e) {
+      console.error('localStorage error:', e)
     }
+  }, [])
+
+  // 決済ページへ遷移（入力データをlocalStorageに保存してから）
+  const handleCheckout = () => {
+    try {
+      window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
+    } catch(e) {
+      console.error('localStorage error:', e)
+    }
+    window.location.href = STRIPE_LINK
   }
 
   const resetAll = () => {
-    setStep(0); setResult(null); setPaidResult(null)
-    setIsPaid(false); setError(''); setPaidError('')
+    setStep(0); setResult(null)
+    setError(''); setLoading(false)
+    // URLからparamを消す
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }
 
   // ランディング
@@ -193,13 +135,13 @@ export function CompatibilityAIClient() {
       <div style={s.container}>
         <div style={s.header}><Link href="/star" style={s.backLink}>← 占いトップへ</Link></div>
         <div style={s.hero}>
-          <div style={s.badge}>💘 NEW</div>
+          <div style={s.badge}>💘 AI相性診断</div>
           <h1 style={s.heroTitle}>この関係、<br />このままでいい？</h1>
           <p style={s.heroSub}>AIが読み解く<br /><span style={s.heroAccent}>「すれ違いの正体」</span>と1年後の未来</p>
           <div style={s.piyochan}>🐥</div>
           <p style={s.piyoMsg}>大丈夫だよ。ふたりのすれ違いには、ちゃんと理由があるんだよ🌸</p>
-          <button style={s.primaryBtn} onClick={() => setStep(1)}>✨ 無料で診断する</button>
-          <p style={s.freeNote}>入力データは保存されません・完全無料</p>
+          <button style={s.primaryBtn} onClick={() => setStep(1)}>✨ 診断をはじめる（¥980）</button>
+          <p style={s.freeNote}>入力データは保存されません</p>
         </div>
         <div style={s.features}>
           {[['💬','すれ違いの\n本質を解説'],['📖','1年後の\nストーリー'],['💡','改善策＆\n会話テンプレ']].map(([icon,text]) => (
@@ -210,8 +152,8 @@ export function CompatibilityAIClient() {
           ))}
         </div>
         <div style={s.priceCard}>
-          <p style={s.priceLabel}>💘 AI相性診断（詳細版）</p>
-          <p style={s.price}><span style={s.origPrice}>通常 ¥1,980</span><span style={s.salePrice}> → 初回限定 ¥980</span></p>
+          <p style={s.priceLabel}>💘 AI相性診断</p>
+          <p style={s.price}><span style={s.salePrice}>¥980</span></p>
           <p style={s.priceDesc}>具体シーン・喧嘩の理由・会話テンプレ付き</p>
         </div>
         <div style={{textAlign:'center',marginBottom:'24px'}}>
@@ -301,17 +243,51 @@ export function CompatibilityAIClient() {
       <Section title="印象的な出来事（気になっていること）" emoji="💭">
         <textarea style={s.textarea} placeholder="例：友達の誘いを優先されてもやもやした..." value={inputs.memorableEvent} onChange={e => update('memorableEvent',e.target.value)} />
       </Section>
+
+      <div style={{background:pinkLight, borderRadius:16, padding:'20px', marginBottom:'16px', textAlign:'center'}}>
+        <p style={{fontSize:14, color:pinkDark, fontWeight:700, margin:'0 0 8px'}}>💘 入力完了！あとは決済するだけ</p>
+        <p style={{fontSize:12, color:textSub, margin:'0 0 16px', lineHeight:1.6}}>決済完了後すぐにAI診断結果が表示されます</p>
+        <div style={{fontSize:13, color:pinkDark, fontWeight:900, margin:'0 0 16px'}}>¥980</div>
+      </div>
+
       {error && <p style={s.errorText}>{error}</p>}
-      <button style={{...s.primaryBtn, opacity: loading ? 0.7 : 1}} onClick={handleDiagnose} disabled={loading}>
-        {loading ? '✨ AI診断中...' : '💫 診断結果を見る'}
+      <button style={s.primaryBtn} onClick={handleCheckout}>
+        💘 決済して診断結果を見る（¥980）
       </button>
       <button style={s.backBtn2} onClick={() => setStep(3)}>← 戻る</button>
     </div></div>
   )
 
-  // RESULT
-  if (step === 5 && result) {
+  // RESULT（決済後）
+  if (step === 5) {
+    if (loading) return (
+      <div style={s.page}><div style={s.container}>
+        <div style={{textAlign:'center', padding:'80px 20px'}}>
+          <div style={{fontSize:48, marginBottom:20}}>🐥</div>
+          <p style={{fontSize:18, fontWeight:700, color:pinkDark, marginBottom:8}}>
+            ✨ AI診断中...
+          </p>
+          <p style={{fontSize:13, color:textSub, lineHeight:1.8}}>
+            ふたりの相性を深く読み解いています<br />少々お待ちください
+          </p>
+        </div>
+      </div></div>
+    )
+
+    if (error) return (
+      <div style={s.page}><div style={s.container}>
+        <div style={{textAlign:'center', padding:'60px 20px'}}>
+          <p style={{color:'red', marginBottom:16}}>{error}</p>
+          <button style={s.retryBtn} onClick={resetAll}>最初からやり直す</button>
+        </div>
+      </div></div>
+    )
+
+    if (!result) return null
+
     const score = parseInt(result.score) || 70
+    const shareText = encodeURIComponent(`AI相性診断をやってみた！相性スコア${score}点✨ ふたりのすれ違いの理由がわかって納得😊 #TwinkleStarOracle\n${SHARE_URL}`)
+
     return (
       <div style={s.page}><div style={s.container}>
 
@@ -325,16 +301,41 @@ export function CompatibilityAIClient() {
           <div style={s.scoreBar}><div style={{...s.scoreBarFill, width:`${score}%`}} /></div>
         </div>
 
-        {/* 無料結果 */}
         <ResultSection title="💖 ふたりの良いところ" text={result.positiveSummary} />
         <ResultSection title="💬 すれ違いの正体" text={result.coreGap} />
+        {result.realScene ? <ResultSection title="🎬 実際のすれ違いシーン" text={result.realScene} /> : null}
+        {result.familyAndFriendImpact ? <ResultSection title="👨‍👩‍👧 家族・友人関係の影響" text={result.familyAndFriendImpact} /> : null}
+        {result.conflictReason ? <ResultSection title="💥 喧嘩になる理由" text={result.conflictReason} /> : null}
 
-        {/* ストーリー */}
-        <div style={s.storyCard}>
-          <p style={s.storyTitle}>📖 1年後のふたりのストーリー...</p>
-          <p style={s.storyText}>{result.futureStoryPreview}</p>
-          <div style={s.storyBlur}><p style={s.storyBlurText}>続きは詳細版で...</p></div>
-        </div>
+        {result.advice && result.advice.length > 0 && (
+          <div style={s.adviceBlock}>
+            <p style={s.adviceBlockTitle}>💡 改善策＆会話テンプレート</p>
+            {result.advice.map((a, i) => (
+              <div key={i} style={s.adviceItem}>
+                <p style={s.adviceTitle}>✦ {a.title}</p>
+                {a.detail ? <p style={s.adviceDetail}>{a.detail}</p> : null}
+                {a.conversationExample ? (
+                  <div style={s.convBox}>
+                    <p style={s.convLabel}>💬 会話例</p>
+                    <p style={s.convText}>{a.conversationExample}</p>
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {result.futureStoryFull ? (
+          <div style={s.storyCardFull}>
+            <p style={s.storyTitle}>📖 1年後のふたりのストーリー</p>
+            <p style={s.storyText}>{result.futureStoryFull}</p>
+          </div>
+        ) : result.futureStoryPreview ? (
+          <div style={s.storyCardFull}>
+            <p style={s.storyTitle}>📖 1年後のふたりのストーリー</p>
+            <p style={s.storyText}>{result.futureStoryPreview}</p>
+          </div>
+        ) : null}
 
         {/* ぴよちゃん */}
         <div style={s.piyoCard}>
@@ -342,113 +343,17 @@ export function CompatibilityAIClient() {
           <p style={s.piyoText}>{result.piyochanMessage}</p>
         </div>
 
-        {/* LINE導線（無料） */}
-        <div style={s.lineCardFree}>
-          <p style={s.lineFreeTitle}>📱 手相診断も気になりませんか？</p>
-          <p style={s.lineFreeDesc}>LINEに登録すると<br />手相診断の受付・占い結果のご質問ができます✨</p>
-          <ul style={s.lineList}>
-            <li>🤲 手相診断の受付（両手の写真を送るだけ）</li>
-            <li>💬 占い結果へのご質問</li>
-            <li>🌟 Twinkle Star Oracleからのお知らせ（不定期）</li>
-          </ul>
-          <a href="https://lin.ee/XHDFrA8" target="_blank" rel="noopener noreferrer" style={s.lineBtn}>🟢 無料で受け取る</a>
+        {/* シェアボタン */}
+        <div style={{textAlign:'center', padding:'16px 0', marginBottom:'16px', display:'flex', gap:8, justifyContent:'center'}}>
+          <a href={`https://twitter.com/intent/tweet?text=${shareText}`} target="_blank" rel="noopener noreferrer"
+            style={{padding:'10px 20px', borderRadius:10, border:'1px solid #e2e8f0', background:'white', color:textSub, fontSize:12, textDecoration:'none'}}>
+            𝕏 シェア
+          </a>
+          <Link href="/star"
+            style={{padding:'10px 20px', borderRadius:10, border:'1px solid #e2e8f0', background:'white', color:textSub, fontSize:12, textDecoration:'none'}}>
+            🌟 占いポータルへ
+          </Link>
         </div>
-
-        {/* 有料ロック or 有料結果 */}
-        {!isPaid ? (
-          <div style={s.lockCard}>
-            <p style={s.lockTitle}>🔒 詳細診断でもっと深く知る</p>
-            <ul style={s.lockList}>
-              <li>✨ 具体的なすれ違いシーン</li>
-              <li>✨ 家族・友人関係の影響</li>
-              <li>✨ 喧嘩になる理由と対処法</li>
-              <li>✨ 改善策＆会話テンプレート</li>
-              <li>✨ 1年後のストーリー完全版</li>
-            </ul>
-            <p style={s.lockPrice}>
-              <span style={s.lockOrig}>通常 ¥1,980</span>{' → '}
-              <span style={s.lockSale}>初回限定 ¥980</span>
-            </p>
-            <button
-              onClick={handleCheckout}
-              disabled={checkoutLoading}
-              style={{...s.primaryBtn as React.CSSProperties, opacity: checkoutLoading ? 0.7 : 1, cursor: checkoutLoading ? 'wait' : 'pointer'}}
-            >
-              {checkoutLoading ? '⏳ 決済画面を準備中...' : '💘 この関係を壊さない方法を見る（¥980）'}
-            </button>
-            <Link href="/star/compatibility-ai/sample" style={s.sampleFallback}>📋 まずサンプルを見てみる</Link>
-            {/* テストボタン */}
-            <div style={s.demoSection}>
-              <p style={s.demoNote}>※ 下は動作確認用です（開発中）</p>
-              {paidLoading ? (
-                <div style={s.paidLoading}><p style={s.paidLoadingText}>✨ あなた専用の続きを読み解いています…</p></div>
-              ) : (
-                <button style={s.demoBtn} onClick={async () => {
-                setPaidLoading(true)
-                setPaidError('')
-                try {
-                  const res = await fetch('/api/compatibility-ai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ inputs, mode: 'paid' }),
-                  })
-                  const data = await res.json()
-                  if (data.success && data.result) {
-                    setPaidResult(data.result)
-                    setIsPaid(true)
-                    setTimeout(() => document.getElementById('paid-result-anchor')?.scrollIntoView({ behavior: 'smooth' }), 300)
-                  } else { setPaidError(data.error || 'エラー') }
-                } catch { setPaidError('通信エラー') } finally { setPaidLoading(false) }
-              }} disabled={paidLoading}>🔓 有料版を表示（テスト）</button>
-              )}
-              {paidError && <p style={s.errorText}>{paidError}</p>}
-            </div>
-          </div>
-        ) : paidResult ? (
-          <div id="paid-result-anchor">
-            <div style={s.paidHeader}>
-              <span style={s.paidBadge}>💘 詳細診断</span>
-              <p style={s.paidHeaderTitle}>ふたりのすれ違いの全貌</p>
-            </div>
-            {paidResult.realScene ? <ResultSection title="🎬 実際のすれ違いシーン" text={paidResult.realScene} /> : null}
-            {paidResult.familyAndFriendImpact ? <ResultSection title="👨‍👩‍👧 家族・友人関係の影響" text={paidResult.familyAndFriendImpact} /> : null}
-            {paidResult.conflictReason ? <ResultSection title="💥 喧嘩になる理由" text={paidResult.conflictReason} /> : null}
-            {paidResult.advice && paidResult.advice.length > 0 && (
-              <div style={s.adviceBlock}>
-                <p style={s.adviceBlockTitle}>💡 改善策＆会話テンプレート</p>
-                {paidResult.advice.map((a, i) => (
-                  <div key={i} style={s.adviceItem}>
-                    <p style={s.adviceTitle}>✦ {a.title}</p>
-                    {a.detail ? <p style={s.adviceDetail}>{a.detail}</p> : null}
-                    {a.conversationExample ? (
-                      <div style={s.convBox}>
-                        <p style={s.convLabel}>💬 会話例</p>
-                        <p style={s.convText}>{a.conversationExample}</p>
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            )}
-            {paidResult.futureStoryFull ? (
-              <div style={s.storyCardFull}>
-                <p style={s.storyTitle}>📖 1年後のふたりのストーリー（完全版）</p>
-                <p style={s.storyText}>{paidResult.futureStoryFull}</p>
-              </div>
-            ) : null}
-            {/* LINE導線（有料後） */}
-            <div style={s.lineCardPaid}>
-              <p style={s.lineFreeTitle}>📱 手相診断も合わせて受けてみませんか？</p>
-              <p style={s.lineFreeDesc}>LINEに登録すると<br />手相診断の受付・占い結果のご質問ができます✨</p>
-              <ul style={s.lineList}>
-                <li>🤲 手相診断の受付（両手の写真を送るだけ）</li>
-                <li>💬 占い結果へのご質問</li>
-                <li>🌟 Twinkle Star Oracleからのお知らせ（不定期）</li>
-              </ul>
-              <a href="https://lin.ee/XHDFrA8" target="_blank" rel="noopener noreferrer" style={s.lineBtn}>🟢 LINEで登録する（無料）</a>
-            </div>
-          </div>
-        ) : null}
 
         <p style={s.disclaimer}>{result.disclaimer}</p>
         <p style={s.privacyNote}>🔒 入力された情報はサーバーに保存されません。</p>
@@ -475,6 +380,7 @@ function StepHeader({ step, total, title, onBack }: { step:number; total:number;
     </div>
   )
 }
+
 function Section({ title, emoji, children }: { title:string; emoji:string; children:React.ReactNode }) {
   return (
     <div style={{marginBottom:'24px'}}>
@@ -483,6 +389,7 @@ function Section({ title, emoji, children }: { title:string; emoji:string; child
     </div>
   )
 }
+
 function ChoiceBtn({ label, selected, onClick }: { label:string; selected:boolean; onClick:()=>void }) {
   return (
     <button onClick={onClick} style={{display:'block',width:'100%',padding:'12px 16px',background: selected ? '#fce7f3' : 'white',border: selected ? '2px solid #f472b6' : '2px solid #e2e8f0',borderRadius:'12px',fontSize:'14px',color: selected ? '#db2777' : '#1e1b4b',cursor:'pointer',marginBottom:'8px',textAlign:'left',fontWeight: selected ? 700 : 400}}>
@@ -490,6 +397,7 @@ function ChoiceBtn({ label, selected, onClick }: { label:string; selected:boolea
     </button>
   )
 }
+
 function NavBtns({ onBack, onNext, nextDisabled=false }: { onBack?:()=>void; onNext?:()=>void; nextDisabled?:boolean }) {
   return (
     <div style={{display:'flex',gap:'12px',marginTop:'8px',paddingBottom:'24px'}}>
@@ -498,6 +406,7 @@ function NavBtns({ onBack, onNext, nextDisabled=false }: { onBack?:()=>void; onN
     </div>
   )
 }
+
 function ResultSection({ title, text }: { title:string; text:string }) {
   if (!text) return null
   return (
@@ -508,7 +417,6 @@ function ResultSection({ title, text }: { title:string; text:string }) {
   )
 }
 
-// スタイル
 const s: Record<string, React.CSSProperties> = {
   page: { minHeight:'100vh', background:'linear-gradient(135deg,#fdf2f8 0%,#f0f9ff 50%,#fdf4ff 100%)', fontFamily:"'Hiragino Kaku Gothic ProN','Hiragino Sans',sans-serif", paddingBottom:'40px' },
   container: { maxWidth:'480px', margin:'0 auto', padding:'0 16px' },
@@ -530,8 +438,7 @@ const s: Record<string, React.CSSProperties> = {
   priceCard: { background:'linear-gradient(135deg,#fdf2f8,#fce7f3)', border:`2px solid ${pink}`, borderRadius:'20px', padding:'20px', textAlign:'center', marginBottom:'16px' },
   priceLabel: { fontSize:'14px', fontWeight:700, color:pinkDark, margin:'0 0 8px' },
   price: { margin:'0 0 8px' },
-  origPrice: { fontSize:'14px', color:textSub, textDecoration:'line-through' },
-  salePrice: { fontSize:'20px', fontWeight:900, color:pinkDark },
+  salePrice: { fontSize:'28px', fontWeight:900, color:pinkDark },
   priceDesc: { fontSize:'12px', color:textSub, margin:0 },
   sampleBtn: { color:purple, textDecoration:'none', fontSize:'14px', border:`1px solid ${purple}`, borderRadius:'999px', padding:'8px 20px', display:'inline-block' },
   textarea: { width:'100%', minHeight:'80px', padding:'12px', border:'2px solid #e2e8f0', borderRadius:'12px', fontSize:'14px', color:textMain, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
@@ -545,35 +452,11 @@ const s: Record<string, React.CSSProperties> = {
   scorePct: { fontSize:'18px', color:pinkDark, fontWeight:700, marginTop:'12px' },
   scoreBar: { height:'8px', background:'#e2e8f0', borderRadius:'999px', overflow:'hidden' },
   scoreBarFill: { height:'100%', background:'linear-gradient(135deg,#f472b6,#a855f7)', borderRadius:'999px' },
-  storyCard: { background:'linear-gradient(135deg,#fdf4ff,#fce7f3)', borderRadius:'20px', padding:'20px', marginBottom:'16px', overflow:'hidden' },
   storyCardFull: { background:'linear-gradient(135deg,#fdf4ff,#fce7f3)', borderRadius:'20px', padding:'20px', marginBottom:'16px' },
   storyTitle: { fontSize:'15px', fontWeight:700, color:purple, margin:'0 0 10px' },
   storyText: { fontSize:'14px', color:textSub, lineHeight:1.7, margin:0 },
-  storyBlur: { background:'linear-gradient(to bottom,transparent,rgba(253,244,255,0.98))', paddingTop:'20px', textAlign:'center' },
-  storyBlurText: { fontSize:'13px', color:purple, fontWeight:700, margin:0 },
   piyoCard: { background:pinkLight, borderRadius:'20px', padding:'20px', textAlign:'center', marginBottom:'16px' },
   piyoText: { fontSize:'14px', color:pinkDark, lineHeight:1.7, margin:0 },
-  lineCardFree: { background:'linear-gradient(135deg,#f0fdf4,#dcfce7)', border:'2px solid #86efac', borderRadius:'20px', padding:'20px', marginBottom:'16px' },
-  lineCardPaid: { background:'linear-gradient(135deg,#fdf2f8,#f0fdf4)', border:'2px solid #86efac', borderRadius:'20px', padding:'20px', marginBottom:'16px' },
-  lineFreeTitle: { fontSize:'15px', fontWeight:900, color:'#166534', margin:'0 0 6px' },
-  lineFreeDesc: { fontSize:'13px', color:'#166534', lineHeight:1.7, margin:'0 0 12px' },
-  lineList: { listStyle:'none', padding:0, margin:'0 0 16px', fontSize:'13px', color:'#166534', lineHeight:2 },
-  lineBtn: { display:'block', background:'#22c55e', color:'white', padding:'14px', borderRadius:'12px', textDecoration:'none', fontWeight:700, fontSize:'16px', textAlign:'center' },
-  lockCard: { background:'white', border:`2px solid ${pink}`, borderRadius:'20px', padding:'24px', marginBottom:'16px', boxShadow:'0 4px 20px rgba(244,114,182,0.15)' },
-  lockTitle: { fontSize:'16px', fontWeight:900, color:textMain, margin:'0 0 16px' },
-  lockList: { listStyle:'none', padding:0, margin:'0 0 16px', fontSize:'14px', color:textMain, lineHeight:2 },
-  lockPrice: { textAlign:'center', margin:'0 0 16px' },
-  lockOrig: { color:textSub, textDecoration:'line-through', fontSize:'14px' },
-  lockSale: { color:pinkDark, fontWeight:900, fontSize:'20px' },
-  sampleFallback: { display:'block', textAlign:'center', color:purple, textDecoration:'none', fontSize:'13px', marginTop:'10px', padding:'8px' },
-  demoSection: { marginTop:'16px', paddingTop:'16px', borderTop:'1px dashed #e2e8f0' },
-  demoNote: { fontSize:'11px', color:textSub, textAlign:'center', marginBottom:'8px', lineHeight:1.6 },
-  demoBtn: { display:'block', width:'100%', padding:'12px', background:'#f1f5f9', border:'1px dashed #94a3b8', borderRadius:'10px', fontSize:'14px', color:textSub, cursor:'pointer' },
-  paidLoading: { textAlign:'center', padding:'32px 20px', background:'linear-gradient(135deg,#fdf2f8,#fdf4ff)', borderRadius:'20px', marginBottom:'16px' },
-  paidLoadingText: { fontSize:'15px', color:pinkDark, fontWeight:700, lineHeight:1.6, margin:0 },
-  paidHeader: { textAlign:'center', padding:'20px 0 8px', marginBottom:'8px' },
-  paidBadge: { display:'inline-block', background:'linear-gradient(135deg,#f472b6,#a855f7)', color:'white', fontSize:'12px', fontWeight:700, padding:'4px 16px', borderRadius:'999px', marginBottom:'8px' },
-  paidHeaderTitle: { fontSize:'20px', fontWeight:900, color:textMain, margin:'8px 0 0' },
   adviceBlock: { background:'white', borderRadius:'20px', padding:'20px', marginBottom:'16px', boxShadow:'0 2px 12px rgba(0,0,0,0.06)' },
   adviceBlockTitle: { fontSize:'15px', fontWeight:700, color:textMain, margin:'0 0 14px' },
   adviceItem: { marginBottom:'20px', paddingBottom:'20px', borderBottom:'1px solid #f1f5f9' },
