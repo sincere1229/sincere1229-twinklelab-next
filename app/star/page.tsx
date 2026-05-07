@@ -34,6 +34,7 @@ const CARDS = [
 const DEEP = [
   { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'https://numerology-app-lovat.vercel.app' },
   { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'https://kiju-app.vercel.app' },
+  { icon:'💕', name:'相性占い（無料）', sub:'2人の運命スコアを算出', href:'https://aicompat-app.vercel.app' },
   { icon:'☯️', name:'四柱推命', sub:'命式・五行バランスを解読', href:'https://shichu-app.vercel.app' },
 ]
 
