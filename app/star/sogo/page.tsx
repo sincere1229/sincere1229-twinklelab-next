@@ -94,7 +94,46 @@ export default function SogoPage() {
     }
   }
 
-  const copy = async () => { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),3000) }
+  const downloadPDF = () => {
+    // printウィンドウでPDF保存を促す方法（日本語フォント問題を回避）
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+    const today = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' })
+    const cardList = drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards
+    const cardText = cardList.map(c => `【${c.position}】${c.name}${c.reversed?' (逆位置)':''}`).join(' ／ ')
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="ja">
+      <head>
+        <meta charset="UTF-8">
+        <title>AI総合鑑定書 - ${name}様</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&display=swap');
+          body { font-family: 'Noto Serif JP', serif; max-width: 700px; margin: 0 auto; padding: 40px; color: #2a1020; background: white; }
+          h1 { font-size: 24px; text-align: center; color: #8a5a20; border-bottom: 2px solid #c9a84c; padding-bottom: 12px; margin-bottom: 8px; }
+          .subtitle { text-align: center; font-size: 13px; color: #8a6a9a; margin-bottom: 4px; }
+          .date { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 24px; }
+          .gold-line { border: none; border-top: 1px solid #c9a84c; margin: 16px 0; }
+          .cards { background: #fdf8f0; border: 1px solid #e8c97a; border-radius: 8px; padding: 14px; margin: 16px 0; font-size: 12px; color: #6a4a20; line-height: 2; }
+          .result { font-size: 14px; line-height: 2.2; color: #2a1020; white-space: pre-wrap; margin: 16px 0; }
+          .footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; }
+          @media print { button { display: none; } }
+        </style>
+      </head>
+      <body>
+        <h1>✦ AI総合鑑定書 ✦</h1>
+        <div class="subtitle">${name}様</div>
+        <div class="date">${today} | Twinkle Star Oracle</div>
+        <hr class="gold-line">
+        <div class="cards">🃏 タロットカード：${cardText}</div>
+        <div class="result">${result}</div>
+        <div class="footer">© Twinkle Star Oracle / twinkle-lab.jp</div>
+        <script>window.onload = () => { window.print(); }<\/script>
+      </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
   const reset = () => {
     setStep('top'); setName(''); setGender(''); setBirthdate(''); setBirthtime('')
     setBirthplace(''); setConcern(''); setImageL(null); setImageR(null)
@@ -135,7 +174,7 @@ export default function SogoPage() {
             <div style={{ fontSize:36, marginBottom:16 }}>🔮</div>
             <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:12 }}>AI総合鑑定 ¥3,980</div>
             <div style={{ fontSize:13, color:'rgba(253,246,240,0.55)', lineHeight:1.9, marginBottom:24 }}>
-              手相・タロット5枚・ホロスコープ・数秘術を統合<br />恋愛・仕事・金運を本格リーディング
+              手相・タロット5枚・ホロスコープ・数秘術を統合<br />恋愛・仕事・金運を本格リーディング<br />結果はPDF鑑定書で保存できます
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:8, alignItems:'center', marginBottom:24 }}>
               {['🤚 手相リーディング（左右両手）','🃏 タロット5枚引き','⭐ ホロスコープ鑑定','🔢 数秘術分析'].map(item=>(
@@ -229,6 +268,9 @@ export default function SogoPage() {
             <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>{result}</div>
             <button onClick={copy} style={{ width:'100%', padding:13, border:`1px solid ${copied?'rgba(240,168,192,0.5)':'rgba(155,106,176,0.4)'}`, borderRadius:12, background:'transparent', color:copied?'#f0a8c0':'#c4a0d8', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10 }}>
               {copied?'✅ コピーしました！':'📋 テキストをコピー'}
+            </button>
+            <button onClick={downloadPDF} style={{ width:'100%', padding:13, border:'1px solid rgba(212,168,67,0.4)', borderRadius:12, background:'rgba(212,168,67,0.08)', color:'#f0d080', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10 }}>
+              📄 PDF鑑定書を保存する
             </button>
             <div style={{ display:'flex', gap:8, justifyContent:'center', marginBottom:12 }}>
               <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('AI総合鑑定を受けました✨ #TwinkleStarOracle\nhttps://twinkle-lab.jp/star/sogo')}`} target="_blank" rel="noopener noreferrer"
