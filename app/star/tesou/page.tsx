@@ -60,7 +60,7 @@ export default function TesouPage() {
     if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname)
   }
 
-  const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(212,168,67,0.2)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' }
+  const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(212,168,67,0.2)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' as const }
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#1a0a10,#2a1020,#1a0818)', padding:'40px 20px 80px', fontFamily:"'Noto Serif JP',serif", color:'#fdf6f0' }}>
