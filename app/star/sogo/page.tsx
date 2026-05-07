@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const DECK = [
   {num:'0',name:'愚者',symbol:'🌟',img:'/tarot/card_00_fool.jpg'},
@@ -30,36 +30,41 @@ function drawCards() {
   return [...DECK].sort(()=>Math.random()-0.5).slice(0,5).map((card,i)=>({...card, position:POSITIONS[i], reversed:Math.random()>0.7}))
 }
 
+const STRIPE_LINK = 'https://buy.stripe.com/aFa5kw8Hs6C6dR3fRx33W02'
+
 export default function SogoPage() {
+  const [step, setStep] = useState('top')
   const [name, setName] = useState('')
   const [gender, setGender] = useState('')
   const [birthdate, setBirthdate] = useState('')
   const [birthtime, setBirthtime] = useState('')
   const [birthplace, setBirthplace] = useState('')
   const [concern, setConcern] = useState('')
-  const [imageL, setImageL] = useState<string|null>(null)
-  const [imageR, setImageR] = useState<string|null>(null)
+  const [imageL, setImageL] = useState(null)
+  const [imageR, setImageR] = useState(null)
   const [mimeTypeL, setMimeTypeL] = useState('image/jpeg')
   const [mimeTypeR, setMimeTypeR] = useState('image/jpeg')
-  const [cards, setCards] = useState<any[]>([])
-  const drawnCardsRef = useRef<any[]>([])
-  const [loading, setLoading] = useState(false)
+  const [cards, setCards] = useState([])
+  const drawnCardsRef = useRef([])
   const [result, setResult] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
-  const [paymentSuccess] = useState(
-    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('payment') === 'success'
-  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('payment') === 'success') setStep('form')
+  }, [])
 
   const hasImage = imageL || imageR
   const canStart = name && gender && birthdate && concern && hasImage
 
-  const handleImage = (side: 'L'|'R', file: File) => {
+  const handleImage = (side, file) => {
     if (!file.type.startsWith('image/')) { setError('画像ファイルを選択してください'); return }
     if (file.size > 10*1024*1024) { setError('10MB以下の画像を選択してください'); return }
     const reader = new FileReader()
     reader.onload = e => {
-      const base64 = (e.target?.result as string).split(',')[1]
+      const base64 = e.target.result.split(',')[1]
       if (side==='L') { setImageL(base64); setMimeTypeL(file.type) }
       else { setImageR(base64); setMimeTypeR(file.type) }
       setError('')
@@ -69,7 +74,7 @@ export default function SogoPage() {
 
   const analyze = async () => {
     if (!canStart) return
-    setLoading(true); setError(''); setResult('')
+    setStep('loading'); setError('')
     const drawn = drawCards()
     try {
       const res = await fetch('/api/uranai/sogo', {
@@ -82,19 +87,24 @@ export default function SogoPage() {
       drawnCardsRef.current = drawn
       setCards([...drawn])
       setResult(data.result)
-    } catch (err: any) {
+      setStep('result')
+    } catch (err) {
       setError(err.message || '鑑定中にエラーが発生しました')
-    } finally {
-      setLoading(false)
+      setStep('form')
     }
   }
 
   const copy = async () => { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),3000) }
-  const reset = () => { setName(''); setGender(''); setBirthdate(''); setBirthtime(''); setBirthplace(''); setConcern(''); setImageL(null); setImageR(null); setCards([]); setResult(''); setError('') }
+  const reset = () => {
+    setStep('top'); setName(''); setGender(''); setBirthdate(''); setBirthtime('')
+    setBirthplace(''); setConcern(''); setImageL(null); setImageR(null)
+    setCards([]); setResult(''); setError('')
+    if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname)
+  }
 
-  const s = { input: { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' as const } }
+  const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' }
 
-  const CardGrid = ({cardList}:{cardList:any[]}) => (
+  const CardGrid = ({cardList}) => (
     <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
       {cardList.map((card,i)=>(
         <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
@@ -115,125 +125,125 @@ export default function SogoPage() {
 
         <div style={{ textAlign:'center', marginBottom:40 }}>
           <div style={{ fontSize:12, letterSpacing:'0.35em', color:'#d4a843', textTransform:'uppercase', marginBottom:12 }}>✦ Twinkle Star Oracle ✦</div>
-          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, marginBottom:6 }}>
-            AI<span style={{ color:'#c4a0d8', fontStyle:'italic' }}>総合鑑定</span>
-          </h1>
+          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, marginBottom:6 }}>AI<span style={{ color:'#c4a0d8', fontStyle:'italic' }}>総合鑑定</span></h1>
           <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'12px auto' }} />
           <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.9 }}>手相・タロット・数秘術・ホロスコープを統合した<br />あなただけの本格リーディング</p>
         </div>
 
-        {paymentSuccess && (
-          <div style={{ background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.25)', borderRadius:12, padding:'14px 18px', textAlign:'center', fontSize:13, color:'#f0d080', marginBottom:24 }}>
-            ✨ お支払いが完了しました。以下のフォームにご入力の上、手相画像をアップロードしてください。
+        {step === 'top' && (
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'36px 28px', textAlign:'center' }}>
+            <div style={{ fontSize:36, marginBottom:16 }}>🔮</div>
+            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:12 }}>AI総合鑑定 ¥3,980</div>
+            <div style={{ fontSize:13, color:'rgba(253,246,240,0.55)', lineHeight:1.9, marginBottom:24 }}>
+              手相・タロット5枚・ホロスコープ・数秘術を統合<br />恋愛・仕事・金運を本格リーディング
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:8, alignItems:'center', marginBottom:24 }}>
+              {['🤚 手相リーディング（左右両手）','🃏 タロット5枚引き','⭐ ホロスコープ鑑定','🔢 数秘術分析'].map(item=>(
+                <div key={item} style={{ fontSize:13, color:'rgba(253,246,240,0.7)' }}>✦ {item}</div>
+              ))}
+            </div>
+            <button onClick={()=>window.location.href=STRIPE_LINK}
+              style={{ width:'100%', padding:18, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:16, letterSpacing:'0.1em', cursor:'pointer', marginBottom:12 }}>
+              🔮 ¥3,980 で鑑定をはじめる
+            </button>
+            <p style={{ fontSize:11, color:'rgba(253,246,240,0.35)' }}>決済完了後にフォーム入力ページへ進みます</p>
+            <a href="/star" style={{ display:'block', marginTop:16, fontSize:12, color:'rgba(253,246,240,0.4)', textDecoration:'none' }}>← 占いポータルに戻る</a>
           </div>
         )}
 
-        <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px', backdropFilter:'blur(12px)' }}>
-
-          {!result && !loading && (
-            <>
-              <div style={{ textAlign:'center', marginBottom:24 }}>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:17, color:'#c4a0d8', marginBottom:6 }}>🌙 お客様情報</div>
-                <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.8 }}>正確な鑑定のため、できる限りご入力ください</p>
-              </div>
-
-              <div style={{ display:'grid', gap:14 }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>お名前 <span style={{color:'#f0a8c0'}}>*</span></div><input style={s.input} value={name} onChange={e=>setName(e.target.value)} placeholder="山田 花子" /></div>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>性別 <span style={{color:'#f0a8c0'}}>*</span></div>
-                    <select style={{...s.input, color:'#fdf6f0', backgroundColor:'#1e0a28'}} value={gender} onChange={e=>setGender(e.target.value)}>
-                      <option value="" style={{background:'#1e0a28',color:'#fdf6f0'}}>選択</option><option value="女性" style={{background:'#1e0a28',color:'#fdf6f0'}}>女性</option><option value="男性" style={{background:'#1e0a28',color:'#fdf6f0'}}>男性</option><option value="その他" style={{background:'#1e0a28',color:'#fdf6f0'}}>その他</option>
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>生年月日 <span style={{color:'#f0a8c0'}}>*</span></div><input style={s.input} type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} /></div>
-                  <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生時間（任意）</div><input style={s.input} type="time" value={birthtime} onChange={e=>setBirthtime(e.target.value)} /></div>
-                </div>
-                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生地（任意）</div><input style={s.input} value={birthplace} onChange={e=>setBirthplace(e.target.value)} placeholder="例：東京都新宿区" /></div>
-                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>相談内容 <span style={{color:'#f0a8c0'}}>*</span></div><textarea style={{...s.input,resize:'none',height:80,lineHeight:1.7}} value={concern} onChange={e=>setConcern(e.target.value)} placeholder="例：仕事を変えるべきか迷っています。恋愛がうまくいかず悩んでいます。など" /></div>
-
-                {/* 手相アップロード */}
-                <div>
-                  <div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:8 }}>手相画像 <span style={{color:'#f0a8c0'}}>*</span>（左右どちらか1枚以上）</div>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                    {(['L','R'] as const).map(side=>(
-                      <div key={side}>
-                        <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginBottom:6 }}>{side==='L'?'🤚 左手':'🤚 右手'}</div>
-                        {(side==='L'?imageL:imageR) ? (
-                          <div style={{ position:'relative' }}>
-                            <img src={`data:${side==='L'?mimeTypeL:mimeTypeR};base64,${side==='L'?imageL:imageR}`} style={{ width:'100%', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', maxHeight:160, objectFit:'cover' }} alt="" />
-                            <button onClick={()=>side==='L'?setImageL(null):setImageR(null)} style={{ position:'absolute', top:6, right:6, background:'rgba(200,96,122,0.8)', border:'none', color:'white', width:24, height:24, borderRadius:'50%', cursor:'pointer', fontSize:12 }}>✕</button>
-                          </div>
-                        ) : (
-                          <label style={{ border:'2px dashed rgba(155,106,176,0.3)', borderRadius:14, padding:'20px 10px', textAlign:'center', cursor:'pointer', display:'block', background:'rgba(155,106,176,0.02)' }}>
-                            <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>e.target.files?.[0]&&handleImage(side,e.target.files[0])} />
-                            <div style={{ fontSize:22, marginBottom:5 }}>{side==='L'?'✋':'🤚'}</div>
-                            <div style={{ fontSize:11, color:'rgba(253,246,240,0.55)' }}>タップして選択</div>
-                          </label>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ fontSize:10, color:'rgba(253,246,240,0.3)', textAlign:'center', marginTop:8 }}>明るい場所で撮影・ピントを合わせてください</div>
-                </div>
-              </div>
-
-              {error && <div style={{ background:'rgba(200,96,122,0.1)', border:'1px solid rgba(200,96,122,0.3)', borderRadius:10, padding:'12px 16px', fontSize:12, color:'#f0a8c0', textAlign:'center', marginTop:12 }}>{error}</div>}
-
-              <button onClick={analyze} disabled={!canStart}
-                style={{ width:'100%', padding:17, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:14, letterSpacing:'0.1em', cursor:canStart?'pointer':'not-allowed', opacity:canStart?1:0.4, marginTop:20, transition:'all 0.3s' }}>
-                🔮 AI総合鑑定をはじめる
-              </button>
-            </>
-          )}
-
-          {loading && (
-            <div style={{ textAlign:'center', padding:'52px 0' }}>
-              {cards.length>0 && (
-                <div style={{ marginBottom:28 }}>
-                  <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, color:'#f0d080', marginBottom:14 }}>🃏 あなたのタロットカード</div>
-                  <CardGrid cardList={cards} />
-                  <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginTop:10 }}>カードと手相・星の配置を統合しています…</div>
-                </div>
-              )}
-              <div style={{ fontSize:56, marginBottom:20 }}>🌟</div>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:10 }}>深く読み解いています…</div>
-              <div style={{ fontSize:12, color:'rgba(253,246,240,0.4)', lineHeight:2 }}>手相・タロット・数秘術・ホロスコープ<br />すべてを統合して鑑定しています</div>
+        {step === 'form' && (
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px', backdropFilter:'blur(12px)' }}>
+            <div style={{ background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.25)', borderRadius:12, padding:'14px 18px', textAlign:'center', fontSize:13, color:'#f0d080', marginBottom:24 }}>
+              ✅ お支払いが完了しました！<br />
+              <span style={{ fontSize:11, color:'rgba(253,246,240,0.5)' }}>以下のフォームにご入力の上、手相画像をアップロードしてください</span>
             </div>
-          )}
-
-          {result && (
-            <>
-              <div style={{ textAlign:'center', marginBottom:20 }}>
-                <div style={{ fontSize:40, marginBottom:10 }}>✨</div>
-                <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:'#c4a0d8' }}>総合鑑定結果</div>
-                <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', marginTop:4 }}>{name}様 | Twinkle Star Oracle</div>
+            <div style={{ textAlign:'center', marginBottom:20 }}>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:17, color:'#c4a0d8' }}>🌙 お客様情報</div>
+            </div>
+            <div style={{ display:'grid', gap:14 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>お名前 *</div><input style={inputStyle} value={name} onChange={e=>setName(e.target.value)} placeholder="山田 花子" /></div>
+                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>性別 *</div>
+                  <select style={{...inputStyle, color:'#fdf6f0', backgroundColor:'#1e0a28'}} value={gender} onChange={e=>setGender(e.target.value)}>
+                    <option value="">選択</option><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option>
+                  </select>
+                </div>
               </div>
-              <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'0 auto 16px' }} />
-
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたタロットカード</div>
-              <CardGrid cardList={drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards} />
-
-              <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>
-                {result}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>生年月日 *</div><input style={inputStyle} type="date" value={birthdate} onChange={e=>setBirthdate(e.target.value)} /></div>
+                <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生時間（任意）</div><input style={inputStyle} type="time" value={birthtime} onChange={e=>setBirthtime(e.target.value)} /></div>
               </div>
+              <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生地（任意）</div><input style={inputStyle} value={birthplace} onChange={e=>setBirthplace(e.target.value)} placeholder="例：東京都新宿区" /></div>
+              <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>相談内容 *</div>
+                <textarea style={{...inputStyle, resize:'none', height:80, lineHeight:1.7}} value={concern} onChange={e=>setConcern(e.target.value)} placeholder="例：仕事を変えるべきか迷っています。" />
+              </div>
+              <div>
+                <div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:8 }}>手相画像 *（左右どちらか1枚以上）</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                  {['L','R'].map(side=>(
+                    <div key={side}>
+                      <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginBottom:6 }}>{side==='L'?'🤚 左手':'🤚 右手'}</div>
+                      {(side==='L'?imageL:imageR) ? (
+                        <div style={{ position:'relative' }}>
+                          <img src={`data:${side==='L'?mimeTypeL:mimeTypeR};base64,${side==='L'?imageL:imageR}`} style={{ width:'100%', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', maxHeight:160, objectFit:'cover' }} alt="" />
+                          <button onClick={()=>side==='L'?setImageL(null):setImageR(null)} style={{ position:'absolute', top:6, right:6, background:'rgba(200,96,122,0.8)', border:'none', color:'white', width:24, height:24, borderRadius:'50%', cursor:'pointer', fontSize:12 }}>✕</button>
+                        </div>
+                      ) : (
+                        <label style={{ border:'2px dashed rgba(155,106,176,0.3)', borderRadius:14, padding:'20px 10px', textAlign:'center', cursor:'pointer', display:'block', background:'rgba(155,106,176,0.02)' }}>
+                          <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>e.target.files?.[0]&&handleImage(side,e.target.files[0])} />
+                          <div style={{ fontSize:22, marginBottom:5 }}>{side==='L'?'✋':'🤚'}</div>
+                          <div style={{ fontSize:11, color:'rgba(253,246,240,0.55)' }}>タップして選択</div>
+                        </label>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {error && <div style={{ background:'rgba(200,96,122,0.1)', border:'1px solid rgba(200,96,122,0.3)', borderRadius:10, padding:'12px 16px', fontSize:12, color:'#f0a8c0', textAlign:'center', marginTop:12 }}>{error}</div>}
+            <button onClick={analyze} disabled={!canStart}
+              style={{ width:'100%', padding:17, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:14, letterSpacing:'0.1em', cursor:canStart?'pointer':'not-allowed', opacity:canStart?1:0.4, marginTop:20 }}>
+              🔮 AI総合鑑定をはじめる
+            </button>
+          </div>
+        )}
 
-              <button onClick={copy} style={{ width:'100%', padding:13, border:`1px solid ${copied?'rgba(240,168,192,0.5)':'rgba(155,106,176,0.4)'}`, borderRadius:12, background:'transparent', color:copied?'#f0a8c0':'#c4a0d8', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10, transition:'all 0.3s' }}>
-                {copied?'✅ コピーしました！':'📋 テキストをコピー'}
-              </button>
-              <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.04)', color:'rgba(253,246,240,0.35)', fontFamily:"'Noto Serif JP',serif", fontSize:11, cursor:'pointer' }}>
-                最初からやり直す
-              </button>
-            </>
-          )}
-        </div>
+        {step === 'loading' && (
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'52px 28px', textAlign:'center' }}>
+            <div style={{ fontSize:56, marginBottom:20 }}>🌟</div>
+            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:10 }}>深く読み解いています…</div>
+            <div style={{ fontSize:12, color:'rgba(253,246,240,0.4)', lineHeight:2 }}>手相・タロット・数秘術・ホロスコープ<br />すべてを統合して鑑定しています</div>
+          </div>
+        )}
+
+        {step === 'result' && (
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px' }}>
+            <div style={{ textAlign:'center', marginBottom:20 }}>
+              <div style={{ fontSize:40, marginBottom:10 }}>✨</div>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:'#c4a0d8' }}>総合鑑定結果</div>
+              <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', marginTop:4 }}>{name}様 | Twinkle Star Oracle</div>
+            </div>
+            <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'0 auto 16px' }} />
+            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたタロットカード</div>
+            <CardGrid cardList={drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards} />
+            <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>{result}</div>
+            <button onClick={copy} style={{ width:'100%', padding:13, border:`1px solid ${copied?'rgba(240,168,192,0.5)':'rgba(155,106,176,0.4)'}`, borderRadius:12, background:'transparent', color:copied?'#f0a8c0':'#c4a0d8', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10 }}>
+              {copied?'✅ コピーしました！':'📋 テキストをコピー'}
+            </button>
+            <div style={{ display:'flex', gap:8, justifyContent:'center', marginBottom:12 }}>
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('AI総合鑑定を受けました✨ #TwinkleStarOracle\nhttps://twinkle-lab.jp/star/sogo')}`} target="_blank" rel="noopener noreferrer"
+                style={{ padding:'10px 20px', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', background:'transparent', color:'rgba(253,246,240,0.5)', fontSize:12, textDecoration:'none' }}>𝕏 シェア</a>
+              <a href="/star" style={{ padding:'10px 20px', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', background:'transparent', color:'rgba(253,246,240,0.5)', fontSize:12, textDecoration:'none' }}>🌟 占いポータルへ</a>
+            </div>
+            <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.04)', color:'rgba(253,246,240,0.35)', fontFamily:"'Noto Serif JP',serif", fontSize:11, cursor:'pointer' }}>最初からやり直す</button>
+          </div>
+        )}
 
         <div style={{ marginTop:24, padding:14, background:'rgba(155,106,176,0.04)', borderRadius:12, fontSize:11, color:'rgba(253,246,240,0.28)', lineHeight:1.9, textAlign:'center' }}>
           ご入力いただいた情報・画像は鑑定後に保持されません<br />結果はコピーして保存してください
         </div>
       </div>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Serif+JP:wght@300;400&display=swap');`}</style>
+      <style>{"@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Serif+JP:wght@300;400&display=swap');"}</style>
     </div>
   )
 }
