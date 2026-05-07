@@ -27,7 +27,7 @@ export default function TesouPage() {
     if (file.size > 10*1024*1024) { setError('10MB以下の画像を選択してください'); return }
     const reader = new FileReader()
     reader.onload = e => {
-      const base64 = e.target.result.split(',')[1]
+      const base64 = (e.target!.result as string).split(',')[1]
       if (side==='L') { setImageL(base64); setMimeTypeL(file.type) }
       else { setImageR(base64); setMimeTypeR(file.type) }
       setError('')
