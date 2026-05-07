@@ -69,6 +69,7 @@ export function CompatibilityAIClient() {
   const [result, setResult] = useState<DiagnosisResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [paidReady, setPaidReady] = useState(false)
 
   const update = (key: keyof FormInputs, value: string) =>
     setInputs(prev => ({ ...prev, [key]: value }))
@@ -78,37 +79,33 @@ export function CompatibilityAIClient() {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     if (params.get('payment') !== 'success') return
-
-    // localStorageから入力データを復元
-    try {
-      const saved = window.localStorage.getItem('compatibility_inputs')
-      if (saved) {
-        const savedInputs = JSON.parse(saved)
-        setInputs(savedInputs)
-        window.localStorage.removeItem('compatibility_inputs')
-        setStep(5)
-        setLoading(true)
-        // 有料診断を実行
-        fetch('/api/compatibility-ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ inputs: savedInputs, mode: 'paid' }),
-        }).then(res => res.json()).then(data => {
-          if (data.success && data.result) {
-            setResult(data.result)
-          } else {
-            setError(data.error || 'エラーが発生しました')
-          }
-        }).catch(() => {
-          setError('通信エラーが発生しました。もう一度お試しください。')
-        }).finally(() => {
-          setLoading(false)
-        })
-      }
-    } catch(e) {
-      console.error('localStorage error:', e)
-    }
+    // 決済完了→質問入力へ
+    setStep(1)
+    setPaidReady(true)
   }, [])
+
+  // 決済後の診断実行
+  const handleDiagnose = async () => {
+    setLoading(true); setError('')
+    try {
+      const res = await fetch('/api/compatibility-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs, mode: 'paid' }),
+      })
+      const data = await res.json()
+      if (data.success && data.result) {
+        setResult(data.result)
+        setStep(5)
+      } else {
+        setError(data.error || 'エラーが発生しました')
+      }
+    } catch {
+      setError('通信エラーが発生しました。もう一度お試しください。')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // 決済ページへ遷移（入力データをlocalStorageに保存してから）
   const handleCheckout = () => {
@@ -140,7 +137,9 @@ export function CompatibilityAIClient() {
           <p style={s.heroSub}>AIが読み解く<br /><span style={s.heroAccent}>「すれ違いの正体」</span>と1年後の未来</p>
           <div style={s.piyochan}>🐥</div>
           <p style={s.piyoMsg}>大丈夫だよ。ふたりのすれ違いには、ちゃんと理由があるんだよ🌸</p>
-          <button style={s.primaryBtn} onClick={() => setStep(1)}>✨ 診断をはじめる（¥980）</button>
+          <button style={s.primaryBtn} onClick={() => {
+            window.location.href = STRIPE_LINK
+          }}>✨ 診断をはじめる（¥980）</button>
           <p style={s.freeNote}>入力データは保存されません</p>
         </div>
         <div style={s.features}>
@@ -167,6 +166,12 @@ export function CompatibilityAIClient() {
   if (step === 1) return (
     <div style={s.page}><div style={s.container}>
       <StepHeader step={1} total={4} title="性格タイプ" onBack={() => setStep(0)} />
+      {paidReady && (
+        <div style={{background:'linear-gradient(135deg,#f0fdf4,#dcfce7)', border:'2px solid #86efac', borderRadius:16, padding:'14px 18px', marginBottom:16, textAlign:'center'}}>
+          <p style={{fontSize:13, fontWeight:700, color:'#166534', margin:'0 0 2px'}}>✅ お支払いが完了しました！</p>
+          <p style={{fontSize:11, color:'#166534', margin:0}}>以下の質問に答えて診断を受けてください</p>
+        </div>
+      )}
       <Section title="あなたの性格タイプ" emoji="💫">
         {PERSONALITY_TYPES.map(o => <ChoiceBtn key={o.value} label={o.label} selected={inputs.yourType===o.value} onClick={() => update('yourType',o.value)} />)}
       </Section>
@@ -244,15 +249,17 @@ export function CompatibilityAIClient() {
         <textarea style={s.textarea} placeholder="例：友達の誘いを優先されてもやもやした..." value={inputs.memorableEvent} onChange={e => update('memorableEvent',e.target.value)} />
       </Section>
 
-      <div style={{background:pinkLight, borderRadius:16, padding:'20px', marginBottom:'16px', textAlign:'center'}}>
-        <p style={{fontSize:14, color:pinkDark, fontWeight:700, margin:'0 0 8px'}}>💘 入力完了！あとは決済するだけ</p>
-        <p style={{fontSize:12, color:textSub, margin:'0 0 16px', lineHeight:1.6}}>決済完了後すぐにAI診断結果が表示されます</p>
-        <div style={{fontSize:13, color:pinkDark, fontWeight:900, margin:'0 0 16px'}}>¥980</div>
-      </div>
+      {paidReady && (
+        <div style={{background:'linear-gradient(135deg,#f0fdf4,#dcfce7)', border:'2px solid #86efac', borderRadius:16, padding:'16px 20px', marginBottom:16, textAlign:'center'}}>
+          <p style={{fontSize:14, fontWeight:700, color:'#166534', margin:'0 0 4px'}}>✅ お支払いが完了しました！</p>
+          <p style={{fontSize:12, color:'#166534', margin:0}}>以下の質問に答えて診断を受けてください</p>
+        </div>
+      )}
 
       {error && <p style={s.errorText}>{error}</p>}
-      <button style={s.primaryBtn} onClick={handleCheckout}>
-        💘 決済して診断結果を見る（¥980）
+      <button style={{...s.primaryBtn as React.CSSProperties, opacity: loading ? 0.7 : 1}}
+        onClick={handleDiagnose} disabled={loading}>
+        {loading ? '✨ AI診断中...' : '💫 診断結果を見る'}
       </button>
       <button style={s.backBtn2} onClick={() => setStep(3)}>← 戻る</button>
     </div></div>
