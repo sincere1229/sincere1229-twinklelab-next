@@ -263,6 +263,11 @@ export function CompatibilityAIClient() {
     if (loading) return (
       <div style={s.page}><div style={s.container}>
         <div style={{textAlign:'center', padding:'80px 20px'}}>
+          <div style={{background:'linear-gradient(135deg,#fdf2f8,#fce7f3)', border:`2px solid ${pink}`, borderRadius:20, padding:'24px 20px', marginBottom:32}}>
+            <div style={{fontSize:36, marginBottom:8}}>✅</div>
+            <p style={{fontSize:16, fontWeight:900, color:pinkDark, margin:'0 0 6px'}}>お支払いが完了しました！</p>
+            <p style={{fontSize:13, color:textSub, margin:0}}>ありがとうございます。AI診断を開始しています。</p>
+          </div>
           <div style={{fontSize:48, marginBottom:20}}>🐥</div>
           <p style={{fontSize:18, fontWeight:700, color:pinkDark, marginBottom:8}}>
             ✨ AI診断中...
