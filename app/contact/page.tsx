@@ -23,7 +23,7 @@ export default function ContactPage() {
 
     try {
       // Formspreeのエンドポイントに送信（YOUR_FORM_IDを実際のIDに置き換えてください）
-      const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+      const res = await fetch("https://formspree.io/f/mvzlbwep", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(formData),
