@@ -282,7 +282,15 @@ export default function StarPortal() {
           </p>
         </div>
 
-        <footer>© 2026 Twinkle Lab / Twinkle Star Oracle</footer>
+        <footer>
+          <footer>
+  <div style={{display:'flex',justifyContent:'center',gap:'1.5rem',flexWrap:'wrap',marginBottom:'10px'}}>
+    <a href="/privacy" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>プライバシーポリシー</a>
+    <a href="/contact" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>お問い合わせ</a>
+  </div>
+  © 2026 Twinkle Lab / Twinkle Star Oracle
+</footer>
+          © 2026 Twinkle Lab / Twinkle Star Oracle</footer>
       </div>
     </>
   )
