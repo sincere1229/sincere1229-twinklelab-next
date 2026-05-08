@@ -214,8 +214,8 @@ export default function PrivacyPage() {
             本プライバシーポリシーに関するお問い合わせは、下記までご連絡ください。
           </p>
           <div className="pp-note">
-            運営者：Twinkle Lab（ぴよ子）<br />
-            メールアドレス：twinklelab.jp@gmail.com<br />
+            運営者：Twinkle Lab<br />
+            メールアドレス：twinklelab2026@gmail.com<br />
             ウェブサイト：https://www.twinkle-lab.jp
           </div>
         </div>
