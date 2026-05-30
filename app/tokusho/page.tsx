@@ -156,7 +156,7 @@ export default function Tokusho() {
           <tbody>
             <tr>
               <th>販売業者名</th>
-              <td>Twinkle Lab（トゥインクル ラボ）</td>
+              <td>Twinkle Lab（トゥウィンクル ラボ）</td>
             </tr>
             <tr>
               <th>運営責任者</th>
