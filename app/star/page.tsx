@@ -287,6 +287,7 @@ export default function StarPortal() {
   <div style={{display:'flex',justifyContent:'center',gap:'1.5rem',flexWrap:'wrap',marginBottom:'10px'}}>
     <a href="/privacy" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>プライバシーポリシー</a>
     <a href="/tokusho" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>特定商取引法に基づく表記</a>
+    <a href="/tos" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>利用規約</a>
     <a href="/contact" style={{fontSize:'11px',color:'rgba(120,80,100,0.6)',textDecoration:'none'}}>お問い合わせ</a>
   </div>
   © 2026 Twinkle Lab / Twinkle Star Oracle
