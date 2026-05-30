@@ -280,12 +280,13 @@ export default function Home() {
 
       <footer>
         <div className="footer-links">
-  <a href="/privacy">プライバシーポリシー</a>
+          <a href="/privacy">プライバシーポリシー</a>
           <a href="/tokusho">特定商取引法に基づく表記</a>
-  <a href="/contact">お問い合わせ</a>
-  <a href="/sukinavi">好きナビ</a>
-  <a href="/study">勉強ナビ</a>
-</div>
+          <a href="/tos">利用規約</a>
+          <a href="/contact">お問い合わせ</a>
+          <a href="/sukinavi">好きナビ</a>
+          <a href="/study">勉強ナビ</a>
+        </div>
         © 2026 Twinkle Lab. All rights reserved.
       </footer>
     </>
