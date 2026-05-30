@@ -165,7 +165,7 @@ export default function Tokusho() {
             <tr>
               <th>所在地</th>
               <td>
-                〒355-0321<br />
+                〒355-0211<br />
                 埼玉県比企郡嵐山町<br />
                 <span style={{fontSize:'11px', color:'var(--text-s)'}}>※番地はお問い合わせいただいた際にお知らせします</span>
               </td>
