@@ -155,6 +155,10 @@ export default function TokushoPage() {
         <table>
           <tbody>
             <tr>
+              <th>URL</th>
+              <td><a href="/tokusho" className="gold-link">https://www.twinkle-lab.jp/tokusho</a></td>
+            </tr>
+            <tr>
               <th>販売事業者名</th>
               <td>Twinkle Lab 中村恵子</td>
             </tr>
@@ -215,15 +219,15 @@ export default function TokushoPage() {
             </tr>
             <tr>
               <th>お支払い方法</th>
-              <td>クレジットカード（VISA・Mastercard・JCB・American Express）</td>
+              <td>クレジットカード決済</td>
             </tr>
             <tr>
               <th>代金の支払い時期</th>
-              <td>ご購入お手続き完了時</td>
+              <td>クレジットカード決済：ご購入お手続き完了時決済</td>
             </tr>
             <tr>
               <th>商品の引き渡し時期</th>
-              <td>決済完了後、即時にご利用いただけます</td>
+              <td>決済完了後、すぐにサービスをご提供します。</td>
             </tr>
             <tr>
               <th>動作環境</th>
