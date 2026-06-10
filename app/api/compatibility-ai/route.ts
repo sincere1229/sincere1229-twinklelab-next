@@ -1,5 +1,6 @@
 // app/api/compatibility-ai/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { pickScoreLabel, pickPossibility, pickCliffhanger } from '../../../lib/compatibilityStock'
 
 /* 無料/有料 出し分け + PAY.JP課金照会
    free … 無料層のみ（短く「気づき」まで／答えは出さない）
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     // ===== 無料層スキーマ（短く・気づき止まり・スコアラベル・誘導メッセージ）=====
     const freeSchema =
-      `{"score":65,"scoreLabel":"二人に合う短いラベル（例：成長型のご縁／ゆっくり深まる相性／違いが魅力になる二人）","currentAssessment":"現状の見立て・100字程度","tendencies":"2人の傾向・100字程度","possibility":"関係の可能性・90字程度。ただし答えを出さず『まだ表面化していない転機が隠れているようです』のように続きが気になる余白で終える","hookMessage":"ピンク誘導文・90字程度。不安を煽らず期待を作り、完全版で本音と今後3か月を読み解くと伝える。ぴよちゃん口調を少し混ぜる"}`
+      `{"score":65,"currentAssessment":"現状の見立て・100字程度・当たっていると感じる具体性","tendencies":"2人の傾向・100字程度","hookMessage":"ピンク誘導文・90字程度。不安を煽らず期待を作り、完全版で本音と今後3か月を読み解くと伝える。ぴよちゃん口調を少し混ぜる"}`
 
     // ===== 有料層スキーマ（強化版）=====
     const paidSchema =
@@ -155,6 +156,13 @@ ${mode === 'paid' ? paidSchema : freeSchema}`
 
     if (result && typeof result.score !== 'undefined') {
       result.score = parseInt(String(result.score), 10) || 70
+    }
+
+    // 無料モード：ラベル・関係の可能性・クリフハンガーは確定ストックから選んで付与
+    if (mode !== 'paid' && result) {
+      result.scoreLabel = pickScoreLabel(result.score)
+      result.possibility = pickPossibility()
+      result.cliffhanger = pickCliffhanger()
     }
 
     return NextResponse.json({ success: true, result })
