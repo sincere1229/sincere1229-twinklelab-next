@@ -1,62 +1,76 @@
+// app/api/uranai/tesou-free/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+
+/* 手相かんたん診断（無料）：性格傾向・現在の状態・可能性まで。
+   行動アドバイス・未来予測・転機は出さない（有料 tesou の領域）。 */
 
 export async function POST(req: NextRequest) {
   try {
     const { image, mimeType } = await req.json()
-
     if (!image) {
-      return NextResponse.json({ error: '画像が必要です' }, { status: 400 })
+      return NextResponse.json({ success: false, error: '画像が必要です' }, { status: 400 })
     }
 
-    const prompt = `添付された手相画像を見て、シンプルで温かい「かんたん手相診断」を作成してください。
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY || ''
+    if (!apiKey) {
+      return NextResponse.json({ success: false, error: 'APIキーが設定されていません。' }, { status: 500 })
+    }
+    const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001'
 
-【出力条件】
-250〜350文字
-やさしく・ポジティブ・読みやすい
-「少し当たってる」と感じさせる
-友達に話しかけるような自然なトーン
-絵文字を適度に使う
-マークダウン記号（##、**、---など）は一切使わない
+    const schema =
+      `{"personality":"性格傾向・110字程度・手相から見える人柄や本来の性質","currentState":"現在の状態・90字程度・今の傾向や流れの事実描写（『休んで』『労って』などの行動アドバイスは禁止）","possibility":"可能性・80字程度・断定せず余白を残す"}`
 
-【構成】
-① 手相から見える、その人の一番の特徴・強み（1〜2文）
-② 今の状態・流れ（1〜2文）
-③ 一言メッセージ（ドキッとするが優しい言葉）
-④ 締め：「もっと詳しく知りたい方は詳細診断もあります✨」という一文で締める
+    const systemPrompt = `あなたは手相から「今のその人」を読み解く、やさしい占い師です。
+これは無料の「かんたん診断」。役割は現状把握まで。
+ルール：
+- 出すのは「性格傾向」「現在の状態」「可能性」の3つだけ。
+- 行動アドバイス（休む・労る・〜するといい等）は禁止。未来予測・人生の転機も禁止（それは有料の詳細診断の領域）。
+- 「少し当たってる」と感じる具体性は入れるが、答えや指針は出さない。
+- 恐怖訴求は禁止。やさしく前向きに。
 
-※長くしない・難しくしない・シンプルに`
+必ず以下のJSONのみを返す。前後に説明やバッククォートを付けない。
+${schema}`
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mimeType, data: image } },
-            { type: 'text', text: prompt }
-          ]
-        }],
+        model,
+        max_tokens: 700,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mimeType || 'image/jpeg', data: image } },
+          { type: 'text', text: '添付の手相画像から、性格傾向・現在の状態・可能性を読み解いてJSONで返してください。' },
+        ] }],
       }),
     })
 
-    if (!response.ok) {
-      const err = await response.json()
-      throw new Error(err.error?.message || '診断に失敗しました')
+    if (!apiRes.ok) {
+      const errBody = await apiRes.text()
+      console.error('Anthropic API error:', apiRes.status, errBody)
+      return NextResponse.json({ success: false, error: `AI APIエラー(${apiRes.status})。しばらく待ってから再試行してください。` }, { status: 500 })
     }
 
-    const data = await response.json()
-    const result = data.content[0]?.text || ''
-    return NextResponse.json({ result })
+    const apiData = await apiRes.json()
+    const rawText: string = apiData.content?.[0]?.type === 'text' ? apiData.content[0].text : ''
+    if (!rawText) {
+      return NextResponse.json({ success: false, error: 'AIからの応答が空でした。もう一度お試しください。' }, { status: 500 })
+    }
+
+    const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim()
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      return NextResponse.json({ success: false, error: 'AI応答の解析に失敗しました。もう一度お試しください。' }, { status: 500 })
+    }
+
+    let result
+    try { result = JSON.parse(jsonMatch[0]) }
+    catch { return NextResponse.json({ success: false, error: 'AI応答の解析に失敗しました。もう一度お試しください。' }, { status: 500 }) }
+
+    return NextResponse.json({ success: true, result })
 
   } catch (err: any) {
-    console.error(err)
-    return NextResponse.json({ error: err.message || '診断に失敗しました' }, { status: 500 })
+    console.error('tesou-free unexpected error:', err)
+    return NextResponse.json({ success: false, error: '予期しないエラーが発生しました。もう一度お試しください。' }, { status: 500 })
   }
 }
