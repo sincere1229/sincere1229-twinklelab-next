@@ -1,7 +1,13 @@
+// next.config.js  （TSO親 sincere1229-twinklelab-next のルート / 既存を差し替え）
+//
+// 無料占いアプリを twinkle-lab.jp/star/<path> 配下に寄せる。
+// ▼静的HTMLアプリ（index.html だけの自己完結型）は、子側を一切変更せずにこの設定だけで寄ります。
+//   転送先はルート（/）に向けます。
+// ▼もし子アプリが Next.js（next.config.js や app/ がある）だった場合は、そのアプリだけ
+//   basePath 方式が必要になります（その時は教えてください）。
+
 /** @type {import('next').NextConfig} */
 
-// 無料占いアプリ（外部Vercel）を twinkle-lab.jp/star/<path> 配下に寄せる。
-// 各子アプリ側で basePath: '/star/<path>' を設定し再デプロイすることが前提。
 const ZONES = [
   { path: 'horoscope',    url: 'https://horoscope-today-omega.vercel.app' }, // 今日の星座占い
   { path: 'calendar',     url: 'https://lucky-calendar-seven.vercel.app'  }, // 開運カレンダー
@@ -22,8 +28,9 @@ const nextConfig = {
   async rewrites() {
     const rules = []
     for (const z of ZONES) {
-      rules.push({ source: `/star/${z.path}`,        destination: `${z.url}/star/${z.path}` })
-      rules.push({ source: `/star/${z.path}/:path*`, destination: `${z.url}/star/${z.path}/:path*` })
+      // 静的HTMLアプリ：ルート（/）に転送
+      rules.push({ source: `/star/${z.path}`,        destination: `${z.url}` })
+      rules.push({ source: `/star/${z.path}/:path*`, destination: `${z.url}/:path*` })
     }
     return rules
   },
