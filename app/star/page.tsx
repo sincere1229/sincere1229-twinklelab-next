@@ -13,27 +13,29 @@ export const metadata = {
   },
 }
 
+type Item = { icon: string; name: string; sub: string; href: string; ext?: boolean }
+
 // ext:true … まだリライト未対応のため外部URL+別タブのまま（angel-number / affirmation / bird-oracle）
 // それ以外 … twinkle-lab.jp/star 配下に内部化済み・同一タブ
-const DAILY_TOP = [
+const DAILY_TOP: Item[] = [
   { icon:'⭐', name:'今日の星座占い', sub:'12星座・毎日更新', href:'/star/horoscope' },
   { icon:'📅', name:'開運カレンダー', sub:'吉日・ラッキー情報', href:'/star/calendar' },
   { icon:'✨', name:'エンジェルナンバー', sub:'今日の数字のメッセージ', href:'https://angel-number-fawn.vercel.app', ext:true },
 ]
 
-const DAILY_REST = [
+const DAILY_REST: Item[] = [
   { icon:'💫', name:'アファメーション', sub:'今日の言葉・朝の習慣', href:'https://affirmation-app-rho.vercel.app', ext:true },
   { icon:'🌙', name:'夢占い', sub:'夢の意味を読み解く', href:'/star/dream' },
 ]
 
-const CARDS = [
+const CARDS: Item[] = [
   { icon:'🃏', name:'タロットカード', sub:'大アルカナ22枚・1枚/3枚引き', href:'/star/tarot' },
   { icon:'🦅', name:'バードオラクル', sub:'36枚の守護鳥カード', href:'https://bird-oracle-ten.vercel.app', ext:true },
   { icon:'☯', name:'易占い', sub:'64卦・問いを立てて占う', href:'/star/iching' },
   { icon:'🌸', name:'前世リーディング', sub:'魂の記憶を読み解く', href:'/star/past-life' },
 ]
 
-const DEEP = [
+const DEEP: Item[] = [
   { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'/star/numerology' },
   { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'/star/kyusei' },
   { icon:'💕', name:'相性占い（無料）', sub:'2人の運命スコアを算出', href:'/star/compat-free' },
