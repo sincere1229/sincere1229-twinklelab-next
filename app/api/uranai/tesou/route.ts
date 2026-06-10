@@ -32,13 +32,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { imageL, imageR, mimeTypeL, mimeTypeR, memo, chargeId } = body
 
-    // 有料エンドポイント：必ず支払い確認
-    const v = await verifyCharge(chargeId)
-    if (!v.ok) {
-      return NextResponse.json(
-        { success: false, error: `決済の確認ができませんでした（${v.reason}）。お手数ですがサポートへご連絡ください。` },
-        { status: 402 }
-      )
+    // 決済前のテスト導線：環境変数 ALLOW_TEST_BYPASS=1 のときだけ TEST_BYPASS を許可（既定はOFF）
+    const isTestBypass = chargeId === 'TEST_BYPASS' && process.env.ALLOW_TEST_BYPASS === '1'
+    if (!isTestBypass) {
+      // 有料エンドポイント：必ず支払い確認
+      const v = await verifyCharge(chargeId)
+      if (!v.ok) {
+        return NextResponse.json(
+          { success: false, error: `決済の確認ができませんでした（${v.reason}）。お手数ですがサポートへご連絡ください。` },
+          { status: 402 }
+        )
+      }
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY || ''
