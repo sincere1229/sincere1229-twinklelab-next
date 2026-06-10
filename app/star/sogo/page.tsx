@@ -1,212 +1,127 @@
+// app/star/sogo/page.tsx
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
+import PayjpCheckoutButton from '../../components/PayjpCheckoutButton'
+import { buildCliffhangers, CTA_OPTIONS } from '../../../lib/sogoStock'
 
 const DECK = [
-  {num:'0',name:'愚者',symbol:'🌟',img:'/tarot/card_00_fool.jpg'},
-  {num:'I',name:'魔術師',symbol:'⚗️',img:'/tarot/card_01_magician.jpg'},
-  {num:'II',name:'女教皇',symbol:'🌙',img:'/tarot/card_02_high-priestess.jpg'},
-  {num:'III',name:'女帝',symbol:'👑',img:'/tarot/card_03_empress.jpg'},
-  {num:'IV',name:'皇帝',symbol:'⚔️',img:'/tarot/card_04_emperor.jpg'},
-  {num:'V',name:'法王',symbol:'🔑',img:'/tarot/card_05_hierophant.jpg'},
-  {num:'VI',name:'恋人',symbol:'💕',img:'/tarot/card_06_lovers.jpg'},
-  {num:'VII',name:'戦車',symbol:'🏆',img:'/tarot/card_07_chariot.jpg'},
-  {num:'VIII',name:'力',symbol:'🦁',img:'/tarot/card_08_strength.jpg'},
-  {num:'IX',name:'隠者',symbol:'🔦',img:'/tarot/card_09_hermit.jpg'},
-  {num:'X',name:'運命の輪',symbol:'🎡',img:'/tarot/card_10_wheel-of-fortune.jpg'},
-  {num:'XI',name:'正義',symbol:'⚖️',img:'/tarot/card_11_justice.jpg'},
-  {num:'XII',name:'吊られた男',symbol:'🔄',img:'/tarot/card_12_hanged-man.jpg'},
-  {num:'XIII',name:'死神',symbol:'🌿',img:'/tarot/card_13_death.jpg'},
-  {num:'XIV',name:'節制',symbol:'🌊',img:'/tarot/card_14_temperance.jpg'},
-  {num:'XV',name:'悪魔',symbol:'🔗',img:'/tarot/card_15_devil.jpg'},
-  {num:'XVI',name:'塔',symbol:'⚡',img:'/tarot/card_16_tower.jpg'},
-  {num:'XVII',name:'星',symbol:'⭐',img:'/tarot/card_17_star.jpg'},
-  {num:'XVIII',name:'月',symbol:'🌕',img:'/tarot/card_18_moon.jpg'},
-  {num:'XIX',name:'太陽',symbol:'☀️',img:'/tarot/card_19_sun.jpg'},
-  {num:'XX',name:'審判',symbol:'🎺',img:'/tarot/card_20_judgement.jpg'},
-  {num:'XXI',name:'世界',symbol:'🌍',img:'/tarot/card_21_world.jpg'},
+  {num:'0',name:'愚者',img:'/tarot/card_00_fool.jpg'},{num:'I',name:'魔術師',img:'/tarot/card_01_magician.jpg'},
+  {num:'II',name:'女教皇',img:'/tarot/card_02_high-priestess.jpg'},{num:'III',name:'女帝',img:'/tarot/card_03_empress.jpg'},
+  {num:'IV',name:'皇帝',img:'/tarot/card_04_emperor.jpg'},{num:'V',name:'法王',img:'/tarot/card_05_hierophant.jpg'},
+  {num:'VI',name:'恋人',img:'/tarot/card_06_lovers.jpg'},{num:'VII',name:'戦車',img:'/tarot/card_07_chariot.jpg'},
+  {num:'VIII',name:'力',img:'/tarot/card_08_strength.jpg'},{num:'IX',name:'隠者',img:'/tarot/card_09_hermit.jpg'},
+  {num:'X',name:'運命の輪',img:'/tarot/card_10_wheel-of-fortune.jpg'},{num:'XI',name:'正義',img:'/tarot/card_11_justice.jpg'},
+  {num:'XII',name:'吊られた男',img:'/tarot/card_12_hanged-man.jpg'},{num:'XIII',name:'死神',img:'/tarot/card_13_death.jpg'},
+  {num:'XIV',name:'節制',img:'/tarot/card_14_temperance.jpg'},{num:'XV',name:'悪魔',img:'/tarot/card_15_devil.jpg'},
+  {num:'XVI',name:'塔',img:'/tarot/card_16_tower.jpg'},{num:'XVII',name:'星',img:'/tarot/card_17_star.jpg'},
+  {num:'XVIII',name:'月',img:'/tarot/card_18_moon.jpg'},{num:'XIX',name:'太陽',img:'/tarot/card_19_sun.jpg'},
+  {num:'XX',name:'審判',img:'/tarot/card_20_judgement.jpg'},{num:'XXI',name:'世界',img:'/tarot/card_21_world.jpg'},
 ]
 const POSITIONS = ['過去','現在','未来','課題','アドバイス']
-function drawCards() {
-  return [...DECK].sort(()=>Math.random()-0.5).slice(0,5).map((card,i)=>({...card, position:POSITIONS[i], reversed:Math.random()>0.7}))
-}
+const drawCards = () => [...DECK].sort(()=>Math.random()-0.5).slice(0,5).map((c,i)=>({...c, position:POSITIONS[i], reversed:Math.random()>0.7}))
 
-const STRIPE_LINK = 'https://buy.stripe.com/aFa5kw8Hs6C6dR3fRx33W02'
+const CTA_LABEL = `${CTA_OPTIONS[0]} ¥3,980`
+
+const purple = '#c4a0d8', gold = '#f0d080', goldDeep = '#d4a843'
+
+const PAID_TEASERS = [
+  { icon:'💗', label:'恋愛運（出会い・関係・流れ）' },
+  { icon:'💼', label:'仕事運（適職・転職・才能）' },
+  { icon:'💰', label:'金運（収入・付き合い方）' },
+  { icon:'🤝', label:'人間関係（大切な縁・離れる縁）' },
+  { icon:'🍀', label:'開運アクション' },
+  { icon:'🗓', label:'人生ロードマップ（30日/90日/半年/1年）' },
+]
 
 export default function SogoPage() {
-  const [step, setStep] = useState('top')
-  const [name, setName] = useState('')
-  const [gender, setGender] = useState('')
-  const [birthdate, setBirthdate] = useState('')
-  const [birthtime, setBirthtime] = useState('')
-  const [birthplace, setBirthplace] = useState('')
-  const [concern, setConcern] = useState('')
-  const [imageL, setImageL] = useState(null)
-  const [imageR, setImageR] = useState(null)
-  const [mimeTypeL, setMimeTypeL] = useState('image/jpeg')
-  const [mimeTypeR, setMimeTypeR] = useState('image/jpeg')
-  const [cards, setCards] = useState([])
-  const drawnCardsRef = useRef([])
-  const [result, setResult] = useState('')
+  const [step, setStep] = useState<'form'|'loadingFree'|'free'|'palmUpload'|'loadingPaid'|'paid'>('form')
+  const [name, setName] = useState(''); const [gender, setGender] = useState('')
+  const [birthdate, setBirthdate] = useState(''); const [birthtime, setBirthtime] = useState('')
+  const [birthplace, setBirthplace] = useState(''); const [concern, setConcern] = useState('')
+  const [imageL, setImageL] = useState<string|null>(null); const [imageR, setImageR] = useState<string|null>(null)
+  const [mimeTypeL, setMimeTypeL] = useState('image/jpeg'); const [mimeTypeR, setMimeTypeR] = useState('image/jpeg')
+  const cardsRef = useRef<any[]>([])
+  const [freeResult, setFreeResult] = useState<any>(null)
+  const [paidResult, setPaidResult] = useState<any>(null)
+  const chargeRef = useRef<string>('')
   const [error, setError] = useState('')
-  const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('payment') === 'success') setStep('form')
-  }, [])
+  const canStart = name && gender && birthdate && concern
 
-  const hasImage = imageL || imageR
-  const canStart = name && gender && birthdate && concern && hasImage
-
-  const handleImage = (side, file) => {
+  const handleImage = (side:'L'|'R', file:File) => {
     if (!file.type.startsWith('image/')) { setError('画像ファイルを選択してください'); return }
     if (file.size > 10*1024*1024) { setError('10MB以下の画像を選択してください'); return }
     const reader = new FileReader()
     reader.onload = e => {
       const base64 = (e.target!.result as string).split(',')[1]
-      if (side==='L') { setImageL(base64); setMimeTypeL(file.type) }
-      else { setImageR(base64); setMimeTypeR(file.type) }
+      if (side==='L') { setImageL(base64); setMimeTypeL(file.type) } else { setImageR(base64); setMimeTypeR(file.type) }
       setError('')
     }
     reader.readAsDataURL(file)
   }
 
-  const analyze = async () => {
+  const base = () => ({ name, gender, birthdate, birthtime, birthplace, concern, cards: cardsRef.current })
+
+  const handleFree = async () => {
     if (!canStart) return
-    setStep('loading'); setError('')
-    const drawn = drawCards()
+    cardsRef.current = drawCards()
+    setStep('loadingFree'); setError('')
     try {
-      const res = await fetch('/api/uranai/sogo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, gender, birthdate, birthtime, birthplace, concern, imageL, imageR, mimeTypeL, mimeTypeR, cards: drawn }),
-      })
+      const res = await fetch('/api/uranai/sogo', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ...base(), mode:'free' }) })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || '鑑定に失敗しました')
-      drawnCardsRef.current = drawn
-      setCards([...drawn])
-      setResult(data.result)
-      setStep('result')
-    } catch (err) {
-      setError(err.message || '鑑定中にエラーが発生しました')
-      setStep('form')
-    }
+      if (data.success && data.result) { setFreeResult(data.result); setStep('free') }
+      else { setError(data.error || 'エラーが発生しました'); setStep('form') }
+    } catch { setError('通信エラーが発生しました。'); setStep('form') }
   }
 
-  const downloadPDF = () => {
-    // printウィンドウでPDF保存を促す方法（日本語フォント問題を回避）
-    const printWindow = window.open('', '_blank')
-    if (!printWindow) return
-    const today = new Date().toLocaleDateString('ja-JP', { year:'numeric', month:'long', day:'numeric' })
-    const cardList = drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards
-    const cardText = cardList.map(c => `【${c.position}】${c.name}${c.reversed?' (逆位置)':''}`).join(' ／ ')
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="ja">
-      <head>
-        <meta charset="UTF-8">
-        <title>AI総合鑑定書 - ${name}様</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&display=swap');
-          body { font-family: 'Noto Serif JP', serif; max-width: 700px; margin: 0 auto; padding: 40px; color: #2a1020; background: white; }
-          h1 { font-size: 24px; text-align: center; color: #8a5a20; border-bottom: 2px solid #c9a84c; padding-bottom: 12px; margin-bottom: 8px; }
-          .subtitle { text-align: center; font-size: 13px; color: #8a6a9a; margin-bottom: 4px; }
-          .date { text-align: center; font-size: 12px; color: #aaa; margin-bottom: 24px; }
-          .gold-line { border: none; border-top: 1px solid #c9a84c; margin: 16px 0; }
-          .cards { background: #fdf8f0; border: 1px solid #e8c97a; border-radius: 8px; padding: 14px; margin: 16px 0; font-size: 12px; color: #6a4a20; line-height: 2; }
-          .result { font-size: 14px; line-height: 2.2; color: #2a1020; white-space: pre-wrap; margin: 16px 0; }
-          .footer { text-align: center; font-size: 11px; color: #aaa; margin-top: 40px; padding-top: 16px; border-top: 1px solid #eee; }
-          @media print { button { display: none; } }
-        </style>
-      </head>
-      <body>
-        <h1>✦ AI総合鑑定書 ✦</h1>
-        <div class="subtitle">${name}様</div>
-        <div class="date">${today} | Twinkle Star Oracle</div>
-        <hr class="gold-line">
-        <div class="cards">🃏 タロットカード：${cardText}</div>
-        <div class="result">${result}</div>
-        <div class="footer">© Twinkle Star Oracle / twinkle-lab.jp</div>
-        <script>window.onload = () => { window.print(); }<\/script>
-      </body>
-      </html>
-    `)
-    printWindow.document.close()
-  }
+  const onPaid = (chargeId:string) => { chargeRef.current = chargeId; setStep('palmUpload') }
 
-  const copy = async () => { await navigator.clipboard.writeText(result); setCopied(true); setTimeout(()=>setCopied(false),3000) }
+  const handleGeneratePaid = async () => {
+    setStep('loadingPaid'); setError('')
+    try {
+      const res = await fetch('/api/uranai/sogo', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ...base(), mode:'paid', chargeId: chargeRef.current, imageL, imageR, mimeTypeL, mimeTypeR }) })
+      const data = await res.json()
+      if (data.success && data.result) { setPaidResult(data.result); setStep('paid') }
+      else { setError(data.error || '鑑定の生成に失敗しました。お手数ですがお問い合わせください。'); setStep('palmUpload') }
+    } catch { setError('通信エラーが発生しました。'); setStep('palmUpload') }
+  }
 
   const reset = () => {
-    setStep('top'); setName(''); setGender(''); setBirthdate(''); setBirthtime('')
-    setBirthplace(''); setConcern(''); setImageL(null); setImageR(null)
-    setCards([]); setResult(''); setError('')
-    if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname)
+    setStep('form'); setName(''); setGender(''); setBirthdate(''); setBirthtime(''); setBirthplace(''); setConcern('')
+    setImageL(null); setImageR(null); setFreeResult(null); setPaidResult(null); chargeRef.current=''; setError('')
   }
 
   const inputStyle = { width:'100%', background:'rgba(253,246,240,0.04)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:10, padding:'11px 13px', color:'#fdf6f0', fontFamily:"'Noto Serif JP',serif", fontSize:13, outline:'none', boxSizing:'border-box' as const }
-
-  const CardGrid = ({cardList}) => (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
-      {cardList.map((card,i)=>(
-        <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-          <div style={{ position:'relative', width:'100%', aspectRatio:'2/3', borderRadius:10, overflow:'hidden', border:'1px solid rgba(196,160,216,0.4)', transform:card.reversed?'rotate(180deg)':'' }}>
-            <img src={card.img} alt={card.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-          </div>
-          <div style={{ fontSize:8, color:'#c4a0d8', textAlign:'center', lineHeight:1.3 }}>{card.name}</div>
-          <div style={{ fontSize:7, color:'rgba(253,246,240,0.4)', textAlign:'center' }}>{card.position}</div>
-          {card.reversed && <div style={{ fontSize:7, color:'#f0a8c0' }}>逆位置</div>}
-        </div>
-      ))}
-    </div>
-  )
+  const box = { background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.18)', borderRadius:14, padding:'18px', marginBottom:14 } as const
+  const title = { fontSize:13, color:gold, fontWeight:700, margin:'0 0 8px' } as const
+  const txt = { fontSize:13, lineHeight:1.9, color:'rgba(253,246,240,0.85)', margin:0, whiteSpace:'pre-wrap' as const }
 
   return (
     <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#120818,#1e0a28,#120618)', padding:'40px 20px 80px', fontFamily:"'Noto Serif JP',serif", color:'#fdf6f0' }}>
       <div style={{ maxWidth:620, margin:'0 auto' }}>
 
-        <div style={{ textAlign:'center', marginBottom:40 }}>
-          <div style={{ fontSize:12, letterSpacing:'0.35em', color:'#d4a843', textTransform:'uppercase', marginBottom:12 }}>✦ Twinkle Star Oracle ✦</div>
-          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, marginBottom:6 }}>AI<span style={{ color:'#c4a0d8', fontStyle:'italic' }}>総合鑑定</span></h1>
-          <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'12px auto' }} />
-          <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.9 }}>手相・タロット・数秘術・ホロスコープを統合した<br />あなただけの本格リーディング</p>
+        <div style={{ textAlign:'center', marginBottom:34 }}>
+          <div style={{ fontSize:12, letterSpacing:'0.35em', color:goldDeep, textTransform:'uppercase', marginBottom:12 }}>✦ Twinkle Star Oracle ✦</div>
+          <h1 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:28, fontWeight:300, marginBottom:6 }}>人生<span style={{ color:purple, fontStyle:'italic' }}>ロードマップ鑑定</span></h1>
+          <div style={{ width:70, height:1, background:`linear-gradient(90deg,transparent,${goldDeep},transparent)`, margin:'12px auto' }} />
+          <p style={{ fontSize:12, color:'rgba(253,246,240,0.45)', lineHeight:1.9 }}>手相・タロット・数秘・星を統合し、<br />「これからどう進むか」を設計する最上位鑑定</p>
         </div>
 
-        {step === 'top' && (
-          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'36px 28px', textAlign:'center' }}>
-            <div style={{ fontSize:36, marginBottom:16 }}>🔮</div>
-            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:12 }}>AI総合鑑定 ¥3,980</div>
-            <div style={{ fontSize:13, color:'rgba(253,246,240,0.55)', lineHeight:1.9, marginBottom:24 }}>
-              手相・タロット5枚・ホロスコープ・数秘術を統合<br />恋愛・仕事・金運を本格リーディング<br />結果はPDF鑑定書で保存できます
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:8, alignItems:'center', marginBottom:24 }}>
-              {['🤚 手相リーディング（左右両手）','🃏 タロット5枚引き','⭐ ホロスコープ鑑定','🔢 数秘術分析'].map(item=>(
-                <div key={item} style={{ fontSize:13, color:'rgba(253,246,240,0.7)' }}>✦ {item}</div>
-              ))}
-            </div>
-            <button onClick={()=>window.location.href=STRIPE_LINK}
-              style={{ width:'100%', padding:18, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:16, letterSpacing:'0.1em', cursor:'pointer', marginBottom:12 }}>
-              🔮 ¥3,980 で鑑定をはじめる
-            </button>
-            <p style={{ fontSize:11, color:'rgba(253,246,240,0.35)' }}>決済完了後にフォーム入力ページへ進みます</p>
-            <a href="/star" style={{ display:'block', marginTop:16, fontSize:12, color:'rgba(253,246,240,0.4)', textDecoration:'none' }}>← 占いポータルに戻る</a>
-          </div>
-        )}
-
+        {/* 入力 */}
         {step === 'form' && (
-          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px', backdropFilter:'blur(12px)' }}>
-            <div style={{ background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.25)', borderRadius:12, padding:'14px 18px', textAlign:'center', fontSize:13, color:'#f0d080', marginBottom:24 }}>
-              ✅ お支払いが完了しました！<br />
-              <span style={{ fontSize:11, color:'rgba(253,246,240,0.5)' }}>以下のフォームにご入力の上、手相画像をアップロードしてください</span>
-            </div>
-            <div style={{ textAlign:'center', marginBottom:20 }}>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:17, color:'#c4a0d8' }}>🌙 お客様情報</div>
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'30px 26px' }}>
+            <div style={{ textAlign:'center', marginBottom:18 }}>
+              <div style={{ fontSize:34, marginBottom:10 }}>🔮</div>
+              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:18, color:purple }}>まずは無料で、今の人生地図を見てみましょう</div>
+              <p style={{ fontSize:11, color:'rgba(253,246,240,0.4)', marginTop:6 }}>無料・登録不要（手相画像は完全版のときに使います）</p>
             </div>
             <div style={{ display:'grid', gap:14 }}>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                 <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>お名前 *</div><input style={inputStyle} value={name} onChange={e=>setName(e.target.value)} placeholder="山田 花子" /></div>
                 <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>性別 *</div>
-                  <select style={{...inputStyle, color:'#fdf6f0', backgroundColor:'#1e0a28'}} value={gender} onChange={e=>setGender(e.target.value)}>
+                  <select style={{...inputStyle, backgroundColor:'#1e0a28'}} value={gender} onChange={e=>setGender(e.target.value)}>
                     <option value="">選択</option><option value="女性">女性</option><option value="男性">男性</option><option value="その他">その他</option>
                   </select>
                 </div>
@@ -216,77 +131,192 @@ export default function SogoPage() {
                 <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生時間（任意）</div><input style={inputStyle} type="time" value={birthtime} onChange={e=>setBirthtime(e.target.value)} /></div>
               </div>
               <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>出生地（任意）</div><input style={inputStyle} value={birthplace} onChange={e=>setBirthplace(e.target.value)} placeholder="例：東京都新宿区" /></div>
-              <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>相談内容 *</div>
-                <textarea style={{...inputStyle, resize:'none', height:80, lineHeight:1.7}} value={concern} onChange={e=>setConcern(e.target.value)} placeholder="例：仕事を変えるべきか迷っています。" />
-              </div>
-              <div>
-                <div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:8 }}>手相画像 *（左右どちらか1枚以上）</div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                  {['L','R'].map(side=>(
-                    <div key={side}>
-                      <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginBottom:6 }}>{side==='L'?'🤚 左手':'🤚 右手'}</div>
-                      {(side==='L'?imageL:imageR) ? (
-                        <div style={{ position:'relative' }}>
-                          <img src={`data:${side==='L'?mimeTypeL:mimeTypeR};base64,${side==='L'?imageL:imageR}`} style={{ width:'100%', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', maxHeight:160, objectFit:'cover' }} alt="" />
-                          <button onClick={()=>side==='L'?setImageL(null):setImageR(null)} style={{ position:'absolute', top:6, right:6, background:'rgba(200,96,122,0.8)', border:'none', color:'white', width:24, height:24, borderRadius:'50%', cursor:'pointer', fontSize:12 }}>✕</button>
-                        </div>
-                      ) : (
-                        <label style={{ border:'2px dashed rgba(155,106,176,0.3)', borderRadius:14, padding:'20px 10px', textAlign:'center', cursor:'pointer', display:'block', background:'rgba(155,106,176,0.02)' }}>
-                          <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>e.target.files?.[0]&&handleImage(side,e.target.files[0])} />
-                          <div style={{ fontSize:22, marginBottom:5 }}>{side==='L'?'✋':'🤚'}</div>
-                          <div style={{ fontSize:11, color:'rgba(253,246,240,0.55)' }}>タップして選択</div>
-                        </label>
-                      )}
-                    </div>
-                  ))}
-                </div>
+              <div><div style={{ fontSize:11, color:'rgba(253,246,240,0.5)', marginBottom:6 }}>いま向き合っていること *</div>
+                <textarea style={{...inputStyle, resize:'none', height:80, lineHeight:1.7}} value={concern} onChange={e=>setConcern(e.target.value)} placeholder="例：これからの生き方に迷っています。" />
               </div>
             </div>
             {error && <div style={{ background:'rgba(200,96,122,0.1)', border:'1px solid rgba(200,96,122,0.3)', borderRadius:10, padding:'12px 16px', fontSize:12, color:'#f0a8c0', textAlign:'center', marginTop:12 }}>{error}</div>}
-            <button onClick={analyze} disabled={!canStart}
-              style={{ width:'100%', padding:17, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontFamily:"'Noto Serif JP',serif", fontSize:14, letterSpacing:'0.1em', cursor:canStart?'pointer':'not-allowed', opacity:canStart?1:0.4, marginTop:20 }}>
-              🔮 AI総合鑑定をはじめる
+            <button onClick={handleFree} disabled={!canStart}
+              style={{ width:'100%', padding:16, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontSize:15, letterSpacing:'0.08em', cursor:canStart?'pointer':'not-allowed', opacity:canStart?1:0.4, marginTop:18 }}>
+              🆓 無料で人生地図を見る
             </button>
+            <a href="/star" style={{ display:'block', textAlign:'center', marginTop:14, fontSize:12, color:'rgba(253,246,240,0.4)', textDecoration:'none' }}>← 占いポータルに戻る</a>
           </div>
         )}
 
-        {step === 'loading' && (
+        {(step === 'loadingFree' || step === 'loadingPaid') && (
           <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'52px 28px', textAlign:'center' }}>
-            <div style={{ fontSize:56, marginBottom:20 }}>🌟</div>
-            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:'#c4a0d8', marginBottom:10 }}>深く読み解いています…</div>
-            <div style={{ fontSize:12, color:'rgba(253,246,240,0.4)', lineHeight:2 }}>手相・タロット・数秘術・ホロスコープ<br />すべてを統合して鑑定しています</div>
+            <div style={{ fontSize:52, marginBottom:18 }}>🌟</div>
+            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:20, color:purple, marginBottom:8 }}>{step==='loadingPaid' ? '人生の地図を描いています…' : '今の人生地図を読み解いています…'}</div>
+            <div style={{ fontSize:12, color:'rgba(253,246,240,0.4)', lineHeight:2.2 }}>手相・タロット・数秘・星を統合しています</div>
           </div>
         )}
 
-        {step === 'result' && (
-          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'32px 28px' }}>
-            <div style={{ textAlign:'center', marginBottom:20 }}>
-              <div style={{ fontSize:40, marginBottom:10 }}>✨</div>
-              <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:22, color:'#c4a0d8' }}>総合鑑定結果</div>
-              <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', marginTop:4 }}>{name}様 | Twinkle Star Oracle</div>
+        {/* 無料の俯瞰 */}
+        {step === 'free' && freeResult && (
+          <div>
+            <div style={{ ...box, textAlign:'center', background:'linear-gradient(135deg,rgba(155,106,176,0.1),rgba(30,10,40,0.5))' }}>
+              <p style={{ fontSize:11, color:'rgba(253,246,240,0.45)', margin:'0 0 4px' }}>あなたの現在地</p>
+              <p style={{ fontSize:15, color:'#fdf6f0', lineHeight:1.8, margin:0 }}>{freeResult.currentPosition}</p>
             </div>
-            <div style={{ width:70, height:1, background:'linear-gradient(90deg,transparent,#d4a843,transparent)', margin:'0 auto 16px' }} />
-            <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:14, color:'#f0d080', marginBottom:10, paddingLeft:10, borderLeft:'2px solid #d4a843' }}>🃏 引いたタロットカード</div>
-            <CardGrid cardList={drawnCardsRef.current.length > 0 ? drawnCardsRef.current : cards} />
-            <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.15)', borderRadius:14, padding:22, fontSize:13, lineHeight:2, color:'rgba(253,246,240,0.85)', whiteSpace:'pre-wrap', wordBreak:'break-word', margin:'16px 0' }}>{result}</div>
-            <button onClick={copy} style={{ width:'100%', padding:13, border:`1px solid ${copied?'rgba(240,168,192,0.5)':'rgba(155,106,176,0.4)'}`, borderRadius:12, background:'transparent', color:copied?'#f0a8c0':'#c4a0d8', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10 }}>
-              {copied?'✅ コピーしました！':'📋 テキストをコピー'}
+
+            {Array.isArray(freeResult.lifeThemes) && freeResult.lifeThemes.length>0 && (
+              <div style={{ ...box, textAlign:'center' }}>
+                <p style={title}>🧭 今後の人生テーマ</p>
+                <div style={{ display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap', marginTop:4 }}>
+                  {freeResult.lifeThemes.map((t:string,i:number)=>(
+                    <span key={i} style={{ fontSize:14, color:purple, border:`1px solid rgba(196,160,216,0.4)`, borderRadius:999, padding:'6px 16px' }}>{t}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {freeResult.strength && <div style={box}><p style={title}>💪 あなたの強み</p><p style={txt}>{freeResult.strength}</p></div>}
+            {freeResult.possibility && (
+              <div style={{ ...box, background:'rgba(196,160,216,0.08)', borderColor:'rgba(196,160,216,0.3)' }}>
+                <p style={title}>✨ これからの可能性</p><p style={txt}>{freeResult.possibility}</p>
+              </div>
+            )}
+            {freeResult.specialNote && (
+              <div style={{ background:'linear-gradient(135deg,rgba(240,208,128,0.14),rgba(196,160,216,0.08))', border:`1px solid ${goldDeep}`, borderRadius:14, padding:'14px 16px', marginBottom:14, textAlign:'center' }}>
+                <span style={{ fontSize:13, color:gold, fontWeight:600 }}>🌟 {freeResult.specialNote}</span>
+              </div>
+            )}
+            {freeResult.hookMessage && (
+              <div style={{ background:'linear-gradient(135deg,rgba(196,160,216,0.12),rgba(240,208,128,0.08))', border:`1px solid rgba(212,168,67,0.3)`, borderRadius:16, padding:'20px', textAlign:'center', marginBottom:18 }}>
+                <div style={{ fontSize:28, marginBottom:6 }}>🐥</div>
+                <p style={{ fontSize:13, color:gold, lineHeight:1.85, margin:0 }}>{freeResult.hookMessage}</p>
+              </div>
+            )}
+
+            {/* ロック */}
+            <div style={{ background:'linear-gradient(135deg,rgba(155,106,176,0.14),rgba(20,8,24,0.5))', border:`1.5px solid ${goldDeep}`, borderRadius:20, padding:'24px 20px', marginBottom:18 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+                <span style={{ fontSize:28 }}>🔒</span>
+                <div>
+                  <p style={{ fontSize:16, fontWeight:700, color:gold, margin:'0 0 2px' }}>完全版＝人生ロードマップ</p>
+                  <p style={{ fontSize:11, color:'rgba(253,246,240,0.5)', margin:0 }}>恋愛・仕事・金運・人間関係と、1年後までの未来設計</p>
+                </div>
+              </div>
+              <div style={{ display:'grid', gap:8, marginBottom:14 }}>
+                {buildCliffhangers().map((c,i)=>(
+                  <div key={i} style={{ background:'rgba(18,8,24,0.5)', border:'1px solid rgba(196,160,216,0.2)', borderRadius:12, padding:'12px 14px' }}>
+                    <div style={{ fontSize:11, color:purple, marginBottom:4 }}>{c.head}</div>
+                    <div style={{ fontSize:13, color:gold, fontWeight:600 }}>「{c.tail}」</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:16 }}>
+                {PAID_TEASERS.map(t=>(
+                  <div key={t.label} style={{ display:'flex', alignItems:'center', gap:8, background:'rgba(253,246,240,0.03)', borderRadius:10, padding:'10px', border:'1px solid rgba(155,106,176,0.15)' }}>
+                    <span style={{ fontSize:16 }}>{t.icon}</span>
+                    <span style={{ fontSize:11, color:'rgba(253,246,240,0.85)', flex:1 }}>{t.label}</span>
+                    <span style={{ fontSize:11, opacity:0.5 }}>🔒</span>
+                  </div>
+                ))}
+              </div>
+              {error && <p style={{ color:'#f0a8c0', fontSize:13, textAlign:'center', marginBottom:10 }}>{error}</p>}
+              <PayjpCheckoutButton product="sogo" label={CTA_LABEL} onPaid={onPaid} />
+              <p style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', margin:'10px 0 0' }}>決済後、手相画像をアップロードして人生設計をお受け取りいただけます</p>
+            </div>
+
+            <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.03)', color:'rgba(253,246,240,0.35)', fontSize:11, cursor:'pointer' }}>最初からやり直す</button>
+          </div>
+        )}
+
+        {/* 決済後：手相アップロード */}
+        {step === 'palmUpload' && (
+          <div style={{ background:'rgba(253,246,240,0.03)', border:'1px solid rgba(155,106,176,0.25)', borderRadius:20, padding:'30px 26px' }}>
+            <div style={{ background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.25)', borderRadius:12, padding:'14px 18px', textAlign:'center', fontSize:13, color:gold, marginBottom:20 }}>
+              ✅ お支払いが完了しました！<br />
+              <span style={{ fontSize:11, color:'rgba(253,246,240,0.5)' }}>手相画像をアップロードすると、より正確な人生設計になります（任意）</span>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
+              {(['L','R'] as const).map(side=>(
+                <div key={side}>
+                  <div style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginBottom:6 }}>{side==='L'?'🤚 左手':'🤚 右手'}</div>
+                  {(side==='L'?imageL:imageR) ? (
+                    <div style={{ position:'relative' }}>
+                      <img src={`data:${side==='L'?mimeTypeL:mimeTypeR};base64,${side==='L'?imageL:imageR}`} style={{ width:'100%', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', maxHeight:160, objectFit:'cover' }} alt="" />
+                      <button onClick={()=>side==='L'?setImageL(null):setImageR(null)} style={{ position:'absolute', top:6, right:6, background:'rgba(200,96,122,0.8)', border:'none', color:'white', width:24, height:24, borderRadius:'50%', cursor:'pointer', fontSize:12 }}>✕</button>
+                    </div>
+                  ) : (
+                    <label style={{ border:'2px dashed rgba(155,106,176,0.3)', borderRadius:14, padding:'20px 10px', textAlign:'center', cursor:'pointer', display:'block', background:'rgba(155,106,176,0.02)' }}>
+                      <input type="file" accept="image/*" style={{ display:'none' }} onChange={e=>e.target.files?.[0]&&handleImage(side,e.target.files[0])} />
+                      <div style={{ fontSize:22, marginBottom:5 }}>{side==='L'?'✋':'🤚'}</div>
+                      <div style={{ fontSize:11, color:'rgba(253,246,240,0.55)' }}>タップして選択</div>
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
+            {error && <div style={{ background:'rgba(200,96,122,0.1)', border:'1px solid rgba(200,96,122,0.3)', borderRadius:10, padding:'12px 16px', fontSize:12, color:'#f0a8c0', textAlign:'center', marginBottom:12 }}>{error}</div>}
+            <button onClick={handleGeneratePaid}
+              style={{ width:'100%', padding:16, border:'none', borderRadius:14, background:'linear-gradient(135deg,#9b6ab0,#c4a0d8,#f0d080)', color:'white', fontSize:15, letterSpacing:'0.08em', cursor:'pointer' }}>
+              🔮 人生ロードマップを受け取る
             </button>
-            <button onClick={downloadPDF} style={{ width:'100%', padding:13, border:'1px solid rgba(212,168,67,0.4)', borderRadius:12, background:'rgba(212,168,67,0.08)', color:'#f0d080', fontFamily:"'Noto Serif JP',serif", fontSize:13, cursor:'pointer', marginBottom:10 }}>
-              📄 PDF鑑定書を保存する
-            </button>
+            <p style={{ fontSize:11, color:'rgba(253,246,240,0.4)', textAlign:'center', marginTop:10 }}>画像なしでも鑑定できます（生年月日・星・数秘で読み解きます）</p>
+          </div>
+        )}
+
+        {/* 有料：人生設計 */}
+        {step === 'paid' && paidResult && (
+          <div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, background:'linear-gradient(135deg,rgba(196,160,216,0.12),rgba(240,208,128,0.1))', border:`1px solid ${goldDeep}`, borderRadius:14, padding:12, marginBottom:16 }}>
+              <span style={{ fontSize:18 }}>✨</span><span style={{ fontSize:13, fontWeight:900, color:gold }}>{name}様の人生ロードマップ</span>
+            </div>
+            {paidResult.specialNote && (
+              <div style={{ ...box, textAlign:'center', background:'linear-gradient(135deg,rgba(240,208,128,0.14),rgba(196,160,216,0.08))', borderColor:goldDeep }}>
+                <span style={{ fontSize:13, color:gold, fontWeight:600 }}>🌟 {paidResult.specialNote}</span>
+              </div>
+            )}
+            {paidResult.love && <div style={box}><p style={title}>💗 恋愛運</p><p style={txt}>{paidResult.love}</p></div>}
+            {paidResult.work && <div style={box}><p style={title}>💼 仕事運</p><p style={txt}>{paidResult.work}</p></div>}
+            {paidResult.money && <div style={box}><p style={title}>💰 金運</p><p style={txt}>{paidResult.money}</p></div>}
+            {paidResult.relationships && <div style={box}><p style={title}>🤝 人間関係</p><p style={txt}>{paidResult.relationships}</p></div>}
+
+            {Array.isArray(paidResult.luckActions) && paidResult.luckActions.length>0 && (
+              <div style={box}><p style={title}>🍀 開運アクション</p>
+                {paidResult.luckActions.map((a:string,i:number)=>(
+                  <div key={i} style={{ fontSize:12.5, color:'rgba(253,246,240,0.82)', lineHeight:1.8, marginBottom:6 }}><span style={{ color:goldDeep, marginRight:8 }}>✦</span>{a}</div>
+                ))}
+              </div>
+            )}
+
+            {Array.isArray(paidResult.roadmap) && paidResult.roadmap.length>0 && (
+              <div style={{ ...box, background:'linear-gradient(135deg,rgba(155,106,176,0.1),rgba(20,8,24,0.4))', borderColor:'rgba(196,160,216,0.35)' }}>
+                <p style={title}>🗺️ 人生ロードマップ</p>
+                {paidResult.roadmap.map((r:any,i:number)=>(
+                  <div key={i} style={{ display:'flex', gap:12, marginBottom:12, paddingBottom:12, borderBottom:i<paidResult.roadmap.length-1?'1px solid rgba(196,160,216,0.15)':'none' }}>
+                    <div style={{ fontSize:12, fontWeight:700, color:gold, minWidth:64 }}>🗓 {r.period}</div>
+                    <div style={{ fontSize:12.5, color:'rgba(253,246,240,0.85)', lineHeight:1.7, flex:1 }}>{r.action}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {paidResult.coreMessage && (
+              <div style={{ ...box, background:'rgba(196,160,216,0.08)', borderColor:'rgba(196,160,216,0.3)' }}>
+                <p style={title}>🌙 最も大切なメッセージ</p><p style={txt}>{paidResult.coreMessage}</p>
+              </div>
+            )}
+            {paidResult.piyochanMessage && (
+              <div style={{ background:'rgba(196,160,216,0.08)', border:'1px solid rgba(196,160,216,0.25)', borderRadius:16, padding:'20px', textAlign:'center', marginBottom:14 }}>
+                <div style={{ fontSize:30, marginBottom:6 }}>🐥</div>
+                <p style={{ fontSize:13, color:gold, lineHeight:1.8, margin:0 }}>{paidResult.piyochanMessage}</p>
+              </div>
+            )}
+            {paidResult.disclaimer && <p style={{ fontSize:11, color:'rgba(253,246,240,0.4)', lineHeight:1.6, textAlign:'center', padding:12, border:'1px solid rgba(155,106,176,0.2)', borderRadius:10, marginBottom:14 }}>{paidResult.disclaimer}</p>}
+
             <div style={{ display:'flex', gap:8, justifyContent:'center', marginBottom:12 }}>
-              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('AI総合鑑定を受けました✨ #TwinkleStarOracle\nhttps://twinkle-lab.jp/star/sogo')}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('人生ロードマップ鑑定を受けました✨ #TwinkleStarOracle\nhttps://twinkle-lab.jp/star/sogo')}`} target="_blank" rel="noopener noreferrer"
                 style={{ padding:'10px 20px', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', background:'transparent', color:'rgba(253,246,240,0.5)', fontSize:12, textDecoration:'none' }}>𝕏 シェア</a>
               <a href="/star" style={{ padding:'10px 20px', borderRadius:10, border:'1px solid rgba(155,106,176,0.3)', background:'transparent', color:'rgba(253,246,240,0.5)', fontSize:12, textDecoration:'none' }}>🌟 占いポータルへ</a>
             </div>
-            <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.04)', color:'rgba(253,246,240,0.35)', fontFamily:"'Noto Serif JP',serif", fontSize:11, cursor:'pointer' }}>最初からやり直す</button>
+            <button onClick={reset} style={{ width:'100%', padding:11, border:'none', borderRadius:10, background:'rgba(253,246,240,0.03)', color:'rgba(253,246,240,0.35)', fontSize:11, cursor:'pointer' }}>最初からやり直す</button>
           </div>
         )}
 
-        <div style={{ marginTop:24, padding:14, background:'rgba(155,106,176,0.04)', borderRadius:12, fontSize:11, color:'rgba(253,246,240,0.28)', lineHeight:1.9, textAlign:'center' }}>
-          ご入力いただいた情報・画像は鑑定後に保持されません<br />結果はコピーして保存してください
-        </div>
       </div>
       <style>{"@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Serif+JP:wght@300;400&display=swap');"}</style>
     </div>
