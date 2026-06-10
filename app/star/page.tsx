@@ -13,29 +13,31 @@ export const metadata = {
   },
 }
 
+// ext:true … まだリライト未対応のため外部URL+別タブのまま（angel-number / affirmation / bird-oracle）
+// それ以外 … twinkle-lab.jp/star 配下に内部化済み・同一タブ
 const DAILY_TOP = [
-  { icon:'⭐', name:'今日の星座占い', sub:'12星座・毎日更新', href:'https://horoscope-today-omega.vercel.app' },
-  { icon:'📅', name:'開運カレンダー', sub:'吉日・ラッキー情報', href:'https://lucky-calendar-seven.vercel.app' },
-  { icon:'✨', name:'エンジェルナンバー', sub:'今日の数字のメッセージ', href:'https://angel-number-fawn.vercel.app' },
+  { icon:'⭐', name:'今日の星座占い', sub:'12星座・毎日更新', href:'/star/horoscope' },
+  { icon:'📅', name:'開運カレンダー', sub:'吉日・ラッキー情報', href:'/star/calendar' },
+  { icon:'✨', name:'エンジェルナンバー', sub:'今日の数字のメッセージ', href:'https://angel-number-fawn.vercel.app', ext:true },
 ]
 
 const DAILY_REST = [
-  { icon:'💫', name:'アファメーション', sub:'今日の言葉・朝の習慣', href:'https://affirmation-app-rho.vercel.app' },
-  { icon:'🌙', name:'夢占い', sub:'夢の意味を読み解く', href:'https://dream-app-omega.vercel.app' },
+  { icon:'💫', name:'アファメーション', sub:'今日の言葉・朝の習慣', href:'https://affirmation-app-rho.vercel.app', ext:true },
+  { icon:'🌙', name:'夢占い', sub:'夢の意味を読み解く', href:'/star/dream' },
 ]
 
 const CARDS = [
-  { icon:'🃏', name:'タロットカード', sub:'大アルカナ22枚・1枚/3枚引き', href:'https://tarot-app-rouge.vercel.app' },
-  { icon:'🦅', name:'バードオラクル', sub:'36枚の守護鳥カード', href:'https://bird-oracle-ten.vercel.app' },
-  { icon:'☯', name:'易占い', sub:'64卦・問いを立てて占う', href:'https://iching-app-sigma.vercel.app' },
-  { icon:'🌸', name:'前世リーディング', sub:'魂の記憶を読み解く', href:'https://pastlife-app.vercel.app' },
+  { icon:'🃏', name:'タロットカード', sub:'大アルカナ22枚・1枚/3枚引き', href:'/star/tarot' },
+  { icon:'🦅', name:'バードオラクル', sub:'36枚の守護鳥カード', href:'https://bird-oracle-ten.vercel.app', ext:true },
+  { icon:'☯', name:'易占い', sub:'64卦・問いを立てて占う', href:'/star/iching' },
+  { icon:'🌸', name:'前世リーディング', sub:'魂の記憶を読み解く', href:'/star/past-life' },
 ]
 
 const DEEP = [
-  { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'https://numerology-app-lovat.vercel.app' },
-  { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'https://kiju-app.vercel.app' },
-  { icon:'💕', name:'相性占い（無料）', sub:'2人の運命スコアを算出', href:'https://aicompat-app.vercel.app' },
-  { icon:'☯️', name:'四柱推命', sub:'命式・五行バランスを解読', href:'https://shichu-app.vercel.app' },
+  { icon:'🔢', name:'数秘術', sub:'運命数から使命を知る', href:'/star/numerology' },
+  { icon:'🌟', name:'九星気学', sub:'本命星・吉方位を診断', href:'/star/kyusei' },
+  { icon:'💕', name:'相性占い（無料）', sub:'2人の運命スコアを算出', href:'/star/compat-free' },
+  { icon:'☯️', name:'四柱推命', sub:'命式・五行バランスを解読', href:'/star/shichu' },
 ]
 
 const SHARE_TEXT = encodeURIComponent('Twinkle Star Oracle｜AI占いポータル✨ タロット・手相・相性診断など無料占いからAI本格鑑定まで！\nhttps://twinkle-lab.jp/star')
@@ -167,7 +169,7 @@ export default function StarPortal() {
         </div>
         <div className="daily-grid">
           {DAILY_TOP.map((d) => (
-            <a key={d.name} href={d.href} target="_blank" className="daily-card">
+            <a key={d.name} href={d.href} {...(d.ext ? {target:'_blank', rel:'noopener noreferrer'} : {})} className="daily-card">
               <span className="d-icon">{d.icon}</span>
               <div className="d-name">{d.name}</div>
               <div className="d-sub">{d.sub}</div>
@@ -179,7 +181,7 @@ export default function StarPortal() {
         <div className="div-line"><span className="div-text">✦ カード占い ✦</span></div>
         <div className="main-grid">
           {CARDS.map((c) => (
-            <a key={c.name} href={c.href} target="_blank" className="main-card">
+            <a key={c.name} href={c.href} {...(c.ext ? {target:'_blank', rel:'noopener noreferrer'} : {})} className="main-card">
               <span className="m-icon">{c.icon}</span>
               <div className="m-name">{c.name}</div>
               <div className="m-sub">{c.sub}</div>
@@ -191,7 +193,7 @@ export default function StarPortal() {
         <div className="div-line"><span className="div-text">✦ 詳細鑑定 ✦</span></div>
         <div className="main-grid">
           {DEEP.map((d) => (
-            <a key={d.name} href={d.href} target="_blank" className="main-card">
+            <a key={d.name} href={d.href} {...(d.ext ? {target:'_blank', rel:'noopener noreferrer'} : {})} className="main-card">
               <span className="m-icon">{d.icon}</span>
               <div className="m-name">{d.name}</div>
               <div className="m-sub">{d.sub}</div>
@@ -203,7 +205,7 @@ export default function StarPortal() {
         <div className="div-line"><span className="div-text">✦ その他の無料占い ✦</span></div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:'10px',padding:'0 14px 16px'}}>
           {DAILY_REST.map((d) => (
-            <a key={d.name} href={d.href} target="_blank" className="main-card">
+            <a key={d.name} href={d.href} {...(d.ext ? {target:'_blank', rel:'noopener noreferrer'} : {})} className="main-card">
               <span className="m-icon">{d.icon}</span>
               <div className="m-name">{d.name}</div>
               <div className="m-sub">{d.sub}</div>
