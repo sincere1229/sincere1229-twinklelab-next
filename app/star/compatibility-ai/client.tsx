@@ -1,7 +1,42 @@
+// app/star/compatibility-ai/client.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
+import PayjpCheckoutButton from '../../components/PayjpCheckoutButton'
+
+/* =========================================================
+   ★ 全鑑定共通の「無料/有料 出し分け」契約（この型が他鑑定の雛形）
+   - FreeResult … 支払いなしで生成・表示（現状・傾向・可能性まで）
+   - PaidResult … 決済確認後にサーバー側でのみ生成して返す
+   ========================================================= */
+interface FreeResult {
+  score: number              // 相性スコア
+  currentAssessment: string  // 現状の見立て
+  tendencies: string         // 2人の傾向
+  possibility: string        // 関係の可能性
+  piyochanMessage?: string
+}
+interface PaidResult {
+  partnerTrueFeelings: string                       // 相手の本音
+  disconnectCause: string                           // すれ違いの原因
+  forecast3months: string                           // 今後3か月の未来予測
+  approachAdvice: string                            // 連絡・告白・距離の縮め方
+  luckActions: string[]                             // 開運アクション
+  roadmap: { period: string; action: string }[]    // 個別ロードマップ
+  piyochanMessage: string
+  disclaimer: string
+}
+
+// 有料層でこれから見られるもの（ティーザーで項目名だけ見せる）
+const PAID_TEASERS = [
+  { icon: '💭', label: '相手の本音' },
+  { icon: '💥', label: 'すれ違いの原因' },
+  { icon: '🔮', label: '今後3か月の未来予測' },
+  { icon: '💌', label: '連絡・告白・距離の縮め方' },
+  { icon: '🍀', label: '開運アクション' },
+  { icon: '🗺️', label: 'あなた専用ロードマップ' },
+]
 
 interface FormInputs {
   yourType: string; yourWeekend: string; yourAloneTime: string; yourFriends: string
@@ -9,15 +44,6 @@ interface FormInputs {
   partnerType: string; partnerWeekend: string; partnerAloneTime: string; partnerFriends: string
   partnerFamily: string; partnerFamilyPriority: string; partnerHobbies: string
   recentEvent: string; recentHappy: string; memorableEvent: string
-}
-
-interface AdviceItem { title: string; detail: string; conversationExample: string }
-
-interface DiagnosisResult {
-  score: string; positiveSummary: string; coreGap: string
-  realScene: string; familyAndFriendImpact: string; conflictReason: string
-  advice: AdviceItem[]; futureStoryPreview: string; futureStoryFull: string
-  piyochanMessage: string; disclaimer: string
 }
 
 const PERSONALITY_TYPES = [
@@ -54,7 +80,6 @@ const purple = '#a855f7'
 const textMain = '#1e1b4b'
 const textSub = '#64748b'
 
-const STRIPE_LINK = 'https://buy.stripe.com/dRmfZa5vggcGfZbfRx33W06'
 const SHARE_URL = 'https://twinkle-lab.jp/star/compatibility-ai'
 
 export function CompatibilityAIClient() {
@@ -66,36 +91,27 @@ export function CompatibilityAIClient() {
     partnerFamily: '', partnerFamilyPriority: '', partnerHobbies: '',
     recentEvent: '', recentHappy: '', memorableEvent: '',
   })
-  const [result, setResult] = useState<DiagnosisResult | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [freeResult, setFreeResult] = useState<FreeResult | null>(null)
+  const [paidResult, setPaidResult] = useState<PaidResult | null>(null)
+  const [loading, setLoading] = useState(false)       // 無料診断中
+  const [paidLoading, setPaidLoading] = useState(false) // 有料生成中
   const [error, setError] = useState('')
-  const [paidReady, setPaidReady] = useState(false)
 
   const update = (key: keyof FormInputs, value: string) =>
     setInputs(prev => ({ ...prev, [key]: value }))
 
-  // Stripe決済後：?payment=success でリダイレクトされてきた場合
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('payment') !== 'success') return
-    // 決済完了→質問入力へ
-    setStep(1)
-    setPaidReady(true)
-  }, [])
-
-  // 決済後の診断実行
-  const handleDiagnose = async () => {
+  // 無料診断（支払いなし・無料層のみ生成）
+  const handleFreeDiagnose = async () => {
     setLoading(true); setError('')
     try {
       const res = await fetch('/api/compatibility-ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs, mode: 'paid' }),
+        body: JSON.stringify({ inputs, mode: 'free' }),
       })
       const data = await res.json()
       if (data.success && data.result) {
-        setResult(data.result)
+        setFreeResult(data.result)
         setStep(5)
       } else {
         setError(data.error || 'エラーが発生しました')
@@ -107,26 +123,34 @@ export function CompatibilityAIClient() {
     }
   }
 
-  // 決済ページへ遷移（入力データをlocalStorageに保存してから）
-  const handleCheckout = () => {
+  // 決済成功 → 有料層を生成（サーバーが chargeId を照会してから返す）
+  const handlePaidDiagnose = async (chargeId: string) => {
+    setPaidLoading(true); setError('')
     try {
-      window.localStorage.setItem('compatibility_inputs', JSON.stringify(inputs))
-    } catch(e) {
-      console.error('localStorage error:', e)
+      const res = await fetch('/api/compatibility-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs, mode: 'paid', chargeId }),
+      })
+      const data = await res.json()
+      if (data.success && data.result) {
+        setPaidResult(data.result)
+      } else {
+        setError(data.error || '鑑定の生成に失敗しました。お手数ですがお問い合わせください。')
+      }
+    } catch {
+      setError('通信エラーが発生しました。')
+    } finally {
+      setPaidLoading(false)
     }
-    window.location.href = STRIPE_LINK
   }
 
   const resetAll = () => {
-    setStep(0); setResult(null)
-    setError(''); setLoading(false)
-    // URLからparamを消す
-    if (typeof window !== 'undefined') {
-      window.history.replaceState({}, '', window.location.pathname)
-    }
+    setStep(0); setFreeResult(null); setPaidResult(null)
+    setError(''); setLoading(false); setPaidLoading(false)
   }
 
-  // ランディング
+  // ===== ランディング（無料スタート） =====
   if (step === 0) return (
     <div style={s.page}>
       <div style={s.container}>
@@ -134,26 +158,19 @@ export function CompatibilityAIClient() {
         <div style={s.hero}>
           <div style={s.badge}>💘 AI相性診断</div>
           <h1 style={s.heroTitle}>この関係、<br />このままでいい？</h1>
-          <p style={s.heroSub}>AIが読み解く<br /><span style={s.heroAccent}>「すれ違いの正体」</span>と1年後の未来</p>
+          <p style={s.heroSub}>まずは<span style={s.heroAccent}>無料</span>で、2人の今を診断。<br />相性スコアと「すれ違いの芽」が見えます</p>
           <div style={s.piyochan}>🐥</div>
           <p style={s.piyoMsg}>大丈夫だよ。ふたりのすれ違いには、ちゃんと理由があるんだよ🌸</p>
-          <button style={s.primaryBtn} onClick={() => {
-            window.location.href = STRIPE_LINK
-          }}>✨ 診断をはじめる（¥980）</button>
-          <p style={s.freeNote}>入力データは保存されません</p>
+          <button style={s.primaryBtn} onClick={() => setStep(1)}>✨ 無料で診断をはじめる</button>
+          <p style={s.freeNote}>登録不要・入力データは保存されません</p>
         </div>
         <div style={s.features}>
-          {[['💬','すれ違いの\n本質を解説'],['📖','1年後の\nストーリー'],['💡','改善策＆\n会話テンプレ']].map(([icon,text]) => (
+          {[['🆓','無料で\n相性スコア'],['💬','すれ違いの\n芽を発見'],['🔓','完全版で\n本音と未来']].map(([icon,text]) => (
             <div key={text} style={s.featureItem}>
               <span style={s.featureIcon}>{icon}</span>
               <p style={s.featureText}>{text}</p>
             </div>
           ))}
-        </div>
-        <div style={s.priceCard}>
-          <p style={s.priceLabel}>💘 AI相性診断</p>
-          <p style={s.price}><span style={s.salePrice}>¥980</span></p>
-          <p style={s.priceDesc}>具体シーン・喧嘩の理由・会話テンプレ付き</p>
         </div>
         <div style={{textAlign:'center',marginBottom:'24px'}}>
           <Link href="/star/compatibility-ai/sample" style={s.sampleBtn}>📋 サンプル診断結果を見る</Link>
@@ -162,16 +179,10 @@ export function CompatibilityAIClient() {
     </div>
   )
 
-  // STEP1
+  // ===== STEP1 =====
   if (step === 1) return (
     <div style={s.page}><div style={s.container}>
       <StepHeader step={1} total={4} title="性格タイプ" onBack={() => setStep(0)} />
-      {paidReady && (
-        <div style={{background:'linear-gradient(135deg,#f0fdf4,#dcfce7)', border:'2px solid #86efac', borderRadius:16, padding:'14px 18px', marginBottom:16, textAlign:'center'}}>
-          <p style={{fontSize:13, fontWeight:700, color:'#166534', margin:'0 0 2px'}}>✅ お支払いが完了しました！</p>
-          <p style={{fontSize:11, color:'#166534', margin:0}}>以下の質問に答えて診断を受けてください</p>
-        </div>
-      )}
       <Section title="あなたの性格タイプ" emoji="💫">
         {PERSONALITY_TYPES.map(o => <ChoiceBtn key={o.value} label={o.label} selected={inputs.yourType===o.value} onClick={() => update('yourType',o.value)} />)}
       </Section>
@@ -182,7 +193,7 @@ export function CompatibilityAIClient() {
     </div></div>
   )
 
-  // STEP2
+  // ===== STEP2 =====
   if (step === 2) return (
     <div style={s.page}><div style={s.container}>
       <StepHeader step={2} total={4} title="生活スタイル" onBack={() => setStep(1)} />
@@ -202,7 +213,7 @@ export function CompatibilityAIClient() {
     </div></div>
   )
 
-  // STEP3
+  // ===== STEP3 =====
   if (step === 3) return (
     <div style={s.page}><div style={s.container}>
       <StepHeader step={3} total={4} title="人間関係" onBack={() => setStep(2)} />
@@ -234,7 +245,7 @@ export function CompatibilityAIClient() {
     </div></div>
   )
 
-  // STEP4
+  // ===== STEP4 → 無料診断実行 =====
   if (step === 4) return (
     <div style={s.page}><div style={s.container}>
       <StepHeader step={4} total={4} title="最近のエピソード" onBack={() => setStep(3)} />
@@ -248,57 +259,22 @@ export function CompatibilityAIClient() {
       <Section title="印象的な出来事（気になっていること）" emoji="💭">
         <textarea style={s.textarea} placeholder="例：友達の誘いを優先されてもやもやした..." value={inputs.memorableEvent} onChange={e => update('memorableEvent',e.target.value)} />
       </Section>
-
-      {paidReady && (
-        <div style={{background:'linear-gradient(135deg,#f0fdf4,#dcfce7)', border:'2px solid #86efac', borderRadius:16, padding:'16px 20px', marginBottom:16, textAlign:'center'}}>
-          <p style={{fontSize:14, fontWeight:700, color:'#166534', margin:'0 0 4px'}}>✅ お支払いが完了しました！</p>
-          <p style={{fontSize:12, color:'#166534', margin:0}}>以下の質問に答えて診断を受けてください</p>
-        </div>
-      )}
-
       {error && <p style={s.errorText}>{error}</p>}
       <button style={{...s.primaryBtn as React.CSSProperties, opacity: loading ? 0.7 : 1}}
-        onClick={handleDiagnose} disabled={loading}>
-        {loading ? '✨ AI診断中...' : '💫 診断結果を見る'}
+        onClick={handleFreeDiagnose} disabled={loading}>
+        {loading ? '✨ AI診断中...' : '🆓 無料で相性を診断する'}
       </button>
       <button style={s.backBtn2} onClick={() => setStep(3)}>← 戻る</button>
     </div></div>
   )
 
-  // RESULT（決済後）
+  // ===== STEP5: 無料結果 + ロック + 有料結果 =====
   if (step === 5) {
-    if (loading) return (
-      <div style={s.page}><div style={s.container}>
-        <div style={{textAlign:'center', padding:'80px 20px'}}>
-          <div style={{background:'linear-gradient(135deg,#fdf2f8,#fce7f3)', border:`2px solid ${pink}`, borderRadius:20, padding:'24px 20px', marginBottom:32}}>
-            <div style={{fontSize:36, marginBottom:8}}>✅</div>
-            <p style={{fontSize:16, fontWeight:900, color:pinkDark, margin:'0 0 6px'}}>お支払いが完了しました！</p>
-            <p style={{fontSize:13, color:textSub, margin:0}}>ありがとうございます。AI診断を開始しています。</p>
-          </div>
-          <div style={{fontSize:48, marginBottom:20}}>🐥</div>
-          <p style={{fontSize:18, fontWeight:700, color:pinkDark, marginBottom:8}}>
-            ✨ AI診断中...
-          </p>
-          <p style={{fontSize:13, color:textSub, lineHeight:1.8}}>
-            ふたりの相性を深く読み解いています<br />少々お待ちください
-          </p>
-        </div>
-      </div></div>
-    )
+    if (loading) return <LoadingView />
+    if (!freeResult) return null
 
-    if (error) return (
-      <div style={s.page}><div style={s.container}>
-        <div style={{textAlign:'center', padding:'60px 20px'}}>
-          <p style={{color:'red', marginBottom:16}}>{error}</p>
-          <button style={s.retryBtn} onClick={resetAll}>最初からやり直す</button>
-        </div>
-      </div></div>
-    )
-
-    if (!result) return null
-
-    const score = parseInt(result.score) || 70
-    const shareText = encodeURIComponent(`AI相性診断をやってみた！相性スコア${score}点✨ ふたりのすれ違いの理由がわかって納得😊 #TwinkleStarOracle\n${SHARE_URL}`)
+    const score = freeResult.score || 70
+    const shareText = encodeURIComponent(`AI相性診断をやってみた！相性スコア${score}点✨ ふたりのすれ違いの芽がわかって納得😊 #TwinkleStarOracle\n${SHARE_URL}`)
 
     return (
       <div style={s.page}><div style={s.container}>
@@ -311,51 +287,62 @@ export function CompatibilityAIClient() {
             <span style={s.scorePct}>点</span>
           </div>
           <div style={s.scoreBar}><div style={{...s.scoreBarFill, width:`${score}%`}} /></div>
+          <p style={s.freeTag}>ここまで無料</p>
         </div>
 
-        <ResultSection title="💖 ふたりの良いところ" text={result.positiveSummary} />
-        <ResultSection title="💬 すれ違いの正体" text={result.coreGap} />
-        {result.realScene ? <ResultSection title="🎬 実際のすれ違いシーン" text={result.realScene} /> : null}
-        {result.familyAndFriendImpact ? <ResultSection title="👨‍👩‍👧 家族・友人関係の影響" text={result.familyAndFriendImpact} /> : null}
-        {result.conflictReason ? <ResultSection title="💥 喧嘩になる理由" text={result.conflictReason} /> : null}
-
-        {result.advice && result.advice.length > 0 && (
-          <div style={s.adviceBlock}>
-            <p style={s.adviceBlockTitle}>💡 改善策＆会話テンプレート</p>
-            {result.advice.map((a, i) => (
-              <div key={i} style={s.adviceItem}>
-                <p style={s.adviceTitle}>✦ {a.title}</p>
-                {a.detail ? <p style={s.adviceDetail}>{a.detail}</p> : null}
-                {a.conversationExample ? (
-                  <div style={s.convBox}>
-                    <p style={s.convLabel}>💬 会話例</p>
-                    <p style={s.convText}>{a.conversationExample}</p>
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {result.futureStoryFull ? (
-          <div style={s.storyCardFull}>
-            <p style={s.storyTitle}>📖 1年後のふたりのストーリー</p>
-            <p style={s.storyText}>{result.futureStoryFull}</p>
-          </div>
-        ) : result.futureStoryPreview ? (
-          <div style={s.storyCardFull}>
-            <p style={s.storyTitle}>📖 1年後のふたりのストーリー</p>
-            <p style={s.storyText}>{result.futureStoryPreview}</p>
+        {/* 無料層：現状・傾向・可能性 */}
+        <ResultSection title="💖 現状の見立て" text={freeResult.currentAssessment} />
+        <ResultSection title="🔍 2人の傾向" text={freeResult.tendencies} />
+        <ResultSection title="🌱 関係の可能性" text={freeResult.possibility} />
+        {freeResult.piyochanMessage ? (
+          <div style={s.piyoCard}>
+            <div style={{fontSize:'40px',marginBottom:'8px'}}>🐥</div>
+            <p style={s.piyoText}>{freeResult.piyochanMessage}</p>
           </div>
         ) : null}
 
-        {/* ぴよちゃん */}
-        <div style={s.piyoCard}>
-          <div style={{fontSize:'40px',marginBottom:'8px'}}>🐥</div>
-          <p style={s.piyoText}>{result.piyochanMessage}</p>
-        </div>
+        {/* ===== 有料層 ===== */}
+        {paidResult ? (
+          <PaidResultView result={paidResult} />
+        ) : paidLoading ? (
+          <div style={s.unlockLoading}>
+            <div style={{fontSize:40,marginBottom:10}}>🔓</div>
+            <p style={{fontSize:15,fontWeight:700,color:pinkDark,margin:'0 0 6px'}}>完全版を読み解いています…</p>
+            <p style={{fontSize:12,color:textSub,margin:0}}>相手の本音とこれからの流れを分析中です</p>
+          </div>
+        ) : (
+          <div style={s.lockCard}>
+            <div style={s.lockHeader}>
+              <span style={{fontSize:30}}>🔒</span>
+              <div>
+                <p style={s.lockTitle}>完全版でわかること</p>
+                <p style={s.lockSub}>ここから先は、答えと具体的な行動です</p>
+              </div>
+            </div>
+            <div style={s.teaserGrid}>
+              {PAID_TEASERS.map(t => (
+                <div key={t.label} style={s.teaserItem}>
+                  <span style={{fontSize:18}}>{t.icon}</span>
+                  <span style={s.teaserLabel}>{t.label}</span>
+                  <span style={s.teaserLock}>🔒</span>
+                </div>
+              ))}
+            </div>
+            <div style={s.blurPreview}>
+              <p style={s.blurText}>相手は今あなたに対して◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍</p>
+              <div style={s.blurFade} />
+            </div>
+            {error && <p style={s.errorText}>{error}</p>}
+            <PayjpCheckoutButton
+              product="compatibility-ai"
+              label="🔓 完全版を見る（¥980）"
+              onPaid={handlePaidDiagnose}
+            />
+            <p style={s.lockNote}>決済後すぐに、このページで完全版が開きます</p>
+          </div>
+        )}
 
-        {/* シェアボタン */}
+        {/* 共有・戻る */}
         <div style={{textAlign:'center', padding:'16px 0', marginBottom:'16px', display:'flex', gap:8, justifyContent:'center'}}>
           <a href={`https://twitter.com/intent/tweet?text=${shareText}`} target="_blank" rel="noopener noreferrer"
             style={{padding:'10px 20px', borderRadius:10, border:'1px solid #e2e8f0', background:'white', color:textSub, fontSize:12, textDecoration:'none'}}>
@@ -367,7 +354,6 @@ export function CompatibilityAIClient() {
           </Link>
         </div>
 
-        <p style={s.disclaimer}>{result.disclaimer}</p>
         <p style={s.privacyNote}>🔒 入力された情報はサーバーに保存されません。</p>
         <button style={s.retryBtn} onClick={resetAll}>🔄 もう一度診断する</button>
       </div></div>
@@ -377,7 +363,62 @@ export function CompatibilityAIClient() {
   return null
 }
 
-// サブコンポーネント
+/* ===== 有料結果の表示 ===== */
+function PaidResultView({ result }: { result: PaidResult }) {
+  return (
+    <div>
+      <div style={s.unlockedBanner}>
+        <span style={{fontSize:18}}>✨</span>
+        <span style={{fontSize:13, fontWeight:900, color:pinkDark}}>完全版が解放されました</span>
+      </div>
+      <ResultSection title="💭 相手の本音" text={result.partnerTrueFeelings} />
+      <ResultSection title="💥 すれ違いの原因" text={result.disconnectCause} />
+      <ResultSection title="🔮 今後3か月の未来予測" text={result.forecast3months} />
+      <ResultSection title="💌 連絡・告白・距離の縮め方" text={result.approachAdvice} />
+
+      {result.luckActions && result.luckActions.length > 0 && (
+        <div style={s.adviceBlock}>
+          <p style={s.adviceBlockTitle}>🍀 開運アクション</p>
+          {result.luckActions.map((a, i) => (
+            <div key={i} style={s.luckItem}><span style={{color:purple,marginRight:8}}>✦</span>{a}</div>
+          ))}
+        </div>
+      )}
+
+      {result.roadmap && result.roadmap.length > 0 && (
+        <div style={s.adviceBlock}>
+          <p style={s.adviceBlockTitle}>🗺️ あなた専用ロードマップ</p>
+          {result.roadmap.map((r, i) => (
+            <div key={i} style={s.roadItem}>
+              <div style={s.roadPeriod}>{r.period}</div>
+              <div style={s.roadAction}>{r.action}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={s.piyoCard}>
+        <div style={{fontSize:'40px',marginBottom:'8px'}}>🐥</div>
+        <p style={s.piyoText}>{result.piyochanMessage}</p>
+      </div>
+      <p style={s.disclaimer}>{result.disclaimer}</p>
+    </div>
+  )
+}
+
+function LoadingView() {
+  return (
+    <div style={s.page}><div style={s.container}>
+      <div style={{textAlign:'center', padding:'80px 20px'}}>
+        <div style={{fontSize:48, marginBottom:20}}>🐥</div>
+        <p style={{fontSize:18, fontWeight:700, color:pinkDark, marginBottom:8}}>✨ AI診断中...</p>
+        <p style={{fontSize:13, color:textSub, lineHeight:1.8}}>ふたりの相性を読み解いています<br />少々お待ちください</p>
+      </div>
+    </div></div>
+  )
+}
+
+/* ===== サブコンポーネント ===== */
 function StepHeader({ step, total, title, onBack }: { step:number; total:number; title:string; onBack:()=>void }) {
   return (
     <div style={{padding:'16px 0',marginBottom:'8px'}}>
@@ -392,7 +433,6 @@ function StepHeader({ step, total, title, onBack }: { step:number; total:number;
     </div>
   )
 }
-
 function Section({ title, emoji, children }: { title:string; emoji:string; children:React.ReactNode }) {
   return (
     <div style={{marginBottom:'24px'}}>
@@ -401,7 +441,6 @@ function Section({ title, emoji, children }: { title:string; emoji:string; child
     </div>
   )
 }
-
 function ChoiceBtn({ label, selected, onClick }: { label:string; selected:boolean; onClick:()=>void }) {
   return (
     <button onClick={onClick} style={{display:'block',width:'100%',padding:'12px 16px',background: selected ? '#fce7f3' : 'white',border: selected ? '2px solid #f472b6' : '2px solid #e2e8f0',borderRadius:'12px',fontSize:'14px',color: selected ? '#db2777' : '#1e1b4b',cursor:'pointer',marginBottom:'8px',textAlign:'left',fontWeight: selected ? 700 : 400}}>
@@ -409,7 +448,6 @@ function ChoiceBtn({ label, selected, onClick }: { label:string; selected:boolea
     </button>
   )
 }
-
 function NavBtns({ onBack, onNext, nextDisabled=false }: { onBack?:()=>void; onNext?:()=>void; nextDisabled?:boolean }) {
   return (
     <div style={{display:'flex',gap:'12px',marginTop:'8px',paddingBottom:'24px'}}>
@@ -418,13 +456,12 @@ function NavBtns({ onBack, onNext, nextDisabled=false }: { onBack?:()=>void; onN
     </div>
   )
 }
-
 function ResultSection({ title, text }: { title:string; text:string }) {
   if (!text) return null
   return (
     <div style={{background:'white',borderRadius:'20px',padding:'20px',marginBottom:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
       <p style={{fontSize:'15px',fontWeight:700,color:'#1e1b4b',margin:'0 0 10px'}}>{title}</p>
-      <p style={{fontSize:'14px',color:'#64748b',lineHeight:1.7,margin:0}}>{text}</p>
+      <p style={{fontSize:'14px',color:'#64748b',lineHeight:1.7,margin:0,whiteSpace:'pre-wrap'}}>{text}</p>
     </div>
   )
 }
@@ -447,16 +484,12 @@ const s: Record<string, React.CSSProperties> = {
   featureItem: { textAlign:'center' },
   featureIcon: { fontSize:'28px', display:'block', marginBottom:'6px' },
   featureText: { fontSize:'12px', color:textSub, margin:0, lineHeight:1.4, whiteSpace:'pre-line' },
-  priceCard: { background:'linear-gradient(135deg,#fdf2f8,#fce7f3)', border:`2px solid ${pink}`, borderRadius:'20px', padding:'20px', textAlign:'center', marginBottom:'16px' },
-  priceLabel: { fontSize:'14px', fontWeight:700, color:pinkDark, margin:'0 0 8px' },
-  price: { margin:'0 0 8px' },
-  salePrice: { fontSize:'28px', fontWeight:900, color:pinkDark },
-  priceDesc: { fontSize:'12px', color:textSub, margin:0 },
   sampleBtn: { color:purple, textDecoration:'none', fontSize:'14px', border:`1px solid ${purple}`, borderRadius:'999px', padding:'8px 20px', display:'inline-block' },
   textarea: { width:'100%', minHeight:'80px', padding:'12px', border:'2px solid #e2e8f0', borderRadius:'12px', fontSize:'14px', color:textMain, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
   episodeNote: { background:pinkLight, borderRadius:'12px', padding:'12px 16px', marginBottom:'20px', fontSize:'13px', color:pinkDark },
   backBtn2: { display:'block', width:'100%', padding:'14px', background:'white', border:'2px solid #e2e8f0', borderRadius:'12px', fontSize:'15px', color:textSub, cursor:'pointer', marginTop:'8px' },
-  errorText: { color:'red', fontSize:'14px', marginBottom:'12px', textAlign:'center' },
+  errorText: { color:'red', fontSize:'14px', margin:'12px 0', textAlign:'center' },
+
   scoreCard: { textAlign:'center', background:'white', borderRadius:'24px', padding:'28px 20px', marginBottom:'16px', boxShadow:'0 4px 20px rgba(0,0,0,0.08)' },
   scoreLabel: { fontSize:'14px', color:textSub, margin:'0 0 16px', fontWeight:700 },
   scoreCircle: { width:'120px', height:'120px', borderRadius:'50%', background:'linear-gradient(135deg,#fce7f3,#fdf4ff)', border:`4px solid ${pink}`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' },
@@ -464,19 +497,35 @@ const s: Record<string, React.CSSProperties> = {
   scorePct: { fontSize:'18px', color:pinkDark, fontWeight:700, marginTop:'12px' },
   scoreBar: { height:'8px', background:'#e2e8f0', borderRadius:'999px', overflow:'hidden' },
   scoreBarFill: { height:'100%', background:'linear-gradient(135deg,#f472b6,#a855f7)', borderRadius:'999px' },
-  storyCardFull: { background:'linear-gradient(135deg,#fdf4ff,#fce7f3)', borderRadius:'20px', padding:'20px', marginBottom:'16px' },
-  storyTitle: { fontSize:'15px', fontWeight:700, color:purple, margin:'0 0 10px' },
-  storyText: { fontSize:'14px', color:textSub, lineHeight:1.7, margin:0 },
+  freeTag: { fontSize:'11px', color:'#2a8a50', background:'rgba(26,122,60,0.1)', display:'inline-block', padding:'3px 12px', borderRadius:'999px', margin:'12px 0 0' },
+
   piyoCard: { background:pinkLight, borderRadius:'20px', padding:'20px', textAlign:'center', marginBottom:'16px' },
-  piyoText: { fontSize:'14px', color:pinkDark, lineHeight:1.7, margin:0 },
+  piyoText: { fontSize:'14px', color:pinkDark, lineHeight:1.7, margin:0, whiteSpace:'pre-wrap' },
+
+  /* ロック／ティーザー */
+  lockCard: { background:'linear-gradient(135deg,#fdf2f8,#fdf4ff)', border:`2px solid ${pink}`, borderRadius:'24px', padding:'24px 20px', marginBottom:'20px' },
+  lockHeader: { display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px' },
+  lockTitle: { fontSize:'17px', fontWeight:900, color:pinkDark, margin:'0 0 2px' },
+  lockSub: { fontSize:'12px', color:textSub, margin:0 },
+  teaserGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginBottom:'16px' },
+  teaserItem: { display:'flex', alignItems:'center', gap:'8px', background:'white', borderRadius:'12px', padding:'12px 12px', border:'1px solid #f5d0e5' },
+  teaserLabel: { fontSize:'12px', color:textMain, fontWeight:700, flex:1 },
+  teaserLock: { fontSize:'12px', opacity:0.5 },
+  blurPreview: { position:'relative', background:'white', borderRadius:'12px', padding:'16px', marginBottom:'16px', maxHeight:'64px', overflow:'hidden' },
+  blurText: { fontSize:'13px', color:'#cbd5e1', lineHeight:1.8, margin:0, userSelect:'none' },
+  blurFade: { position:'absolute', left:0, right:0, bottom:0, height:'40px', background:'linear-gradient(transparent,white)' },
+  lockNote: { fontSize:'11px', color:textSub, textAlign:'center', margin:'10px 0 0' },
+
+  unlockLoading: { textAlign:'center', background:'white', borderRadius:'24px', padding:'40px 20px', marginBottom:'20px', boxShadow:'0 4px 20px rgba(0,0,0,0.06)' },
+  unlockedBanner: { display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', background:'linear-gradient(135deg,#fdf2f8,#fce7f3)', border:`1px solid ${pink}`, borderRadius:'14px', padding:'12px', marginBottom:'16px' },
+
   adviceBlock: { background:'white', borderRadius:'20px', padding:'20px', marginBottom:'16px', boxShadow:'0 2px 12px rgba(0,0,0,0.06)' },
   adviceBlockTitle: { fontSize:'15px', fontWeight:700, color:textMain, margin:'0 0 14px' },
-  adviceItem: { marginBottom:'20px', paddingBottom:'20px', borderBottom:'1px solid #f1f5f9' },
-  adviceTitle: { fontSize:'14px', fontWeight:700, color:purple, margin:'0 0 8px' },
-  adviceDetail: { fontSize:'13px', color:textSub, lineHeight:1.7, margin:'0 0 10px' },
-  convBox: { background:pinkLight, borderRadius:'12px', padding:'12px' },
-  convLabel: { fontSize:'11px', color:pinkDark, fontWeight:700, margin:'0 0 4px' },
-  convText: { fontSize:'13px', color:pinkDark, lineHeight:1.7, margin:0 },
+  luckItem: { fontSize:'14px', color:textSub, lineHeight:1.8, marginBottom:'8px' },
+  roadItem: { display:'flex', gap:'12px', marginBottom:'14px', paddingBottom:'14px', borderBottom:'1px solid #f1f5f9' },
+  roadPeriod: { fontSize:'12px', fontWeight:700, color:purple, minWidth:'72px' },
+  roadAction: { fontSize:'13px', color:textSub, lineHeight:1.7, flex:1 },
+
   disclaimer: { fontSize:'11px', color:textSub, lineHeight:1.6, textAlign:'center', margin:'16px 0', padding:'12px', border:'1px solid #e2e8f0', borderRadius:'8px' },
   privacyNote: { fontSize:'11px', color:textSub, textAlign:'center', margin:'8px 0 16px', padding:'8px 12px', background:'#f8fafc', borderRadius:'8px', border:'1px dashed #cbd5e1' },
   retryBtn: { display:'block', width:'100%', padding:'14px', background:'white', border:'2px solid #e2e8f0', borderRadius:'12px', fontSize:'15px', color:textSub, cursor:'pointer' },
