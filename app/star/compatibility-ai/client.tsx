@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import PayjpCheckoutButton from '../../components/PayjpCheckoutButton'
+import { CTA_OPTIONS } from '../../../lib/compatibilityStock'
 
 /* =========================================================
    ★ 全鑑定共通の「無料/有料 出し分け」契約（この型が他鑑定の雛形）
@@ -17,6 +18,7 @@ interface FreeResult {
   tendencies: string         // 2人の傾向（短め）
   possibility: string        // 関係の可能性（答えを出さず余白で終える）
   hookMessage: string        // ピンク誘導メッセージ
+  cliffhanger: string        // ロックカードの途中まで見せる文
 }
 interface PaidResult {
   partnerTrueFeelings: string                       // 相手の本音
@@ -86,6 +88,8 @@ const textMain = '#1e1b4b'
 const textSub = '#64748b'
 
 const SHARE_URL = 'https://twinkle-lab.jp/star/compatibility-ai'
+// PAY.JPボタン文言（ストック④から選択可・基本は[0]＝相手の本音を確認する）
+const CTA_LABEL = `${CTA_OPTIONS[0]} ¥980`
 
 export function CompatibilityAIClient() {
   const [step, setStep] = useState(0)
@@ -334,14 +338,17 @@ export function CompatibilityAIClient() {
                 </div>
               ))}
             </div>
-            <div style={s.blurPreview}>
-              <p style={s.blurText}>相手は今あなたに対して◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍◍</p>
-              <div style={s.blurFade} />
-            </div>
+            {freeResult.cliffhanger ? (
+              <div style={s.cliffCard}>
+                <p style={s.cliffText}>{freeResult.cliffhanger}</p>
+                <div style={s.cliffFade} />
+                <p style={s.cliffLock}>🔒 続きは完全版で</p>
+              </div>
+            ) : null}
             {error && <p style={s.errorText}>{error}</p>}
             <PayjpCheckoutButton
               product="compatibility-ai"
-              label="💞 相手の本音を確かめる（¥980）"
+              label={CTA_LABEL}
               onPaid={handlePaidDiagnose}
             />
             <p style={s.lockNote}>決済後すぐに、このページで完全版が開きます</p>
@@ -530,9 +537,10 @@ const s: Record<string, React.CSSProperties> = {
   teaserItem: { display:'flex', alignItems:'center', gap:'8px', background:'white', borderRadius:'12px', padding:'12px 12px', border:'1px solid #f5d0e5' },
   teaserLabel: { fontSize:'12px', color:textMain, fontWeight:700, flex:1 },
   teaserLock: { fontSize:'12px', opacity:0.5 },
-  blurPreview: { position:'relative', background:'white', borderRadius:'12px', padding:'16px', marginBottom:'16px', maxHeight:'64px', overflow:'hidden' },
-  blurText: { fontSize:'13px', color:'#cbd5e1', lineHeight:1.8, margin:0, userSelect:'none' },
-  blurFade: { position:'absolute', left:0, right:0, bottom:0, height:'40px', background:'linear-gradient(transparent,white)' },
+  cliffCard: { position:'relative', background:'white', borderRadius:'12px', padding:'16px 16px 10px', marginBottom:'16px', border:'1px dashed #f5b6d6' },
+  cliffText: { fontSize:'14px', color:pinkDark, lineHeight:1.9, margin:0, fontWeight:600, whiteSpace:'pre-wrap' },
+  cliffFade: { height:'18px', background:'linear-gradient(transparent,rgba(252,231,243,0.6))' },
+  cliffLock: { fontSize:'11px', color:textSub, textAlign:'center', margin:'4px 0 0' },
   lockNote: { fontSize:'11px', color:textSub, textAlign:'center', margin:'10px 0 0' },
 
   unlockLoading: { textAlign:'center', background:'white', borderRadius:'24px', padding:'40px 20px', marginBottom:'20px', boxShadow:'0 4px 20px rgba(0,0,0,0.06)' },
