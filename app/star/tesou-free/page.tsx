@@ -119,12 +119,13 @@ export default function TesouFreePage() {
                 </p>
 
                 <div style={{ display:'grid', gap:8, marginBottom:16 }}>
-                  {buildCliffhangers().map((c, i) => (
-                    <div key={i} style={{ background:'rgba(6,20,24,0.5)', border:'1px solid rgba(74,154,176,0.2)', borderRadius:12, padding:'12px 14px' }}>
-                      <div style={{ fontSize:11, color:teal, marginBottom:4 }}>{c.head}</div>
-                      <div style={{ fontSize:13, color:gold, fontWeight:600 }}>「{c.tail}」</div>
+                  {buildCliffhangers().map((line, i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, background:'rgba(6,20,24,0.5)', border:'1px solid rgba(74,154,176,0.2)', borderRadius:12, padding:'12px 14px' }}>
+                      <span style={{ color:teal, fontSize:13, lineHeight:1.7 }}>✦</span>
+                      <span style={{ fontSize:13, color:gold, fontWeight:600, lineHeight:1.7, flex:1 }}>{line}</span>
                     </div>
                   ))}
+                  <p style={{ fontSize:11, color:'rgba(253,246,240,0.5)', textAlign:'center', margin:'4px 0 0' }}>くわしい意味は詳細診断で確認できます</p>
                 </div>
 
                 <div style={{ textAlign:'center' }}>
