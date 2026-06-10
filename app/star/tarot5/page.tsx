@@ -303,6 +303,12 @@ function PaidView({ result, cards, sectionBox, sectionTitle, bodyText }: any) {
         <span style={{ fontSize:13, fontWeight:900, color:gold }}>完全鑑定が解放されました</span>
       </div>
 
+      {result.specialNote && (
+        <div style={{ background:'linear-gradient(135deg,rgba(240,208,128,0.14),rgba(138,155,224,0.08))', border:`1px solid ${goldDeep}`, borderRadius:14, padding:'14px 16px', marginBottom:16, textAlign:'center' }}>
+          <span style={{ fontSize:13, color:gold, fontWeight:600 }}>🌟 {result.specialNote}</span>
+        </div>
+      )}
+
       <div style={sectionBox}>
         <p style={sectionTitle}>🃏 5枚それぞれの詳しい意味</p>
         {(result.cardMeanings || []).map((m: any, i: number) => (
@@ -313,7 +319,30 @@ function PaidView({ result, cards, sectionBox, sectionTitle, bodyText }: any) {
         ))}
       </div>
 
-      {result.forecast3months && <div style={sectionBox}><p style={sectionTitle}>🔮 今後3か月の流れ</p><p style={bodyText}>{result.forecast3months}</p></div>}
+      {(result.flow30days || result.flow90days || result.halfYearGoal) && (
+        <div style={sectionBox}>
+          <p style={sectionTitle}>🔮 未来の流れ</p>
+          {result.flow30days && (
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:12, color:blue, fontWeight:700, marginBottom:4 }}>🗓 今後30日</div>
+              <p style={{ ...bodyText, fontSize:12.5 }}>{result.flow30days}</p>
+            </div>
+          )}
+          {result.flow90days && (
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:12, color:blue, fontWeight:700, marginBottom:4 }}>🗓 今後90日</div>
+              <p style={{ ...bodyText, fontSize:12.5 }}>{result.flow90days}</p>
+            </div>
+          )}
+          {result.halfYearGoal && (
+            <div>
+              <div style={{ fontSize:12, color:blue, fontWeight:700, marginBottom:4 }}>🗓 半年後の到達地点</div>
+              <p style={{ ...bodyText, fontSize:12.5 }}>{result.halfYearGoal}</p>
+            </div>
+          )}
+        </div>
+      )}
+      {result.forecast3months && !result.flow90days && <div style={sectionBox}><p style={sectionTitle}>🔮 今後3か月の流れ</p><p style={bodyText}>{result.forecast3months}</p></div>}
       {result.themeDeepDive && <div style={sectionBox}><p style={sectionTitle}>💞 テーマ別の深掘り</p><p style={bodyText}>{result.themeDeepDive}</p></div>}
       {result.actionGuide && <div style={sectionBox}><p style={sectionTitle}>👣 具体的な行動指針</p><p style={bodyText}>{result.actionGuide}</p></div>}
 
