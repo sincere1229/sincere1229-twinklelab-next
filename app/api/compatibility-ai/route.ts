@@ -1,21 +1,16 @@
 // app/api/compatibility-ai/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 
-/* =========================================================
-   相性診断 API（無料/有料 出し分け + PAY.JP課金照会）
-   - mode:'free' … 無料層のみ生成（支払い不要）
-   - mode:'paid' … chargeId を PAY.JP に照会し、支払い済みを確認してから有料層を生成
-   ========================================================= */
+/* 無料/有料 出し分け + PAY.JP課金照会
+   free … 無料層のみ（短く「気づき」まで／答えは出さない）
+   paid … chargeId を照会し支払い済みを確認してから有料層を生成 */
 
-// この商品の正規価格（照会時に金額の一致も確認する）
 const EXPECTED_AMOUNT = 980
 
-// chargeId が本当に支払い済みかを PAY.JP に確認
 async function verifyCharge(chargeId: string): Promise<{ ok: boolean; reason?: string }> {
   const secret = process.env.PAYJP_SECRET_KEY
   if (!secret) return { ok: false, reason: 'PAYJP_SECRET_KEY 未設定' }
   if (!chargeId || typeof chargeId !== 'string') return { ok: false, reason: 'chargeId なし' }
-
   try {
     const res = await fetch(`https://api.pay.jp/v1/charges/${encodeURIComponent(chargeId)}`, {
       method: 'GET',
@@ -39,7 +34,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { inputs, mode, chargeId } = body
 
-    // ===== 有料モードは、生成前に必ず支払い確認 =====
     if (mode === 'paid') {
       const v = await verifyCharge(chargeId)
       if (!v.ok) {
@@ -50,10 +44,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const apiKey =
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.VITE_ANTHROPIC_API_KEY ||
-      ''
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY || ''
     if (!apiKey) {
       return NextResponse.json(
         { success: false, error: 'APIキーが設定されていません。Vercelの環境変数を確認してください。' },
@@ -65,23 +56,27 @@ export async function POST(req: NextRequest) {
       ? (process.env.ANTHROPIC_MODEL_PAID || process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001')
       : (process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001')
 
-    // ===== モード別 出力スキーマ =====
+    // ===== 無料層スキーマ（短く・気づき止まり・スコアラベル・誘導メッセージ）=====
     const freeSchema =
-      `{"score":70,"currentAssessment":"現状の見立て・180字程度","tendencies":"2人の傾向・180字程度","possibility":"関係の可能性・150字程度","piyochanMessage":"ぴよちゃんからの一言・80字程度"}`
+      `{"score":65,"scoreLabel":"二人に合う短いラベル（例：成長型のご縁／ゆっくり深まる相性／違いが魅力になる二人）","currentAssessment":"現状の見立て・100字程度","tendencies":"2人の傾向・100字程度","possibility":"関係の可能性・90字程度。ただし答えを出さず『まだ表面化していない転機が隠れているようです』のように続きが気になる余白で終える","hookMessage":"ピンク誘導文・90字程度。不安を煽らず期待を作り、完全版で本音と今後3か月を読み解くと伝える。ぴよちゃん口調を少し混ぜる"}`
 
+    // ===== 有料層スキーマ（強化版）=====
     const paidSchema =
-      `{"partnerTrueFeelings":"相手の本音・200字以上","disconnectCause":"すれ違いの原因・180字以上","forecast3months":"今後3か月の未来予測・200字以上","approachAdvice":"連絡・告白・距離の縮め方の具体策・200字以上","luckActions":["開運アクション1","開運アクション2","開運アクション3"],"roadmap":[{"period":"今すぐ〜1週間","action":"具体的な行動"},{"period":"1か月以内","action":"具体的な行動"},{"period":"3か月後","action":"具体的な行動"}],"piyochanMessage":"ぴよちゃんからの一言・100字程度","disclaimer":"この鑑定はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
+      `{"partnerTrueFeelings":"相手が言葉にしていない本音・200字以上","disconnectCause":"すれ違いの原因・180字以上","movingTrigger":"関係が動くきっかけと、距離が縮まるタイミング・180字以上","forecast3months":"今後3か月の未来予測＝進展する可能性・200字以上","approachAdvice":"連絡・告白・距離の縮め方＝二人専用の具体アドバイス・200字以上","avoidActions":["避けるべき行動1","避けるべき行動2","避けるべき行動3"],"luckActions":["開運アクション1","開運アクション2","開運アクション3"],"roadmap":[{"period":"今すぐ〜1週間","action":"具体的な行動"},{"period":"1か月以内","action":"具体的な行動"},{"period":"3か月後（90日）","action":"具体的な行動"}],"piyochanMessage":"ぴよちゃんからの安心の一言・100字程度","disclaimer":"この鑑定はAIによる傾向分析です。人間関係は変化します。最終的な判断はあなたの気持ちを大切にしてください。"}`
 
-    const systemPrompt = `あなたはカップルの相性をやさしく前向きに分析するAIです。
-ルール：断定しない／相手を悪者にしない／最後は安心感で終わる／ぴよちゃんの口調（「〜だよ」「〜だね」）を少し混ぜる。
+    const systemPrompt = `あなたはカップル・夫婦・片思い・復縁・友人関係など、あらゆる関係の相性をやさしく前向きに分析するAIです。
+ルール：断定しない／相手を悪者にしない／不安を煽らない／最後は安心感で終わる／ぴよちゃんの口調（「〜だよ」「〜だね」）を少し混ぜる。
 ${mode === 'paid'
-  ? '【有料版】具体的で踏み込んだ内容にする。抽象論で終わらせず、明日からできる行動まで書く。'
-  : '【無料版】「現状・傾向・可能性」という"気づき"までにとどめ、具体的な行動指針や答え・未来の断定は書かない（それは完全版の領域）。'}
+  ? '【有料版】具体的で踏み込んだ内容。抽象論で終わらせず、明日からできる行動・時期・避けるべきことまで書く。'
+  : `【無料版】目的は「当たっている／もっと知りたい」と感じさせること。
+- 現状・傾向・可能性の"気づき"までにとどめる。
+- 次は絶対に出さない：具体的な行動指針／いつ連絡すべきか／告白のタイミング／相手の本音の詳細／未来予測の詳細／開運アクション。
+- 文章は簡潔に。possibility は答えを出さず、続きが読みたくなる余白で終える。`}
 
-必ず以下のJSONのみを返す。前後に説明やバッククォートを付けない。JSON以外の文字列を含めない。
+必ず以下のJSONのみを返す。前後に説明やバッククォートを付けない。
 ${mode === 'paid' ? paidSchema : freeSchema}`
 
-    const userPrompt = `次のカップルを相性診断してください。
+    const userPrompt = `次の二人を相性診断してください。
 
 【あなた】
 性格：${inputs?.yourType || '未入力'}
@@ -115,7 +110,7 @@ ${mode === 'paid' ? paidSchema : freeSchema}`
       },
       body: JSON.stringify({
         model,
-        max_tokens: mode === 'paid' ? 2048 : 1024,
+        max_tokens: mode === 'paid' ? 2400 : 900,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }],
       }),
@@ -158,7 +153,6 @@ ${mode === 'paid' ? paidSchema : freeSchema}`
       )
     }
 
-    // score を数値で返す保険
     if (result && typeof result.score !== 'undefined') {
       result.score = parseInt(String(result.score), 10) || 70
     }
