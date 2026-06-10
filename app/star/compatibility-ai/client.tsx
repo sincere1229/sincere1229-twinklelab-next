@@ -12,16 +12,19 @@ import PayjpCheckoutButton from '../../components/PayjpCheckoutButton'
    ========================================================= */
 interface FreeResult {
   score: number              // 相性スコア
-  currentAssessment: string  // 現状の見立て
-  tendencies: string         // 2人の傾向
-  possibility: string        // 関係の可能性
-  piyochanMessage?: string
+  scoreLabel: string         // スコアの意味づけラベル（例：成長型のご縁）
+  currentAssessment: string  // 現状の見立て（短め・気づき）
+  tendencies: string         // 2人の傾向（短め）
+  possibility: string        // 関係の可能性（答えを出さず余白で終える）
+  hookMessage: string        // ピンク誘導メッセージ
 }
 interface PaidResult {
   partnerTrueFeelings: string                       // 相手の本音
   disconnectCause: string                           // すれ違いの原因
+  movingTrigger: string                             // 関係が動くきっかけ＋距離が縮まるタイミング
   forecast3months: string                           // 今後3か月の未来予測
   approachAdvice: string                            // 連絡・告白・距離の縮め方
+  avoidActions: string[]                            // 避けるべき行動
   luckActions: string[]                             // 開運アクション
   roadmap: { period: string; action: string }[]    // 個別ロードマップ
   piyochanMessage: string
@@ -30,12 +33,14 @@ interface PaidResult {
 
 // 有料層でこれから見られるもの（ティーザーで項目名だけ見せる）
 const PAID_TEASERS = [
-  { icon: '💭', label: '相手の本音' },
+  { icon: '💭', label: '相手が言えない本音' },
   { icon: '💥', label: 'すれ違いの原因' },
+  { icon: '🔑', label: '関係が動くきっかけ' },
+  { icon: '⏳', label: '距離が縮まるタイミング' },
   { icon: '🔮', label: '今後3か月の未来予測' },
   { icon: '💌', label: '連絡・告白・距離の縮め方' },
-  { icon: '🍀', label: '開運アクション' },
-  { icon: '🗺️', label: 'あなた専用ロードマップ' },
+  { icon: '⚠️', label: '避けるべき行動' },
+  { icon: '🗺️', label: '90日ロードマップ' },
 ]
 
 interface FormInputs {
@@ -286,6 +291,7 @@ export function CompatibilityAIClient() {
             <span style={s.scoreNum}>{score}</span>
             <span style={s.scorePct}>点</span>
           </div>
+          {freeResult.scoreLabel ? <p style={s.scoreLabel2}>{freeResult.scoreLabel}</p> : null}
           <div style={s.scoreBar}><div style={{...s.scoreBarFill, width:`${score}%`}} /></div>
           <p style={s.freeTag}>ここまで無料</p>
         </div>
@@ -294,10 +300,10 @@ export function CompatibilityAIClient() {
         <ResultSection title="💖 現状の見立て" text={freeResult.currentAssessment} />
         <ResultSection title="🔍 2人の傾向" text={freeResult.tendencies} />
         <ResultSection title="🌱 関係の可能性" text={freeResult.possibility} />
-        {freeResult.piyochanMessage ? (
-          <div style={s.piyoCard}>
-            <div style={{fontSize:'40px',marginBottom:'8px'}}>🐥</div>
-            <p style={s.piyoText}>{freeResult.piyochanMessage}</p>
+        {freeResult.hookMessage ? (
+          <div style={s.hookCard}>
+            <div style={{fontSize:'34px',marginBottom:'6px'}}>🐥</div>
+            <p style={s.hookText}>{freeResult.hookMessage}</p>
           </div>
         ) : null}
 
@@ -335,7 +341,7 @@ export function CompatibilityAIClient() {
             {error && <p style={s.errorText}>{error}</p>}
             <PayjpCheckoutButton
               product="compatibility-ai"
-              label="🔓 完全版を見る（¥980）"
+              label="💞 相手の本音を確かめる（¥980）"
               onPaid={handlePaidDiagnose}
             />
             <p style={s.lockNote}>決済後すぐに、このページで完全版が開きます</p>
@@ -373,8 +379,18 @@ function PaidResultView({ result }: { result: PaidResult }) {
       </div>
       <ResultSection title="💭 相手の本音" text={result.partnerTrueFeelings} />
       <ResultSection title="💥 すれ違いの原因" text={result.disconnectCause} />
+      <ResultSection title="🔑 関係が動くきっかけ・タイミング" text={result.movingTrigger} />
       <ResultSection title="🔮 今後3か月の未来予測" text={result.forecast3months} />
       <ResultSection title="💌 連絡・告白・距離の縮め方" text={result.approachAdvice} />
+
+      {result.avoidActions && result.avoidActions.length > 0 && (
+        <div style={s.adviceBlock}>
+          <p style={s.adviceBlockTitle}>⚠️ 避けるべき行動</p>
+          {result.avoidActions.map((a, i) => (
+            <div key={i} style={s.luckItem}><span style={{color:'#e0407a',marginRight:8}}>✕</span>{a}</div>
+          ))}
+        </div>
+      )}
 
       {result.luckActions && result.luckActions.length > 0 && (
         <div style={s.adviceBlock}>
@@ -497,7 +513,10 @@ const s: Record<string, React.CSSProperties> = {
   scorePct: { fontSize:'18px', color:pinkDark, fontWeight:700, marginTop:'12px' },
   scoreBar: { height:'8px', background:'#e2e8f0', borderRadius:'999px', overflow:'hidden' },
   scoreBarFill: { height:'100%', background:'linear-gradient(135deg,#f472b6,#a855f7)', borderRadius:'999px' },
+  scoreLabel2: { fontSize:'16px', fontWeight:900, color:purple, margin:'0 0 14px', letterSpacing:'0.02em' },
   freeTag: { fontSize:'11px', color:'#2a8a50', background:'rgba(26,122,60,0.1)', display:'inline-block', padding:'3px 12px', borderRadius:'999px', margin:'12px 0 0' },
+  hookCard: { background:'linear-gradient(135deg,#fce7f3,#fdf4ff)', border:`1px solid ${pink}`, borderRadius:'20px', padding:'22px 20px', textAlign:'center', marginBottom:'16px' },
+  hookText: { fontSize:'14px', color:pinkDark, lineHeight:1.85, margin:0, fontWeight:500 },
 
   piyoCard: { background:pinkLight, borderRadius:'20px', padding:'20px', textAlign:'center', marginBottom:'16px' },
   piyoText: { fontSize:'14px', color:pinkDark, lineHeight:1.7, margin:0, whiteSpace:'pre-wrap' },
