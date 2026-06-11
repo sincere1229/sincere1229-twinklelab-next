@@ -264,7 +264,7 @@ export default function SogoPage() {
           <div>
             <div style={{ marginBottom:16 }}>
               <p style={{ fontSize:13, fontWeight:700, color:gold, textAlign:'center', marginBottom:12 }}>🃏 今回引いたカード</p>
-              <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:6 }}>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap', justifyContent:'center', paddingBottom:6 }}>
                 {cardsRef.current.map((card:any, i:number) => (
                   <div key={i} style={{ flex:'0 0 auto', width:70, textAlign:'center' }}>
                     <div style={{ position:'relative', width:70, height:110 }}>
