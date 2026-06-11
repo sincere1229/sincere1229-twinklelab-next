@@ -1,14 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-// 決済完了後に誘導する鑑定ページのURL
-// ★ 実際の各鑑定アプリのパスに合わせて書き換えてください ★
 const READING_URLS: Record<string, { name: string; url: string }> = {
-  palm: { name: '手相鑑定', url: '/star/tesou' },
-  aisho: { name: '相性占い', url: '/star/aisho' },
-  tarot5: { name: 'タロット5枚引き', url: '/star/tarot' },
-  sogo: { name: '総合鑑定', url: '/star/sogo' },
-  innerchild: { name: 'インナーチャイルド覚醒リーディング', url: '/star/innerchild' },
+  palm:       { name: '手相鑑定',                         url: '/star/tesou' },
+  aisho:      { name: '相性占い',                         url: '/star/compatibility-ai' },
+  tarot5:     { name: 'タロット5枚引き',                  url: '/star/tarot5' },
+  sogo:       { name: '総合鑑定',                         url: '/star/sogo' },
+  innerchild: { name: 'インナーチャイルド覚醒リーディング', url: '/star/mini' },
 }
 
 export const metadata: Metadata = {
