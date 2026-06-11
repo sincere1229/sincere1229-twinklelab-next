@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import TopQuiz from './TopQuiz'
 
 export const metadata = {
   title: 'Twinkle Star Oracle｜AI占いポータル',
@@ -134,12 +135,15 @@ export default function StarPortal() {
         </header>
 
         {/* 導線ラダー */}
+        {/* ✦ 今のあなたへの診断 ✦ */}
+        <TopQuiz />
+
         <div className="flow-ladder">
           <div className="flow-ladder-title">✦ READING PLAN ✦</div>
           <div className="flow-row">
             <div className="flow-step">①</div>
             <div className="flow-desc"><strong style={{color:'var(--text)'}}>無料占い</strong>　タロット・星座・数秘術など</div>
-            <div className="flow-price">FREE</div>
+            <Link href="/star/horoscope" className="flow-cta">無料で見る</Link>
           </div>
           <div className="flow-row">
             <div className="flow-step">②</div>
@@ -149,12 +153,12 @@ export default function StarPortal() {
           <div className="flow-row">
             <div className="flow-step">③</div>
             <div className="flow-desc"><strong style={{color:'var(--text)'}}>手相詳細診断 / 相性診断</strong></div>
-            <div className="flow-price">¥980</div>
+            <Link href="/star/tesou" className="flow-cta" style={{background:'linear-gradient(135deg,#c2185b,#e91e8c)'}}>¥980</Link>
           </div>
           <div className="flow-row">
             <div className="flow-step">④</div>
             <div className="flow-desc"><strong style={{color:'var(--text)'}}>タロット5枚＋ホロスコープ</strong></div>
-            <div className="flow-price">¥1,980</div>
+            <Link href="/star/tarot5" className="flow-cta" style={{background:'linear-gradient(135deg,#c2185b,#e91e8c)'}}>¥1,980</Link>
           </div>
           <div className="flow-row">
             <div className="flow-step">⑤</div>
