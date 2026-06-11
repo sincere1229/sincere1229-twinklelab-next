@@ -262,6 +262,32 @@ export default function SogoPage() {
         {/* 有料：人生設計 */}
         {step === 'paid' && paidResult && (
           <div>
+            <div style={{ marginBottom:16 }}>
+              <p style={{ fontSize:13, fontWeight:700, color:gold, textAlign:'center', marginBottom:12 }}>🃏 今回引いたカード</p>
+              <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:6 }}>
+                {cardsRef.current.map((card:any, i:number) => (
+                  <div key={i} style={{ flex:'0 0 auto', width:70, textAlign:'center' }}>
+                    <div style={{ position:'relative', width:70, height:110 }}>
+                      <img
+                        src={card.img}
+                        alt={card.name}
+                        style={{
+                          width:70, height:110, objectFit:'cover', borderRadius:8,
+                          border:`1px solid ${goldDeep}`,
+                          transform: card.reversed ? 'rotate(180deg)' : 'none',
+                          display:'block'
+                        }}
+                      />
+                      {card.reversed && (
+                        <span style={{ position:'absolute', top:2, right:2, fontSize:9, background:'rgba(200,96,122,0.85)', color:'#fff', borderRadius:3, padding:'1px 3px' }}>逆</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize:9, color:'rgba(253,246,240,0.6)', margin:'4px 0 0', lineHeight:1.3 }}>{card.position}</p>
+                    <p style={{ fontSize:10, color:gold, margin:'2px 0 0', lineHeight:1.3, fontWeight:600 }}>{card.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, background:'linear-gradient(135deg,rgba(196,160,216,0.12),rgba(240,208,128,0.1))', border:`1px solid ${goldDeep}`, borderRadius:14, padding:12, marginBottom:16 }}>
               <span style={{ fontSize:18 }}>✨</span><span style={{ fontSize:13, fontWeight:900, color:gold }}>{name}様の人生ロードマップ</span>
             </div>
