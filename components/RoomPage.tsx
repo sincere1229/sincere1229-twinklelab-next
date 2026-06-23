@@ -202,8 +202,14 @@ export default function RoomPage({ data }: { data: RoomData }) {
         .menu-section{background:var(--tcl);}
         .menu-grid{
           display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-          gap:20px;
+          grid-template-columns:repeat(2,1fr);
+          gap:16px;
+        }
+        @media(min-width:640px){
+          .menu-grid{grid-template-columns:repeat(2,1fr);gap:20px;}
+        }
+        @media(min-width:900px){
+          .menu-grid{grid-template-columns:repeat(4,1fr);gap:20px;}
         }
         .menu-card{
           background:#fff;border-radius:16px;padding:28px 20px;
@@ -281,8 +287,24 @@ export default function RoomPage({ data }: { data: RoomData }) {
         .related-icon{font-size:28px;margin-bottom:10px;display:block;}
         .related-label{
           font-size:10px;color:var(--tc);letter-spacing:0.2em;margin-bottom:4px;
+          display:flex;align-items:center;gap:6px;
         }
         .related-title{font-size:14px;color:#333;font-weight:500;}
+        .related-card-cs{opacity:0.72;background:#f8f8f8;}
+        .related-card-cs:hover{opacity:1;border-color:var(--tc);background:#fff;}
+
+        /* ── Coming Soon badge ── */
+        .cs-badge{
+          display:inline-block;
+          font-size:9px;padding:2px 7px;
+          background:linear-gradient(135deg,var(--tc),var(--tcd));
+          color:#fff;border-radius:8px;
+          letter-spacing:0.05em;font-weight:600;
+          vertical-align:middle;white-space:nowrap;
+        }
+        .menu-card-cs{opacity:0.76;background:#f8f8f8;}
+        .menu-card-cs:hover{opacity:1;border-color:var(--tc);background:#fff;}
+        .menu-card-cs .menu-arrow{color:var(--tc);opacity:0.7;}
 
         /* ── Universe ── */
         .universe-section{background:var(--tcl);}
@@ -407,14 +429,20 @@ export default function RoomPage({ data }: { data: RoomData }) {
             <div className="sec-divider" />
           </div>
           <div className="menu-grid">
-            {data.menuItems.map((item) => (
-              <a key={item.title} href={item.href} className="menu-card">
-                <span className="menu-icon">{item.icon}</span>
-                <div className="menu-title">{item.title}</div>
-                <p className="menu-desc">{item.desc}</p>
-                <span className="menu-arrow">詳しく見る →</span>
-              </a>
-            ))}
+            {data.menuItems.map((item) => {
+              const isCS = item.href === "/coming-soon";
+              return (
+                <a key={item.title} href={item.href} className={`menu-card${isCS ? " menu-card-cs" : ""}`}>
+                  <span className="menu-icon">{item.icon}</span>
+                  <div className="menu-title">
+                    {item.title}
+                    {isCS && <span className="cs-badge">近日公開</span>}
+                  </div>
+                  <p className="menu-desc">{item.desc}</p>
+                  <span className="menu-arrow">{isCS ? "近日公開 ✦" : "詳しく見る →"}</span>
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -450,26 +478,39 @@ export default function RoomPage({ data }: { data: RoomData }) {
               </a>
             )}
             {data.relatedLinks.note && (
-              <a href={data.relatedLinks.note} className="related-card" target="_blank" rel="noopener noreferrer">
-                <span className="related-icon">📝</span>
-                <div className="related-label">NOTE</div>
-                <div className="related-title">{data.name}のnote記事</div>
-              </a>
+              (() => {
+                const isCS = data.relatedLinks.note === "/coming-soon";
+                return (
+                  <a href={data.relatedLinks.note} className={`related-card${isCS ? " related-card-cs" : ""}`} target={isCS ? undefined : "_blank"} rel={isCS ? undefined : "noopener noreferrer"}>
+                    <span className="related-icon">📝</span>
+                    <div className="related-label">NOTE{isCS && <span className="cs-badge">近日公開</span>}</div>
+                    <div className="related-title">{data.name}のnote記事</div>
+                  </a>
+                );
+              })()
             )}
             {data.relatedLinks.kindle && (
-              <a href={data.relatedLinks.kindle} className="related-card" target="_blank" rel="noopener noreferrer">
-                <span className="related-icon">📚</span>
-                <div className="related-label">KINDLE</div>
-                <div className="related-title">Kindle本を見る</div>
-              </a>
+              (() => {
+                const isCS = data.relatedLinks.kindle === "/coming-soon";
+                return (
+                  <a href={data.relatedLinks.kindle} className={`related-card${isCS ? " related-card-cs" : ""}`} target={isCS ? undefined : "_blank"} rel={isCS ? undefined : "noopener noreferrer"}>
+                    <span className="related-icon">📚</span>
+                    <div className="related-label">KINDLE{isCS && <span className="cs-badge">近日公開</span>}</div>
+                    <div className="related-title">Kindle本を見る</div>
+                  </a>
+                );
+              })()
             )}
-            {data.relatedLinks.articles?.map((art) => (
-              <a key={art.title} href={art.href} className="related-card">
-                <span className="related-icon">📄</span>
-                <div className="related-label">ARTICLE</div>
-                <div className="related-title">{art.title}</div>
-              </a>
-            ))}
+            {data.relatedLinks.articles?.map((art) => {
+              const isCS = art.href === "/coming-soon";
+              return (
+                <a key={art.title} href={art.href} className={`related-card${isCS ? " related-card-cs" : ""}`}>
+                  <span className="related-icon">📄</span>
+                  <div className="related-label">ARTICLE{isCS && <span className="cs-badge">近日公開</span>}</div>
+                  <div className="related-title">{art.title}</div>
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>
