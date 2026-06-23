@@ -1,44 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
-export interface RoomData {
-  id: string;
-  name: string;
-  nameEn: string;
-  roomName: string;
-  roomNameJp: string;
-  catchcopy: string;
-  quote: string;
-  bgImage: string;
-  themeColor: string;
-  themeColorDark: string;
-  themeColorLight: string;
-  accentColor: string;
-  textOnTheme: string;
-  about: {
-    intro: string;
-    personality: string;
-    likes: string[];
-    favoritePlace: string;
-    favoriteWord: string;
-  };
-  menuItems: { icon: string; title: string; desc: string; href: string }[];
-  messages: string[];
-  relatedLinks: {
-    youtube?: string;
-    note?: string;
-    kindle?: string;
-    articles?: { title: string; href: string }[];
-  };
-  otherCharacters: {
-    id: string;
-    name: string;
-    title: string;
-    color: string;
-    href: string;
-    emoji: string;
-  }[];
-}
+import type { RoomData } from "@/lib/roomData";
 
 export default function RoomPage({ data }: { data: RoomData }) {
   const [todayMsg, setTodayMsg] = useState("");
