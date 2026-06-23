@@ -1,4 +1,41 @@
-import { RoomData } from "./RoomPage";
+export interface RoomData {
+  id: string;
+  name: string;
+  nameEn: string;
+  roomName: string;
+  roomNameJp: string;
+  catchcopy: string;
+  quote: string;
+  bgImage: string;
+  themeColor: string;
+  themeColorDark: string;
+  themeColorLight: string;
+  accentColor: string;
+  textOnTheme: string;
+  about: {
+    intro: string;
+    personality: string;
+    likes: string[];
+    favoritePlace: string;
+    favoriteWord: string;
+  };
+  menuItems: { icon: string; title: string; desc: string; href: string }[];
+  messages: string[];
+  relatedLinks: {
+    youtube?: string;
+    note?: string;
+    kindle?: string;
+    articles?: { title: string; href: string }[];
+  };
+  otherCharacters: {
+    id: string;
+    name: string;
+    title: string;
+    color: string;
+    href: string;
+    emoji: string;
+  }[];
+}
 
 const ALL_CHARS = [
   { id: "serena", name: "Serena", title: "心を整えるヒーリングガイド", color: "#c06090", href: "/serena", emoji: "🌸" },
