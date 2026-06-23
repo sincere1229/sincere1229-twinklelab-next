@@ -37,15 +37,17 @@ export interface RoomData {
   }[];
 }
 
+const CS = "/coming-soon"; // Coming Soon short alias
+
 const ALL_CHARS = [
-  { id: "serena", name: "Serena", title: "心を整えるヒーリングガイド", color: "#c06090", href: "/serena", emoji: "🌸" },
-  { id: "lumina", name: "Lumina", title: "未来を照らす星とタロットの案内人", color: "#c9a84c", href: "/lumina", emoji: "⭐" },
-  { id: "chrono", name: "Chrono", title: "キャリアと未来設計のパートナー", color: "#4a8fd4", href: "/chrono", emoji: "🕐" },
-  { id: "mana", name: "まな先生", title: "学びを支える先生", color: "#3aaecc", href: "/mana", emoji: "📖" },
-  { id: "minori", name: "みのり", title: "暮らしと実家相談のナビゲーター", color: "#5aaa72", href: "/minori", emoji: "🍀" },
-  { id: "akari", name: "あかり", title: "介護をやさしく案内するサポーター", color: "#e07aaa", href: "/akari", emoji: "💗" },
-  { id: "shizuku", name: "しずく", title: "終活・葬儀をやさしく案内するサポーター", color: "#9a7fcc", href: "/shizuku", emoji: "💧" },
-  { id: "waka", name: "和花", title: "日本文化ナビゲーター", color: "#d47a8a", href: "/waka", emoji: "🌸" },
+  { id: "serena",  name: "Serena",   title: "心を整えるヒーリングガイド",          color: "#c06090", href: "/serena",  emoji: "🌸" },
+  { id: "lumina",  name: "Lumina",   title: "未来を照らす星とタロットの案内人",    color: "#c9a84c", href: "/lumina",  emoji: "⭐" },
+  { id: "chrono",  name: "Chrono",   title: "キャリアと未来設計のパートナー",      color: "#4a8fd4", href: "/chrono",  emoji: "🕐" },
+  { id: "mana",    name: "まな先生", title: "学びを支える先生",                    color: "#3aaecc", href: "/mana",    emoji: "📖" },
+  { id: "minori",  name: "みのり",   title: "暮らしと実家相談のナビゲーター",      color: "#5aaa72", href: "/minori",  emoji: "🍀" },
+  { id: "akari",   name: "あかり",   title: "介護をやさしく案内するサポーター",    color: "#e07aaa", href: "/akari",   emoji: "💗" },
+  { id: "shizuku", name: "しずく",   title: "終活・葬儀をやさしく案内するサポーター", color: "#9a7fcc", href: "/shizuku", emoji: "💧" },
+  { id: "waka",    name: "和花",     title: "日本文化ナビゲーター",                color: "#d47a8a", href: "/waka",    emoji: "🌸" },
 ];
 
 export function otherChars(excludeId: string) {
@@ -77,11 +79,10 @@ export const serenaData: RoomData = {
     favoriteWord: "あなたの光は、いつも誰かの希望になっています。",
   },
   menuItems: [
-    { icon: "🌿", title: "Aura Garden", desc: "ヒーリング音楽とオーラ診断で、心を整える癒しの空間", href: "https://aura-garden.vercel.app" },
-    { icon: "🔮", title: "オーラ診断", desc: "あなたのオーラカラーと今の波動を読み解きます", href: "https://aura-garden.vercel.app/aura" },
-    { icon: "✨", title: "チャクラ診断", desc: "7つのチャクラのバランスを確認しましょう", href: "https://aura-garden.vercel.app/chakra" },
-    { icon: "💎", title: "パワーストーン診断", desc: "今のあなたに必要なパワーストーンを見つけます", href: "https://aura-garden.vercel.app/crystal" },
-    { icon: "🎵", title: "ヒーリング音楽", desc: "ソルフェジオ周波数とバイノーラルビートで深い癒しを", href: "https://aura-garden.vercel.app/music" },
+    { icon: "🌿", title: "Aura Garden",      desc: "ヒーリング音楽とオーラ診断で、心を整える癒しの空間",   href: "https://aura-garden.vercel.app" },
+    { icon: "🔮", title: "オーラ診断",        desc: "あなたのオーラカラーと今の波動を読み解きます",         href: "https://aura-garden.vercel.app/aura" },
+    { icon: "💎", title: "パワーストーン診断", desc: "今のあなたに必要なパワーストーンを見つけます",         href: "https://aura-garden.vercel.app/crystal" },
+    { icon: "🎵", title: "ヒーリング音楽",    desc: "ソルフェジオ周波数とバイノーラルビートで深い癒しを",   href: "https://aura-garden.vercel.app/music" },
   ],
   messages: [
     "今日は自分を責めるのをやめて、ただ存在することを許してあげましょう。",
@@ -94,11 +95,11 @@ export const serenaData: RoomData = {
   ],
   relatedLinks: {
     youtube: "https://www.youtube.com/@AuraGardenJP",
-    note: "https://note.com/twinkle_lab",
-    kindle: "https://www.amazon.co.jp/stores/Twinkle-Lab/author/",
+    note: CS,
+    kindle: CS,
     articles: [
-      { title: "ヒーリング入門ガイド", href: "https://aura-garden.vercel.app/column" },
-      { title: "パワーストーン図鑑", href: "https://aura-garden.vercel.app/crystal" },
+      { title: "ヒーリング入門ガイド",   href: "https://aura-garden.vercel.app/column" },
+      { title: "パワーストーン図鑑",     href: "https://aura-garden.vercel.app/crystal" },
     ],
   },
   otherCharacters: otherChars("serena"),
@@ -130,10 +131,9 @@ export const luminaData: RoomData = {
   },
   menuItems: [
     { icon: "🔮", title: "Twinkle Star Oracle", desc: "タロット・数秘術・AI総合鑑定など多彩な占いが揃う総合占いポータル", href: "/star" },
-    { icon: "🃏", title: "タロット鑑定", desc: "ワンオラクルから5枚スプレッドまで。AIが丁寧に読み解きます", href: "/star/tarot" },
-    { icon: "✨", title: "才能・使命診断", desc: "生年月日から数秘術で魂の使命を読み解きます", href: "/star/soul" },
-    { icon: "💫", title: "AI総合鑑定", desc: "タロット・手相・数秘を組み合わせた深い鑑定レポート", href: "/star/sogo" },
-    { icon: "💑", title: "相性診断", desc: "2人の相性を星とタロットで分析します", href: "/star/aishо" },
+    { icon: "🃏", title: "タロット鑑定",         desc: "ワンオラクルから5枚スプレッドまで。AIが丁寧に読み解きます",       href: "/star/tarot" },
+    { icon: "✨", title: "才能・使命診断",        desc: "生年月日から数秘術で魂の使命を読み解きます",                       href: CS },
+    { icon: "💫", title: "AI総合鑑定",            desc: "タロット・手相・数秘を組み合わせた深い鑑定レポート",               href: "/star/sogo" },
   ],
   messages: [
     "今日の星は「受け取り」のサイン。誰かからの親切を素直に受け取ってみてください。",
@@ -145,11 +145,11 @@ export const luminaData: RoomData = {
     "あなたの未来はまだ白紙の物語。今日、最初の一行を書きましょう。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
-    kindle: "https://www.amazon.co.jp/stores/Twinkle-Lab/author/",
+    note: CS,
+    kindle: CS,
     articles: [
-      { title: "タロット入門ガイド", href: "/star" },
-      { title: "数秘術で使命を知る", href: "/star/soul" },
+      { title: "タロット入門ガイド",     href: CS },
+      { title: "数秘術で使命を知る",     href: CS },
     ],
   },
   otherCharacters: otherChars("lumina"),
@@ -180,11 +180,10 @@ export const chronoData: RoomData = {
     favoriteWord: "未来は選べる。今日の選択が、明日のあなたをつくる。",
   },
   menuItems: [
-    { icon: "🚀", title: "Career TimeTravel", desc: "転職・副業・AI活用の総合キャリア診断ポータル", href: "https://career-timetravel.com" },
-    { icon: "💰", title: "年収診断", desc: "現在の市場価値と給与アップの戦略を診断します", href: "https://career-timetravel.com/diagnosis/salary" },
-    { icon: "🔄", title: "転職市場価値診断", desc: "あなたのスキルと転職タイミングを分析", href: "https://career-timetravel.com/diagnosis/tenshoku" },
-    { icon: "💼", title: "副業適性診断", desc: "あなたに向いている副業タイプを5パターンで診断", href: "https://career-timetravel.com/diagnosis/fukugyo" },
-    { icon: "🤖", title: "AI活用診断", desc: "業務でAIをどう活かすか、適性とロードマップを提示", href: "https://career-timetravel.com/diagnosis/ai" },
+    { icon: "🚀", title: "Career TimeTravel", desc: "転職・副業・AI活用の総合キャリア診断ポータル",     href: "https://career-timetravel.com" },
+    { icon: "💰", title: "年収診断",           desc: "現在の市場価値と給与アップの戦略を診断します",     href: "https://career-timetravel.com/diagnosis/salary" },
+    { icon: "🔄", title: "転職市場価値診断",   desc: "あなたのスキルと転職タイミングを分析",             href: "https://career-timetravel.com/diagnosis/tenshoku" },
+    { icon: "💼", title: "副業適性診断",        desc: "あなたに向いている副業タイプを5パターンで診断",   href: "https://career-timetravel.com/diagnosis/fukugyo" },
   ],
   messages: [
     "今日の小さな行動が、3年後のあなたを大きく変えます。",
@@ -196,11 +195,11 @@ export const chronoData: RoomData = {
     "5年後の自分は、今日何を選ぶかで決まります。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
-    kindle: "https://www.amazon.co.jp/stores/Twinkle-Lab/author/",
+    note: CS,
+    kindle: CS,
     articles: [
-      { title: "転職コラム一覧", href: "https://career-timetravel.com/column" },
-      { title: "AI副業入門ガイド", href: "https://career-timetravel.com/column/ai" },
+      { title: "転職コラム一覧",       href: CS },
+      { title: "AI副業入門ガイド",     href: CS },
     ],
   },
   otherCharacters: otherChars("chrono"),
@@ -231,11 +230,10 @@ export const manaData: RoomData = {
     favoriteWord: "小さな一歩が、大きな未来につながります。",
   },
   menuItems: [
-    { icon: "📚", title: "勉強ナビ", desc: "資格・スキルアップのおすすめ本をAIが紹介", href: "/study" },
-    { icon: "🔢", title: "100マス計算", desc: "タイムアタック形式で計算力を鍛えよう", href: "/kids/100masu" },
-    { icon: "✖️", title: "九九練習", desc: "楽しく九九をマスターするドリルアプリ", href: "/kids/kuku" },
-    { icon: "🇯🇵", title: "日本語学習", desc: "外国人向け日本語学習サポートコンテンツ", href: "/kids/nihongo" },
-    { icon: "🧠", title: "脳トレ", desc: "毎日5分の脳活性化トレーニング", href: "/kids/brain" },
+    { icon: "📚", title: "勉強ナビ",    desc: "資格・スキルアップのおすすめ本をAIが紹介",   href: "/study" },
+    { icon: "🔢", title: "100マス計算", desc: "タイムアタック形式で計算力を鍛えよう",       href: CS },
+    { icon: "✖️", title: "九九練習",     desc: "楽しく九九をマスターするドリルアプリ",       href: CS },
+    { icon: "🇯🇵", title: "日本語学習", desc: "外国人向け日本語学習サポートコンテンツ",     href: CS },
   ],
   messages: [
     "今日覚えたことは、明日のあなたの武器になります。",
@@ -247,11 +245,11 @@ export const manaData: RoomData = {
     "今日の努力は、必ず未来のあなたに届きます。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
-    kindle: "https://www.amazon.co.jp/stores/Twinkle-Lab/author/",
+    note: CS,
+    kindle: CS,
     articles: [
-      { title: "学習コンテンツ一覧", href: "/kids" },
-      { title: "親子でAI学習のすすめ", href: "/heart" },
+      { title: "学習コンテンツ一覧",       href: "/kids" },
+      { title: "親子でAI学習のすすめ",     href: "/heart" },
     ],
   },
   otherCharacters: otherChars("mana"),
@@ -282,10 +280,10 @@ export const minoriData: RoomData = {
     favoriteWord: "小さな一歩が未来を変えます。",
   },
   menuItems: [
-    { icon: "🏠", title: "実家どうするナビ", desc: "実家の整理・売却・活用など総合的にサポート", href: "https://jikka-anshin.com" },
-    { icon: "📦", title: "引越し手続きガイド", href: "https://jikka-anshin.com/column", desc: "引越しに必要な手続きをわかりやすく解説" },
-    { icon: "⚖️", title: "相続ガイド", href: "https://jikka-anshin.com/column/sozoku", desc: "相続の基本から手続きまで丁寧に案内します" },
-    { icon: "🗂️", title: "実家整理のすすめ", href: "https://jikka-anshin.com/column/seiri", desc: "実家の片付けを無理なく進めるコツ" },
+    { icon: "🏠", title: "実家どうするナビ",    desc: "実家の整理・売却・活用など総合的にサポート",           href: "https://jikka-anshin.com" },
+    { icon: "📦", title: "引越し手続きガイド",   desc: "引越しに必要な手続きをわかりやすく解説",               href: CS },
+    { icon: "⚖️", title: "相続ガイド",           desc: "相続の基本から手続きまで丁寧に案内します",             href: CS },
+    { icon: "🗂️", title: "実家整理のすすめ",    desc: "実家の片付けを無理なく進めるコツ",                     href: CS },
   ],
   messages: [
     "今日は一つだけ、気になっていたことを調べてみましょう。",
@@ -297,10 +295,10 @@ export const minoriData: RoomData = {
     "家族との対話が、最良の解決策への第一歩です。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
+    note: CS,
     articles: [
-      { title: "実家問題コラム", href: "https://jikka-anshin.com/column" },
-      { title: "相続診断ツール", href: "https://jikka-anshin.com/diagnosis" },
+      { title: "実家問題コラム",   href: CS },
+      { title: "相続診断ツール",   href: CS },
     ],
   },
   otherCharacters: otherChars("minori"),
@@ -332,10 +330,9 @@ export const akariData: RoomData = {
   },
   menuItems: [
     { icon: "💗", title: "やさしい介護ナビ", desc: "介護の基本から施設探しまで総合的にサポート", href: "https://kaigo-anshin.net" },
-    { icon: "📋", title: "介護保険ガイド", href: "https://kaigo-anshin.net/column/hoken", desc: "介護保険の申請方法・サービス内容を解説" },
-    { icon: "🏥", title: "施設探しサポート", href: "https://kaigo-anshin.net/column/shisetsu", desc: "有料老人ホームから特養まで、選び方を解説" },
-    { icon: "🏠", title: "在宅介護のすすめ", href: "https://kaigo-anshin.net/column/zaitaku", desc: "自宅での介護を支えるサービスと工夫" },
-    { icon: "💬", title: "介護相談", href: "https://kaigo-anshin.net/diagnosis", desc: "今の状況に合った介護診断ツール" },
+    { icon: "📋", title: "介護保険ガイド",   desc: "介護保険の申請方法・サービス内容を解説",   href: CS },
+    { icon: "🏥", title: "施設探しサポート", desc: "有料老人ホームから特養まで、選び方を解説", href: CS },
+    { icon: "🏠", title: "在宅介護のすすめ", desc: "自宅での介護を支えるサービスと工夫",       href: CS },
   ],
   messages: [
     "介護は長距離走。無理せず、休みながら走りましょう。",
@@ -347,10 +344,10 @@ export const akariData: RoomData = {
     "あなたが元気でいることが、介護される方の一番の喜びです。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
+    note: CS,
     articles: [
-      { title: "介護コラム一覧", href: "https://kaigo-anshin.net/column" },
-      { title: "介護診断ツール", href: "https://kaigo-anshin.net/diagnosis" },
+      { title: "介護コラム一覧",   href: CS },
+      { title: "介護診断ツール",   href: CS },
     ],
   },
   otherCharacters: otherChars("akari"),
@@ -381,11 +378,10 @@ export const shizukuData: RoomData = {
     favoriteWord: "今ある時間は、未来への贈り物。",
   },
   menuItems: [
-    { icon: "📖", title: "やさしい葬儀ナビ", desc: "葬儀の基本から費用まで、わかりやすく解説", href: "https://sougi-anshin.net" },
-    { icon: "📝", title: "終活ガイド", href: "https://sougi-anshin.net/column/shukatu", desc: "終活の始め方から進め方まで丁寧に案内" },
-    { icon: "🪦", title: "お墓・供養ガイド", href: "https://sougi-anshin.net/column/ohaka", desc: "お墓の種類・選び方・供養の方法を解説" },
-    { icon: "✒️", title: "エンディングノート", href: "https://sougi-anshin.net/column/ending", desc: "自分らしく生きた証を残すためのガイド" },
-    { icon: "✉️", title: "大切な人への手紙", href: "https://sougi-anshin.net/column/tegami", desc: "想いを言葉にして届けるお手伝い" },
+    { icon: "📖", title: "やさしい葬儀ナビ",  desc: "葬儀の基本から費用まで、わかりやすく解説",   href: "https://sougi-anshin.net" },
+    { icon: "📝", title: "終活ガイド",          desc: "終活の始め方から進め方まで丁寧に案内",       href: CS },
+    { icon: "🪦", title: "お墓・供養ガイド",   desc: "お墓の種類・選び方・供養の方法を解説",       href: CS },
+    { icon: "✒️", title: "エンディングノート",  desc: "自分らしく生きた証を残すためのガイド",       href: CS },
   ],
   messages: [
     "今日は、大切な人への感謝を一言伝えてみましょう。",
@@ -397,17 +393,17 @@ export const shizukuData: RoomData = {
     "今ある時間を、大切な人と丁寧に過ごしてください。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
+    note: CS,
     articles: [
-      { title: "葬儀・終活コラム", href: "https://sougi-anshin.net/column" },
-      { title: "終活診断ツール", href: "https://sougi-anshin.net/diagnosis" },
+      { title: "葬儀・終活コラム", href: CS },
+      { title: "終活診断ツール",   href: CS },
     ],
   },
   otherCharacters: otherChars("shizuku"),
 };
 
 // ─────────────────────────────────────────────
-// Waka
+// Waka  ※ 担当サービス・関連コンテンツすべて Coming Soon
 // ─────────────────────────────────────────────
 export const wakaData: RoomData = {
   id: "waka",
@@ -431,10 +427,10 @@ export const wakaData: RoomData = {
     favoriteWord: "和敬清寂 — 和やかに、敬い、清らかに、静かに。",
   },
   menuItems: [
-    { icon: "📜", title: "百人一首", desc: "百人一首の歌を解説付きで学べるコンテンツ", href: "/kids/hyakunin" },
-    { icon: "⛩️", title: "神社図鑑", desc: "全国の神社と御利益を紹介するガイド", href: "/kids/jinja" },
-    { icon: "🌸", title: "日本文化図鑑", desc: "伝統行事・季節の風習・和の作法を解説", href: "/kids/culture" },
-    { icon: "🍡", title: "和菓子紹介", desc: "季節の和菓子と和文化の深いつながり", href: "/kids/wagashi" },
+    { icon: "📜", title: "百人一首",      desc: "百人一首の歌を解説付きで学べるコンテンツ",   href: CS },
+    { icon: "⛩️", title: "神社図鑑",      desc: "全国の神社と御利益を紹介するガイド",         href: CS },
+    { icon: "🌸", title: "日本文化図鑑",  desc: "伝統行事・季節の風習・和の作法を解説",       href: CS },
+    { icon: "🍡", title: "和菓子紹介",    desc: "季節の和菓子と和文化の深いつながり",         href: CS },
   ],
   messages: [
     "今日は一つ、日本語の美しい言葉を調べてみましょう。",
@@ -446,11 +442,11 @@ export const wakaData: RoomData = {
     "日本の美しさは、細部に宿っています。",
   ],
   relatedLinks: {
-    note: "https://note.com/twinkle_lab",
-    kindle: "https://www.amazon.co.jp/stores/Twinkle-Lab/author/",
+    note: CS,
+    kindle: CS,
     articles: [
-      { title: "日本文化コラム", href: "/kids/culture" },
-      { title: "百人一首を学ぶ", href: "/kids/hyakunin" },
+      { title: "日本文化コラム",   href: CS },
+      { title: "百人一首を学ぶ",   href: CS },
     ],
   },
   otherCharacters: otherChars("waka"),
