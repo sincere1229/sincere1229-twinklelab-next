@@ -63,22 +63,64 @@ export default function RoomPage({ data }: { data: RoomData }) {
         .hero-bg{
           position:absolute;inset:0;
           background-image:url('${data.bgImage}');
-          background-size:cover;background-position:center top;
+          background-size:cover;
+          background-position:${data.bgPosition ?? "center top"};
           transition:transform 0.5s;
         }
         .hero-overlay{
           position:absolute;inset:0;
           background:linear-gradient(
             90deg,
-            rgba(0,0,0,0.62) 0%,
-            rgba(0,0,0,0.38) 55%,
+            rgba(0,0,0,0.65) 0%,
+            rgba(0,0,0,0.42) 50%,
             rgba(0,0,0,0.08) 100%
           );
         }
         .hero-content{
           position:relative;z-index:2;
           padding:80px 48px 40px;
-          max-width:620px;
+          max-width:560px;
+        }
+        @media(max-width:640px){
+          .hero{
+            height:92vh;
+            min-height:640px;
+            max-height:none;
+            align-items:flex-end;
+          }
+          .hero-bg{
+            background-size:cover;
+            background-position:${data.bgPositionSp ?? "60% center"};
+          }
+          .hero-overlay{
+            background:linear-gradient(
+              0deg,
+              rgba(0,0,0,0.78) 0%,
+              rgba(0,0,0,0.50) 40%,
+              rgba(0,0,0,0.10) 100%
+            );
+          }
+          .hero-content{
+            padding:0 22px 56px;
+            max-width:100%;
+            width:100%;
+          }
+          .hero-name-en{
+            font-size:clamp(32px,10vw,48px);
+          }
+          .hero-catchcopy{
+            font-size:clamp(16px,5vw,22px);
+          }
+          .hero-quote{
+            font-size:12px;
+          }
+          .hero-cta{
+            flex-direction:column;
+          }
+          .btn-primary,.btn-outline{
+            text-align:center;
+          }
+          section{padding:60px 20px;}
         }
         .hero-badge{
           display:inline-block;
@@ -146,6 +188,9 @@ export default function RoomPage({ data }: { data: RoomData }) {
         }
         .hero-scroll span{font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:0.3em;}
         .scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,rgba(255,255,255,0.5),transparent);}
+        @media(max-width:640px){
+          .hero-scroll{display:none;}
+        }
 
         /* ── Section common ── */
         section{padding:80px 24px;}
@@ -348,10 +393,6 @@ export default function RoomPage({ data }: { data: RoomData }) {
         .footer-links a:hover{color:var(--tc);}
         .copyright{font-size:11px;color:#bbb;letter-spacing:0.15em;}
 
-        @media(max-width:640px){
-          .hero-content{padding:80px 24px 40px;}
-          section{padding:60px 20px;}
-        }
       `}</style>
 
       {/* Nav */}
