@@ -7,6 +7,8 @@ export interface RoomData {
   catchcopy: string;
   quote: string;
   bgImage: string;
+  bgPosition?: string;      // PC default: "center top"
+  bgPositionSp?: string;    // スマホ専用 e.g. "62% center"
   themeColor: string;
   themeColorDark: string;
   themeColorLight: string;
@@ -66,6 +68,7 @@ export const serenaData: RoomData = {
   catchcopy: "癒しの波動が、あなたを満たす",
   quote: "大丈夫。少しずつ進んでいきましょう。",
   bgImage: "/rooms/serenaroom.png",
+  bgPositionSp: "62% center",
   themeColor: "#b07fba",
   themeColorDark: "#7a4a8a",
   themeColorLight: "rgba(176,127,186,0.08)",
@@ -117,6 +120,7 @@ export const luminaData: RoomData = {
   catchcopy: "星があなたに伝える、運命のメッセージ",
   quote: "未来はまだ白紙の物語です。",
   bgImage: "/rooms/ruminaroom.png",
+  bgPositionSp: "60% center",
   themeColor: "#6d4cb5",
   themeColorDark: "#3d2580",
   themeColorLight: "rgba(109,76,181,0.08)",
@@ -167,6 +171,7 @@ export const chronoData: RoomData = {
   catchcopy: "未来の自分に、会いに行こう。",
   quote: "未来は行動によって変えられます。",
   bgImage: "/rooms/chronoroom.png",
+  bgPositionSp: "62% center",
   themeColor: "#2a5fa8",
   themeColorDark: "#1a3d70",
   themeColorLight: "rgba(42,95,168,0.08)",
@@ -217,6 +222,7 @@ export const manaData: RoomData = {
   catchcopy: "学びは、人生をやさしく導いてくれる魔法です。",
   quote: "わからないを、できた！に変えよう。",
   bgImage: "/rooms/manaroom.png",
+  bgPositionSp: "58% center",
   themeColor: "#4a6fa8",
   themeColorDark: "#2a4a80",
   themeColorLight: "rgba(74,111,168,0.08)",
@@ -267,6 +273,7 @@ export const minoriData: RoomData = {
   catchcopy: "あなたの毎日に、そっと寄り添い心が軽くなるお手伝いをします。",
   quote: "ひとつずつ整理していきましょう。",
   bgImage: "/rooms/minoriroom.png",
+  bgPositionSp: "58% center",
   themeColor: "#5a8a5a",
   themeColorDark: "#3a6040",
   themeColorLight: "rgba(90,138,90,0.08)",
@@ -316,6 +323,7 @@ export const akariData: RoomData = {
   catchcopy: "やさしい気づきが、あなたの未来を照らします。",
   quote: "ひとりで抱え込まなくて大丈夫です。",
   bgImage: "/rooms/akariroom.png",
+  bgPositionSp: "58% center",
   themeColor: "#d06090",
   themeColorDark: "#a04070",
   themeColorLight: "rgba(208,96,144,0.08)",
@@ -365,6 +373,7 @@ export const shizukuData: RoomData = {
   catchcopy: "大切な想いを、未来へつなぐために。",
   quote: "大切な想いを未来へつなぎましょう。",
   bgImage: "/rooms/shizukuroom.png",
+  bgPositionSp: "58% center",
   themeColor: "#8060a8",
   themeColorDark: "#5a3a80",
   themeColorLight: "rgba(128,96,168,0.08)",
@@ -414,6 +423,7 @@ export const wakaData: RoomData = {
   catchcopy: "和の心は、静かに咲く花のようにあなたの日常をやさしく照らします。",
   quote: "日本の素敵な文化をご案内します。",
   bgImage: "/rooms/wakaroom.png",
+  bgPositionSp: "60% center",
   themeColor: "#c06080",
   themeColorDark: "#8a3050",
   themeColorLight: "rgba(192,96,128,0.08)",
