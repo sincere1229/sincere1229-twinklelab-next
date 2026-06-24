@@ -5,9 +5,7 @@
 //   転送先はルート（/）に向けます。
 // ▼もし子アプリが Next.js（next.config.js や app/ がある）だった場合は、そのアプリだけ
 //   basePath 方式が必要になります（その時は教えてください）。
-
 /** @type {import('next').NextConfig} */
-
 const ZONES = [
   { path: 'horoscope',    url: 'https://horoscope-today-omega.vercel.app' }, // 今日の星座占い
   { path: 'calendar',     url: 'https://lucky-calendar-seven.vercel.app'  }, // 開運カレンダー
@@ -33,6 +31,21 @@ const nextConfig = {
       rules.push({ source: `/star/${z.path}/:path*`, destination: `${z.url}/:path*` })
     }
     return rules
+  },
+
+  // ── キャッシュ制御：古いデプロイのJSが残ってServer Actionミスマッチを起こすのを防ぐ
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ]
   },
 }
 
