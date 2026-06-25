@@ -244,39 +244,99 @@ export default function RoomPage({ data }: { data: RoomData }) {
         }
 
         /* ── Menu ── */
-        .menu-section{background:var(--tcl);}
+        .menu-section{background:#0a0f1e;padding:80px 24px;}
+        .menu-section .sec-en{color:#c9a84c;}
+        .menu-section .sec-jp{color:#e8eaf0;}
+        .menu-section .sec-divider{background:linear-gradient(90deg,var(--tc),var(--ac));}
         .menu-grid{
           display:grid;
-          grid-template-columns:repeat(2,1fr);
+          grid-template-columns:repeat(4,1fr);
           gap:16px;
         }
-        @media(min-width:640px){
-          .menu-grid{grid-template-columns:repeat(2,1fr);gap:20px;}
+        @media(max-width:900px){
+          .menu-grid{grid-template-columns:repeat(2,1fr);gap:14px;}
         }
-        @media(min-width:900px){
-          .menu-grid{grid-template-columns:repeat(4,1fr);gap:20px;}
+        @media(max-width:480px){
+          .menu-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
         }
+
+        /* カード本体 */
         .menu-card{
-          background:#fff;border-radius:16px;padding:28px 20px;
-          text-decoration:none;color:inherit;
-          border:1px solid rgba(0,0,0,0.06);
-          transition:all 0.3s;
           display:block;
+          text-decoration:none;color:inherit;
+          border-radius:16px;overflow:hidden;
+          border:2px solid transparent;
+          background:#111827;
+          position:relative;
+          transition:transform 0.28s ease, box-shadow 0.28s ease;
         }
         .menu-card:hover{
-          transform:translateY(-4px);
-          box-shadow:0 12px 32px rgba(0,0,0,0.10);
-          border-color:var(--tc);
+          transform:translateY(-6px) scale(1.02);
+          box-shadow:0 16px 40px rgba(0,0,0,0.55);
         }
-        .menu-icon{font-size:32px;margin-bottom:14px;display:block;}
+
+        /* 画像エリア */
+        .menu-img-wrap{
+          position:relative;
+          width:100%;
+          aspect-ratio:1/1;
+          overflow:hidden;
+          background:#1a2235;
+        }
+        .menu-img-wrap img{
+          width:100%;height:100%;
+          object-fit:cover;object-position:center;
+          display:block;
+          transition:transform 0.35s ease;
+        }
+        .menu-card:hover .menu-img-wrap img{
+          transform:scale(1.06);
+        }
+        /* 画像下部グラデーション */
+        .menu-img-wrap::after{
+          content:'';
+          position:absolute;bottom:0;left:0;right:0;
+          height:50%;
+          background:linear-gradient(to top,rgba(10,15,30,0.85) 0%,transparent 100%);
+          pointer-events:none;
+        }
+        /* 画像なし時のフォールバック */
+        .menu-img-fallback{
+          position:absolute;inset:0;
+          display:none;
+          align-items:center;justify-content:center;
+          font-size:52px;
+        }
+
+        /* テキストエリア */
+        .menu-body{
+          padding:14px 14px 16px;
+        }
         .menu-title{
-          font-size:15px;font-weight:500;color:#222;
-          margin-bottom:8px;letter-spacing:0.04em;
+          font-size:14px;font-weight:700;
+          color:#e8eaf0;
+          margin-bottom:5px;letter-spacing:0.03em;
+          display:flex;align-items:center;gap:6px;
+          flex-wrap:wrap;
         }
-        .menu-desc{font-size:12px;color:#777;line-height:1.7;}
+        .menu-desc{font-size:11px;color:#8892aa;line-height:1.6;margin-bottom:10px;}
         .menu-arrow{
-          display:inline-block;margin-top:12px;
-          font-size:11px;color:var(--tc);letter-spacing:0.1em;
+          display:inline-flex;align-items:center;gap:4px;
+          font-size:11px;font-weight:600;letter-spacing:0.08em;
+          transition:gap 0.2s;
+        }
+        .menu-card:hover .menu-arrow{gap:8px;}
+
+        /* Coming Soon */
+        .menu-card-cs{opacity:0.72;}
+        .menu-card-cs:hover{opacity:1;}
+        .cs-badge{
+          display:inline-block;
+          font-size:9px;padding:2px 7px;
+          background:linear-gradient(135deg,var(--tc),var(--tcd));
+          color:#fff;border-radius:8px;
+          letter-spacing:0.05em;font-weight:600;
+          vertical-align:middle;white-space:nowrap;
         }
 
         /* ── Today's message ── */
@@ -518,17 +578,49 @@ export default function RoomPage({ data }: { data: RoomData }) {
             <div className="sec-divider" />
           </div>
           <div className="menu-grid">
-            {data.menuItems.map((item) => {
+            {data.menuItems.map((item, idx) => {
               const isCS = item.href === "/coming-soon";
+              const imgSrc = `/menu/menu-${data.id}-${idx + 1}.png`;
               return (
-                <a key={item.title} href={item.href} className={`menu-card${isCS ? " menu-card-cs" : ""}`}>
-                  <span className="menu-icon">{item.icon}</span>
-                  <div className="menu-title">
-                    {item.title}
-                    {isCS && <span className="cs-badge">近日公開</span>}
+                <a
+                  key={item.title}
+                  href={item.href}
+                  className={`menu-card${isCS ? " menu-card-cs" : ""}`}
+                  style={{ borderColor: isCS ? "rgba(255,255,255,0.08)" : data.themeColor }}
+                >
+                  {/* 画像 */}
+                  <div className="menu-img-wrap">
+                    <img
+                      src={imgSrc}
+                      alt={item.title}
+                      onError={(e) => {
+                        const t = e.currentTarget;
+                        t.style.display = "none";
+                        const fb = t.nextElementSibling as HTMLElement | null;
+                        if (fb) fb.style.display = "flex";
+                      }}
+                    />
+                    <div
+                      className="menu-img-fallback"
+                      style={{ background: `${data.themeColor}15` }}
+                    >
+                      {item.icon}
+                    </div>
                   </div>
-                  <p className="menu-desc">{item.desc}</p>
-                  <span className="menu-arrow">{isCS ? "近日公開 ✦" : "詳しく見る →"}</span>
+                  {/* テキスト */}
+                  <div className="menu-body">
+                    <div className="menu-title">
+                      {item.title}
+                      {isCS && <span className="cs-badge">近日公開</span>}
+                    </div>
+                    <p className="menu-desc">{item.desc}</p>
+                    <span
+                      className="menu-arrow"
+                      style={{ color: isCS ? "#8892aa" : data.themeColor }}
+                    >
+                      {isCS ? "近日公開 ✦" : "詳しく見る →"}
+                    </span>
+                  </div>
                 </a>
               );
             })}
