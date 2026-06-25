@@ -352,29 +352,77 @@ export default function RoomPage({ data }: { data: RoomData }) {
         .menu-card-cs .menu-arrow{color:var(--tc);opacity:0.7;}
 
         /* ── Universe ── */
-        .universe-section{background:var(--tcl);}
+        .universe-section{background:#0d1220;padding:80px 24px;}
+        .universe-section .sec-en{color:#c9a84c;}
+        .universe-section .sec-jp{color:#e8eaf0;}
+        .universe-section .sec-divider{background:linear-gradient(90deg,#c9a84c,#e8c97a);}
         .universe-grid{
           display:grid;
-          grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-          gap:14px;
+          grid-template-columns:repeat(4,1fr);
+          gap:18px;
+          max-width:960px;
+          margin:0 auto;
+        }
+        @media(max-width:900px){
+          .universe-grid{grid-template-columns:repeat(4,1fr);gap:12px;}
+        }
+        @media(max-width:640px){
+          .universe-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
         }
         .universe-card{
-          background:#fff;border-radius:14px;padding:20px 14px;
-          text-align:center;text-decoration:none;color:inherit;
-          border:1px solid rgba(0,0,0,0.06);
-          transition:all 0.25s;
+          display:block;
+          text-decoration:none;color:inherit;
+          border-radius:16px;
+          overflow:hidden;
+          border:2px solid transparent;
+          transition:transform 0.28s ease, box-shadow 0.28s ease;
+          background:#1a2235;
+          position:relative;
         }
         .universe-card:hover{
-          transform:translateY(-3px);
-          box-shadow:0 8px 24px rgba(0,0,0,0.1);
+          transform:translateY(-6px) scale(1.02);
+          box-shadow:0 16px 40px rgba(0,0,0,0.5);
         }
-        .universe-emoji{font-size:28px;margin-bottom:8px;display:block;}
-        .universe-name{font-size:14px;font-weight:500;color:#222;margin-bottom:4px;}
-        .universe-title{font-size:10px;color:#888;line-height:1.5;}
+        .universe-img-wrap{
+          position:relative;
+          width:100%;
+          aspect-ratio:1/1;
+          overflow:hidden;
+        }
+        .universe-img-wrap img{
+          width:100%;height:100%;
+          object-fit:cover;object-position:top center;
+          transition:transform 0.35s ease;
+          display:block;
+        }
+        .universe-card:hover .universe-img-wrap img{
+          transform:scale(1.06);
+        }
+        .universe-img-fallback{
+          position:absolute;inset:0;
+          display:flex;align-items:center;justify-content:center;
+          font-size:48px;
+        }
+        .universe-body{
+          padding:14px 14px 16px;
+          background:#1a2235;
+        }
+        .universe-name{
+          font-size:14px;font-weight:700;
+          color:#e8eaf0;margin-bottom:4px;
+          letter-spacing:0.04em;
+        }
+        .universe-title{
+          font-size:10.5px;color:#8892aa;
+          line-height:1.5;margin-bottom:10px;
+        }
         .universe-enter{
-          display:inline-block;margin-top:8px;
-          font-size:10px;letter-spacing:0.1em;color:var(--tc);
+          display:inline-flex;align-items:center;gap:4px;
+          font-size:11px;letter-spacing:0.1em;
+          font-weight:600;
+          transition:gap 0.2s;
         }
+        .universe-card:hover .universe-enter{gap:8px;}
 
         /* ── Footer ── */
         .room-footer{
@@ -566,12 +614,39 @@ export default function RoomPage({ data }: { data: RoomData }) {
           </div>
           <div className="universe-grid">
             {data.otherCharacters.map((c) => (
-              <a key={c.id} href={c.href} className="universe-card"
-                style={{ borderTopColor: c.color, borderTopWidth: 3, borderTopStyle: "solid" }}>
-                <span className="universe-emoji">{c.emoji}</span>
-                <div className="universe-name">{c.name}</div>
-                <p className="universe-title">{c.title}</p>
-                <span className="universe-enter">部屋へ →</span>
+              <a
+                key={c.id}
+                href={c.href}
+                className="universe-card"
+                style={{ borderColor: c.color }}
+              >
+                {/* 画像エリア */}
+                <div className="universe-img-wrap">
+                  <img
+                    src={`/${c.id}.png`}
+                    alt={c.name}
+                    onError={(e) => {
+                      const t = e.currentTarget;
+                      t.style.display = "none";
+                      const fb = t.nextElementSibling as HTMLElement | null;
+                      if (fb) fb.style.display = "flex";
+                    }}
+                  />
+                  <div
+                    className="universe-img-fallback"
+                    style={{ display: "none", background: `${c.color}18` }}
+                  >
+                    {c.emoji}
+                  </div>
+                </div>
+                {/* テキストエリア */}
+                <div className="universe-body">
+                  <div className="universe-name">{c.name}</div>
+                  <p className="universe-title">{c.title}</p>
+                  <span className="universe-enter" style={{ color: c.color }}>
+                    部屋へ →
+                  </span>
+                </div>
               </a>
             ))}
           </div>
