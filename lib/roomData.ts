@@ -82,10 +82,10 @@ export const serenaData: RoomData = {
     favoriteWord: "あなたの光は、いつも誰かの希望になっています。",
   },
   menuItems: [
-    { icon: "🌿", title: "Aura Garden",      desc: "ヒーリング音楽とオーラ診断で、心を整える癒しの空間",   href: "https://aura-garden.vercel.app" },
-    { icon: "🔮", title: "オーラ診断",        desc: "あなたのオーラカラーと今の波動を読み解きます",         href: "https://aura-garden.vercel.app/aura" },
-    { icon: "💎", title: "パワーストーン診断", desc: "今のあなたに必要なパワーストーンを見つけます",         href: "https://aura-garden.vercel.app/crystal" },
-    { icon: "🎵", title: "ヒーリング音楽",    desc: "ソルフェジオ周波数とバイノーラルビートで深い癒しを",   href: "https://aura-garden.vercel.app/music" },
+    { icon: "🌿", title: "Aura Garden",      desc: "ヒーリング音楽とオーラ診断で、心を整える癒しの空間",   href: "https://www.auragarden.jp/" },
+    { icon: "🔮", title: "オーラ診断",        desc: "あなたのオーラカラーと今の波動を読み解きます",         href: "https://www.auragarden.jp/aura" },
+    { icon: "💎", title: "パワーストーン診断", desc: "今のあなたに必要なパワーストーンを見つけます",         href: "https://www.auragarden.jp/crystal" },
+    { icon: "🎵", title: "ヒーリング音楽",    desc: "ソルフェジオ周波数とバイノーラルビートで深い癒しを",   href: "https://www.auragarden.jp/music" },
   ],
   messages: [
     "今日は自分を責めるのをやめて、ただ存在することを許してあげましょう。",
@@ -101,8 +101,8 @@ export const serenaData: RoomData = {
     note: CS,
     kindle: CS,
     articles: [
-      { title: "ヒーリング入門ガイド",   href: "https://aura-garden.vercel.app/column" },
-      { title: "パワーストーン図鑑",     href: "https://aura-garden.vercel.app/crystal" },
+      { title: "ヒーリング入門ガイド",   href: "https://www.auragarden.jp/column" },
+      { title: "パワーストーン図鑑",     href: "https://www.auragarden.jp/crystal" },
     ],
   },
   otherCharacters: otherChars("serena"),
